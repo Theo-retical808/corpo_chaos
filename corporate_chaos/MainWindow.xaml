@@ -1,0 +1,498 @@
+﻿<Window x:Class="CorporateChaos.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CorporateChaos"
+        mc:Ignorable="d"
+        Title="Corporate Chaos - Beta" Height="800" Width="1400" WindowStartupLocation="CenterScreen"
+        Icon="images/logo.png">
+    
+    <Grid>
+        <!-- Main Menu Screen -->
+        <Grid x:Name="MainMenuGrid" Visibility="Visible">
+            <Grid.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#1a1a2e" Offset="0"/>
+                    <GradientStop Color="#16213e" Offset="1"/>
+                </LinearGradientBrush>
+            </Grid.Background>
+            
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="350">
+                <!-- Logo -->
+                <Image Source="images/logo.png" Width="200" Height="200" Margin="0,0,0,40" 
+                       HorizontalAlignment="Center"/>
+                
+                <Button x:Name="NewGameBtn" Content="New Run" Height="50" FontSize="18" 
+                        Margin="0,10" Click="NewGameBtn_Click"/>
+                <Button x:Name="LoadGameBtn" Content="Load Run" Height="50" FontSize="18" 
+                        Margin="0,10" Click="LoadGameBtn_Click"/>
+                <Button x:Name="ScoreBoardBtn" Content="Score Board" Height="50" FontSize="18" 
+                        Margin="0,10" Click="ScoreBoardBtn_Click"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Save Slots Screen -->
+        <Grid x:Name="SaveSlotsGrid" Visibility="Collapsed">
+            <Grid.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#1a1a2e" Offset="0"/>
+                    <GradientStop Color="#16213e" Offset="1"/>
+                </LinearGradientBrush>
+            </Grid.Background>
+            
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="400">
+                <TextBlock Text="SELECT GAME MODE" FontSize="24" FontWeight="Bold" 
+                          Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,30"/>
+                
+                <Button x:Name="CorporateBtn" Content="Corporate" Height="60" FontSize="20" 
+                        Margin="0,15" Click="CorporateBtn_Click"/>
+                <Button x:Name="ConglomerateBtn" Content="Conglomerate (Coming Soon)" Height="60" FontSize="20" 
+                        Margin="0,15" IsEnabled="False" Opacity="0.5"/>
+                
+                <Button x:Name="BackToMenuBtn" Content="Back" Height="40" FontSize="16" 
+                        Margin="0,30,0,0" Click="BackToMenuBtn_Click"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Corporate Game Screen -->
+        <Grid x:Name="CorporateGameGrid" Visibility="Collapsed">
+            <Grid.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#0f3460" Offset="0"/>
+                    <GradientStop Color="#16537e" Offset="1"/>
+                </LinearGradientBrush>
+            </Grid.Background>
+            
+            <Grid.RowDefinitions>
+                <RowDefinition Height="60"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="200"/>
+            </Grid.RowDefinitions>
+            
+            <!-- Header -->
+            <Border Grid.Row="0" Background="#1a1a2e" BorderBrush="#333" BorderThickness="0,0,0,2">
+                <Grid>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="20,0,0,0">
+                        <TextBlock Text="Career: " FontSize="16" Foreground="Gray" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="QuarterCounterText" Text="Y1 Q1 (1/120)" FontSize="18" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" Margin="0,0,20,0"/>
+                        <TextBlock Text="💰 " FontSize="16" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="HeaderCapitalText" Text="$500,000" FontSize="16" FontWeight="Bold" Foreground="LightGreen" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    
+                    <TextBlock Text="CORPORATE EXECUTIVE DASHBOARD" FontSize="20" FontWeight="Bold" 
+                              Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="20,0">
+                        <Button x:Name="SaveGameBtn" Content="💾 Save" Width="80" Height="30" 
+                                Margin="0,0,10,0" Click="SaveGameBtn_Click"/>
+                        <Button x:Name="MainMenuBackBtn" Content="Main Menu" Width="100" Height="30" 
+                                Click="MainMenuBackBtn_Click"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+            
+            <!-- Main Game Content -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="300"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="300"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- Executive Control Panel -->
+                <Border Grid.Column="0" Background="#1a1a2e" CornerRadius="10" Margin="10,10,5,10">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="15">
+                            <TextBlock Text="🎛️ EXECUTIVE CONTROLS" FontSize="16" FontWeight="Bold" 
+                                      Foreground="White" Margin="0,0,0,15"/>
+                            
+                            <!-- Risk Appetite -->
+                            <TextBlock Text="Risk Appetite" FontSize="12" FontWeight="Bold" 
+                                      Foreground="LightBlue" Margin="0,0,0,5"/>
+                            <ComboBox x:Name="RiskAppetiteCombo" Margin="0,0,0,10" SelectionChanged="RiskAppetiteCombo_SelectionChanged">
+                                <ComboBoxItem Content="🛡️ Conservative" Tag="Conservative"/>
+                                <ComboBoxItem Content="⚖️ Balanced" Tag="Balanced" IsSelected="True"/>
+                                <ComboBoxItem Content="🚀 Aggressive" Tag="Aggressive"/>
+                            </ComboBox>
+                            
+                            <!-- Budget Allocation -->
+                            <TextBlock Text="Budget Allocation" FontSize="12" FontWeight="Bold" 
+                                      Foreground="LightBlue" Margin="0,0,0,5"/>
+                            <ComboBox x:Name="BudgetAllocationCombo" Margin="0,0,0,10" SelectionChanged="BudgetAllocationCombo_SelectionChanged">
+                                <ComboBoxItem Content="💰 Low Budget" Tag="Low"/>
+                                <ComboBoxItem Content="💰💰 Medium Budget" Tag="Medium" IsSelected="True"/>
+                                <ComboBoxItem Content="💰💰💰 High Budget" Tag="High"/>
+                            </ComboBox>
+                            
+                            <!-- Market Strategy -->
+                            <TextBlock Text="Market Strategy" FontSize="12" FontWeight="Bold" 
+                                      Foreground="LightBlue" Margin="0,0,0,5"/>
+                            <ComboBox x:Name="MarketStrategyCombo" Margin="0,0,0,10" SelectionChanged="MarketStrategyCombo_SelectionChanged">
+                                <ComboBoxItem Content="💸 Cost Leadership" Tag="Cost"/>
+                                <ComboBoxItem Content="⭐ Quality Focus" Tag="Quality" IsSelected="True"/>
+                                <ComboBoxItem Content="🔬 Innovation-Driven" Tag="Innovation"/>
+                            </ComboBox>
+                            
+                            <!-- Crisis Response -->
+                            <TextBlock Text="Crisis Response" FontSize="12" FontWeight="Bold" 
+                                      Foreground="LightBlue" Margin="0,0,0,5"/>
+                            <ComboBox x:Name="CrisisResponseCombo" Margin="0,0,0,15" SelectionChanged="CrisisResponseCombo_SelectionChanged">
+                                <ComboBoxItem Content="⚡ Immediate Action" Tag="Immediate"/>
+                                <ComboBoxItem Content="🛠️ Damage Control" Tag="Control" IsSelected="True"/>
+                                <ComboBoxItem Content="🤷 Ignore and Absorb" Tag="Absorb"/>
+                            </ComboBox>
+                            
+                            <!-- Employee Management -->
+                            <TextBlock Text="👥 EMPLOYEE MANAGEMENT" FontSize="14" FontWeight="Bold" 
+                                      Foreground="White" Margin="0,10,0,10"/>
+                            
+                            <Button x:Name="HireEmployeesBtn" Content="🎯 Hire New Employees" Height="45" 
+                                    Margin="0,0,0,10" Click="HireEmployeesBtn_Click" 
+                                    Background="#2a4d3a" Foreground="White" FontWeight="Bold"/>
+                            
+                            <Button x:Name="ExecutiveDecisionsBtn" Content="📈 Executive Decisions" Height="45" 
+                                    Margin="0,0,0,10" Click="ExecutiveDecisionsBtn_Click" 
+                                    Background="#4d2a4d" Foreground="White" FontWeight="Bold"/>
+                            
+                            <TextBlock x:Name="HiredEmployeesCountText" Text="Total Hired: 0 employees" 
+                                      FontSize="11" Foreground="LightGray" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                            
+                            <TextBlock Text="💡 Tip: Click departments to manage employees" 
+                                      FontSize="10" Foreground="Gray" TextWrapping="Wrap" 
+                                      HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
+                
+                <!-- Center Office Area (Placeholder for Graphics) -->
+                <Border Grid.Column="1" Background="#16213e" CornerRadius="10" Margin="5,10">
+                    <Grid>
+                        <TextBlock Text="🏢 OFFICE DEPARTMENTS" FontSize="18" FontWeight="Bold" 
+                                  Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,20,0,0"/>
+                        
+                        <!-- Department Grid -->
+                        <UniformGrid Rows="2" Columns="3" Margin="20,60,20,20">
+                            <!-- Marketing Department -->
+                            <Button x:Name="MarketingDeptBtn" Height="120" Margin="5" 
+                                    Click="DepartmentBtn_Click" Tag="Marketing" Background="#2a4d3a"
+                                    BorderBrush="#4d7a5d" BorderThickness="2" Cursor="Hand">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Background" Value="#2a4d3a"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#3a5d4a"/>
+                                                <Setter Property="BorderBrush" Value="#5d8a6d"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                                <StackPanel>
+                                    <Grid>
+                                        <Image Source="images/marketing.png" Width="60" Height="60" Margin="0,0,0,5" Stretch="UniformToFill"/>
+                                        <Border Background="#FF4444" CornerRadius="10" Width="20" Height="20" 
+                                               HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-5,-5,0">
+                                            <TextBlock x:Name="MarketingEmployeeCount" Text="0" FontSize="10" FontWeight="Bold" 
+                                                      Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </Grid>
+                                    <TextBlock Text="Marketing" FontSize="12" FontWeight="Bold" 
+                                              Foreground="White" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            
+                            <!-- Operations Department -->
+                            <Button x:Name="OperationsDeptBtn" Height="120" Margin="5" 
+                                    Click="DepartmentBtn_Click" Tag="Operations" Background="#4d2a2a"
+                                    BorderBrush="#7a4d4d" BorderThickness="2" Cursor="Hand">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Background" Value="#4d2a2a"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#5d3a3a"/>
+                                                <Setter Property="BorderBrush" Value="#8a5d5d"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                                <StackPanel>
+                                    <Grid>
+                                        <Image Source="images/operations.png" Width="60" Height="60" Margin="0,0,0,5" Stretch="UniformToFill"/>
+                                        <Border Background="#FF4444" CornerRadius="10" Width="20" Height="20" 
+                                               HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-5,-5,0">
+                                            <TextBlock x:Name="OperationsEmployeeCount" Text="0" FontSize="10" FontWeight="Bold" 
+                                                      Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </Grid>
+                                    <TextBlock Text="Operations" FontSize="12" FontWeight="Bold" 
+                                              Foreground="White" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            
+                            <!-- Finance Department -->
+                            <Button x:Name="FinanceDeptBtn" Height="120" Margin="5" 
+                                    Click="DepartmentBtn_Click" Tag="Finance" Background="#2a2a4d"
+                                    BorderBrush="#4d4d7a" BorderThickness="2" Cursor="Hand">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Background" Value="#2a2a4d"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#3a3a5d"/>
+                                                <Setter Property="BorderBrush" Value="#5d5d8a"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                                <StackPanel>
+                                    <Grid>
+                                        <Image Source="images/finance.png" Width="60" Height="60" Margin="0,0,0,5" Stretch="UniformToFill"/>
+                                        <Border Background="#FF4444" CornerRadius="10" Width="20" Height="20" 
+                                               HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-5,-5,0">
+                                            <TextBlock x:Name="FinanceEmployeeCount" Text="0" FontSize="10" FontWeight="Bold" 
+                                                      Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </Grid>
+                                    <TextBlock Text="Finance" FontSize="12" FontWeight="Bold" 
+                                              Foreground="White" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            
+                            <!-- HR Department -->
+                            <Button x:Name="HRDeptBtn" Height="120" Margin="5" 
+                                    Click="DepartmentBtn_Click" Tag="HR" Background="#4d3a2a"
+                                    BorderBrush="#7a5d4d" BorderThickness="2" Cursor="Hand">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Background" Value="#4d3a2a"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#5d4a3a"/>
+                                                <Setter Property="BorderBrush" Value="#8a6d5d"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                                <StackPanel>
+                                    <Grid>
+                                        <Image Source="images/human_resources.png" Width="60" Height="60" Margin="0,0,0,5" Stretch="UniformToFill"/>
+                                        <Border Background="#FF4444" CornerRadius="10" Width="20" Height="20" 
+                                               HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-5,-5,0">
+                                            <TextBlock x:Name="HREmployeeCount" Text="0" FontSize="10" FontWeight="Bold" 
+                                                      Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </Grid>
+                                    <TextBlock Text="Human Resources" FontSize="12" FontWeight="Bold" 
+                                              Foreground="White" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            
+                            <!-- IT Department -->
+                            <Button x:Name="ITDeptBtn" Height="120" Margin="5" 
+                                    Click="DepartmentBtn_Click" Tag="IT" Background="#3a2a4d"
+                                    BorderBrush="#5d4d7a" BorderThickness="2" Cursor="Hand">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Background" Value="#3a2a4d"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#4a3a5d"/>
+                                                <Setter Property="BorderBrush" Value="#6d5d8a"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                                <StackPanel>
+                                    <Grid>
+                                        <Image Source="images/it.png" Width="60" Height="60" Margin="0,0,0,5" Stretch="UniformToFill"/>
+                                        <Border Background="#FF4444" CornerRadius="10" Width="20" Height="20" 
+                                               HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-5,-5,0">
+                                            <TextBlock x:Name="ITEmployeeCount" Text="0" FontSize="10" FontWeight="Bold" 
+                                                      Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </Grid>
+                                    <TextBlock Text="IT" FontSize="12" FontWeight="Bold" 
+                                              Foreground="White" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            
+                            <!-- Research Department -->
+                            <Button x:Name="ResearchDeptBtn" Height="120" Margin="5" 
+                                    Click="DepartmentBtn_Click" Tag="Research" Background="#2a4d4d"
+                                    BorderBrush="#4d7a7a" BorderThickness="2" Cursor="Hand">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Background" Value="#2a4d4d"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#3a5d5d"/>
+                                                <Setter Property="BorderBrush" Value="#5d8a8a"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                                <StackPanel>
+                                    <Grid>
+                                        <Image Source="images/research.png" Width="60" Height="60" Margin="0,0,0,5" Stretch="UniformToFill"/>
+                                        <Border Background="#FF4444" CornerRadius="10" Width="20" Height="20" 
+                                               HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-5,-5,0">
+                                            <TextBlock x:Name="ResearchEmployeeCount" Text="0" FontSize="10" FontWeight="Bold" 
+                                                      Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </Grid>
+                                    <TextBlock Text="Research" FontSize="12" FontWeight="Bold" 
+                                              Foreground="White" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                        </UniformGrid>
+                    </Grid>
+                </Border>
+                
+                <!-- Statistics and Events Panel -->
+                <Border Grid.Column="2" Background="#1a1a2e" CornerRadius="10" Margin="5,10,10,10">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        
+                        <!-- Company Statistics -->
+                        <Border Grid.Row="0" Background="#16213e" CornerRadius="5" Margin="10">
+                            <StackPanel Margin="10">
+                                <TextBlock Text="📊 COMPANY STATS" FontSize="14" FontWeight="Bold" 
+                                          Foreground="White" Margin="0,0,0,10"/>
+                                
+                                <StackPanel Orientation="Horizontal" Margin="0,2">
+                                    <TextBlock Text="💰 Capital: " FontSize="11" Foreground="Gray" Width="80"/>
+                                    <TextBlock x:Name="CapitalText" Text="$500,000" FontSize="11" FontWeight="Bold" Foreground="LightGreen"/>
+                                </StackPanel>
+                                
+                                <StackPanel Orientation="Horizontal" Margin="0,2">
+                                    <TextBlock Text="📈 Market Share: " FontSize="11" Foreground="Gray" Width="80"/>
+                                    <TextBlock x:Name="MarketShareText" Text="5%" FontSize="11" FontWeight="Bold" Foreground="LightBlue"/>
+                                </StackPanel>
+                                
+                                <StackPanel Orientation="Horizontal" Margin="0,2">
+                                    <TextBlock Text="⭐ Reputation: " FontSize="11" Foreground="Gray" Width="80"/>
+                                    <TextBlock x:Name="ReputationText" Text="50" FontSize="11" FontWeight="Bold" Foreground="Yellow"/>
+                                </StackPanel>
+                                
+                                <StackPanel Orientation="Horizontal" Margin="0,2">
+                                    <TextBlock Text="😊 Morale: " FontSize="11" Foreground="Gray" Width="80"/>
+                                    <TextBlock x:Name="MoraleText" Text="50" FontSize="11" FontWeight="Bold" Foreground="Pink"/>
+                                </StackPanel>
+                                
+                                <StackPanel Orientation="Horizontal" Margin="0,2">
+                                    <TextBlock Text="⚠️ Risk: " FontSize="11" Foreground="Gray" Width="80"/>
+                                    <TextBlock x:Name="RiskText" Text="10" FontSize="11" FontWeight="Bold" Foreground="Orange"/>
+                                </StackPanel>
+                                
+                                <StackPanel Orientation="Horizontal" Margin="0,2">
+                                    <TextBlock Text="👥 Employees: " FontSize="11" Foreground="Gray" Width="80"/>
+                                    <TextBlock x:Name="EmployeeCountText" Text="0" FontSize="11" FontWeight="Bold" Foreground="Cyan"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- Current Events and Crisis Status -->
+                        <Grid Grid.Row="1" Margin="10">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            
+                            <!-- Crisis Status -->
+                            <Border Grid.Row="0" Background="#16213e" CornerRadius="5" Margin="0,0,0,5">
+                                <StackPanel Margin="10">
+                                    <TextBlock Text="🚨 CRISIS STATUS" FontSize="14" FontWeight="Bold" 
+                                              Foreground="White" Margin="0,0,0,10"/>
+                                    <ScrollViewer Height="80" VerticalScrollBarVisibility="Auto">
+                                        <TextBlock x:Name="CrisisStatusText" Text="🟢 No active crises" 
+                                                  FontSize="10" Foreground="White" TextWrapping="Wrap"/>
+                                    </ScrollViewer>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- Current Events Button -->
+                            <Border Grid.Row="1" Background="#16213e" CornerRadius="5" Margin="0,5,0,0">
+                                <Grid Margin="10">
+                                    <Button x:Name="CurrentEventsBtn" Background="#2a4d3a" BorderBrush="#4d7a5d" 
+                                           BorderThickness="2" Height="50" Click="CurrentEventsBtn_Click"
+                                           Cursor="Hand">
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Setter Property="Background" Value="#2a4d3a"/>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="#3a5d4a"/>
+                                                        <Setter Property="BorderBrush" Value="#5d8a6d"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                        <Grid>
+                                            <TextBlock Text="📰 View Quarterly Summary" FontSize="14" FontWeight="Bold" 
+                                                      Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            <Ellipse x:Name="NewEventsIndicator" Width="8" Height="8" Fill="Red" 
+                                                    HorizontalAlignment="Right" VerticalAlignment="Top" 
+                                                    Margin="0,5,5,0" Visibility="Collapsed"/>
+                                        </Grid>
+                                    </Button>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </Grid>
+                </Border>
+            </Grid>
+            
+            <!-- Bottom Control Panel -->
+            <Border Grid.Row="2" Background="#1a1a2e" BorderBrush="#333" BorderThickness="0,2,0,0" Margin="0">
+                <Grid Margin="20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="200"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <!-- Quarterly Summary -->
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="📋 QUARTERLY SUMMARY" FontSize="16" FontWeight="Bold" 
+                                  Foreground="White" Margin="0,0,0,10"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Revenue" FontSize="12" Foreground="Gray"/>
+                                <TextBlock x:Name="QuarterlyRevenueText" Text="$0" FontSize="14" FontWeight="Bold" Foreground="LightGreen"/>
+                            </StackPanel>
+                            
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="Expenses" FontSize="12" Foreground="Gray"/>
+                                <TextBlock x:Name="QuarterlyExpensesText" Text="$0" FontSize="14" FontWeight="Bold" Foreground="LightCoral"/>
+                            </StackPanel>
+                            
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Net Profit" FontSize="12" Foreground="Gray"/>
+                                <TextBlock x:Name="NetProfitText" Text="$0" FontSize="14" FontWeight="Bold" Foreground="White"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                    
+                    <!-- End Quarter Button -->
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <Button x:Name="EndQuarterBtn" Content="⏭️ End Quarter" Height="50" FontSize="16" 
+                                FontWeight="Bold" Click="EndQuarterBtn_Click"/>
+                        <TextBlock Text="Make strategic decisions before ending the quarter" 
+                                  FontSize="10" Foreground="Gray" TextWrapping="Wrap" 
+                                  HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>
