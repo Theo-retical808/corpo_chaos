@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <MaxHighScores>10</MaxHighScores>
+  <DefaultStartingCapital>100000</DefaultStartingCapital>
+  <DefaultStartingEmployees>5</DefaultStartingEmployees>
+  <ScoreMultiplier>1</ScoreMultiplier>
+  <AutoSaveEnabled>true</AutoSaveEnabled>
+  <ShowScoreCalculation>true</ShowScoreCalculation>
+  <MinimumNicknameLength>2</MinimumNicknameLength>
+  <MaximumNicknameLength>20</MaximumNicknameLength>
+</GameConfiguration>

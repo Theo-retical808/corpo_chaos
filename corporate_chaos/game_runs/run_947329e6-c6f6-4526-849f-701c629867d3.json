@@ -1,0 +1,29 @@
+{
+  "runId": "947329e6-c6f6-4526-849f-701c629867d3",
+  "playerNickname": "",
+  "startDate": "2026-01-28T06:44:46.956359+08:00",
+  "endDate": "2026-01-28T06:46:40.5308973+08:00",
+  "finalScore": 580,
+  "quartersPlayed": 15,
+  "endReason": "Bankruptcy - Ran out of capital",
+  "finalStats": {
+    "capital": -68270.84930189548,
+    "reputation": 20,
+    "morale": 77,
+    "marketShare": 4,
+    "risk": 26,
+    "employeeCount": 5,
+    "quarterlyRevenue": 40000,
+    "quarterlyExpenses": 116861,
+    "riskAppetite": 1,
+    "budgetAllocation": 1,
+    "workforceFocus": 1,
+    "marketStrategy": 2,
+    "crisisResponse": 2,
+    "employeeManagement": 1
+  },
+  "quarterlyReports": [],
+  "peakMarketShare": 0,
+  "maxEmployees": 0,
+  "totalRevenue": 0
+}
