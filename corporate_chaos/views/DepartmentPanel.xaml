@@ -18,6 +18,8 @@
                       Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,10"/>
             <TextBlock x:Name="DepartmentStatsText" Text="Department Statistics" 
                       FontSize="12" Foreground="LightGray" HorizontalAlignment="Center"/>
+            <TextBlock Text="💡 Strategic Tip: Look at employee skill keywords and stats to determine the best department assignment for optimal performance" 
+                      FontSize="11" Foreground="LightBlue" HorizontalAlignment="Center" Margin="0,8,0,0" TextWrapping="Wrap"/>
         </StackPanel>
         
         <!-- Main Content -->
@@ -57,7 +59,13 @@
                                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
                                                     <TextBlock Text="🏆 " FontSize="10"/>
                                                     <TextBlock Text="{Binding OverallSkill}" FontSize="10" Foreground="Yellow"/>
-                                                    <TextBlock Text=" | 📈 " FontSize="10" Margin="10,0,0,0"/>
+                                                    <TextBlock Text=" | � " FontSize="10" Margin="8,0,0,0"/>
+                                                    <TextBlock Text="{Binding Experience}" FontSize="10" Foreground="Cyan"/>
+                                                    <TextBlock Text=" yrs" FontSize="10" Foreground="Cyan"/>
+                                                </StackPanel>
+                                                
+                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
+                                                    <TextBlock Text="📈 " FontSize="10"/>
                                                     <TextBlock Text="{Binding Productivity}" FontSize="10" Foreground="LightGreen"/>
                                                     <TextBlock Text=" | 😊 " FontSize="10" Margin="10,0,0,0"/>
                                                     <TextBlock Text="{Binding Morale}" FontSize="10" Foreground="Pink"/>
@@ -66,14 +74,20 @@
                                                 <StackPanel Orientation="Horizontal">
                                                     <TextBlock Text="💰 $" FontSize="10" Foreground="Gray"/>
                                                     <TextBlock Text="{Binding Salary, StringFormat=N0}" FontSize="10" Foreground="LightGreen"/>
-                                                    <TextBlock Text="/month" FontSize="10" Foreground="Gray"/>
+                                                    <TextBlock Text="/month | ⚠️ " FontSize="10" Foreground="Gray"/>
+                                                    <TextBlock Text="{Binding RiskLevel}" FontSize="10" Foreground="Orange"/>
                                                 </StackPanel>
                                             </StackPanel>
                                             
-                                            <!-- Action Button -->
-                                            <Button Grid.Column="1" Content="🔄 Transfer" Width="70" Height="30"
-                                                   Background="#4d2a4d" Foreground="White" BorderBrush="#7a4d7a"
-                                                   Click="TransferBtn_Click" Tag="{Binding}" VerticalAlignment="Center"/>
+                                            <!-- Action Buttons -->
+                                            <StackPanel Grid.Column="1" Orientation="Vertical">
+                                                <Button Content="🔄 Transfer" Width="70" Height="25"
+                                                       Background="#4d2a4d" Foreground="White" BorderBrush="#7a4d7a"
+                                                       Click="TransferBtn_Click" Tag="{Binding}" Margin="0,0,0,5"/>
+                                                <Button Content="🔥 Fire" Width="70" Height="25"
+                                                       Background="#8b2635" Foreground="White" BorderBrush="#b83545"
+                                                       Click="FireBtn_Click" Tag="{Binding}"/>
+                                            </StackPanel>
                                         </Grid>
                                     </Border>
                                 </DataTemplate>
@@ -110,11 +124,28 @@
                                                 <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="Bold" 
                                                           Foreground="White" Margin="0,0,0,3"/>
                                                 
+                                                <!-- Skill Keywords Display -->
+                                                <ItemsControl ItemsSource="{Binding SkillKeywords}" Margin="0,0,0,5">
+                                                    <ItemsControl.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <WrapPanel Orientation="Horizontal"/>
+                                                        </ItemsPanelTemplate>
+                                                    </ItemsControl.ItemsPanel>
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Border Background="#4a4a6d" CornerRadius="3" Padding="4,2" Margin="0,0,3,2">
+                                                                <TextBlock Text="{Binding}" FontSize="9" Foreground="LightBlue" FontWeight="SemiBold"/>
+                                                            </Border>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                                
                                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
-                                                    <TextBlock Text="🎯 " FontSize="10"/>
-                                                    <TextBlock Text="{Binding Specialization}" FontSize="10" Foreground="LightBlue"/>
-                                                    <TextBlock Text=" | 🏆 " FontSize="10" Margin="8,0,0,0"/>
+                                                    <TextBlock Text="� " FontSize="10"/>
                                                     <TextBlock Text="{Binding OverallSkill}" FontSize="10" Foreground="Yellow"/>
+                                                    <TextBlock Text=" | 📅 " FontSize="10" Margin="8,0,0,0"/>
+                                                    <TextBlock Text="{Binding Experience}" FontSize="10" Foreground="Cyan"/>
+                                                    <TextBlock Text=" yrs" FontSize="10" Foreground="Cyan"/>
                                                 </StackPanel>
                                                 
                                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
@@ -127,14 +158,20 @@
                                                 <StackPanel Orientation="Horizontal">
                                                     <TextBlock Text="💰 $" FontSize="10" Foreground="Gray"/>
                                                     <TextBlock Text="{Binding Salary, StringFormat=N0}" FontSize="10" Foreground="LightGreen"/>
-                                                    <TextBlock Text="/month" FontSize="10" Foreground="Gray"/>
+                                                    <TextBlock Text="/month | ⚠️ " FontSize="10" Foreground="Gray"/>
+                                                    <TextBlock Text="{Binding RiskLevel}" FontSize="10" Foreground="Orange"/>
                                                 </StackPanel>
                                             </StackPanel>
                                             
-                                            <!-- Action Button -->
-                                            <Button Grid.Column="1" Content="➕ Assign" Width="70" Height="30"
-                                                   Background="#2a4d3a" Foreground="White" BorderBrush="#4d7a5d"
-                                                   Click="AssignBtn_Click" Tag="{Binding}" VerticalAlignment="Center"/>
+                                            <!-- Action Buttons -->
+                                            <StackPanel Grid.Column="1" Orientation="Vertical">
+                                                <Button Content="➕ Assign" Width="70" Height="25"
+                                                       Background="#2a4d3a" Foreground="White" BorderBrush="#4d7a5d"
+                                                       Click="AssignBtn_Click" Tag="{Binding}" Margin="0,0,0,5"/>
+                                                <Button Content="🔥 Fire" Width="70" Height="25"
+                                                       Background="#8b2635" Foreground="White" BorderBrush="#b83545"
+                                                       Click="FireBtn_Click" Tag="{Binding}"/>
+                                            </StackPanel>
                                         </Grid>
                                     </Border>
                                 </DataTemplate>

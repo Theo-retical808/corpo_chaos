@@ -16,6 +16,14 @@
     <Resource Include="images\human_resources.png" />
     <Resource Include="images\it.png" />
     <Resource Include="images\research.png" />
+    <Resource Include="images\assistant.png" />
+    <Resource Include="audio\background.mp3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="audio\background.mp3">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

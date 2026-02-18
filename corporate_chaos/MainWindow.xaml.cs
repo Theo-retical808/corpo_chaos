@@ -8,6 +8,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.ComponentModel;
 using CorporateChaos.Models;
 using CorporateChaos.Systems;
 using CorporateChaos.Views;
@@ -23,6 +24,9 @@ namespace CorporateChaos
         private int quarterNumber;
         private DataManager dataManager = null!;
         private SaveLoadManager saveLoadManager = null!;
+        private StoryModeManager storyModeManager = null!;
+        private BackgroundMusicManager backgroundMusicManager = null!;
+        private bool isEndlessMode = false; // Track if we're in endless mode
         
         // New systems for employee management
         private Dictionary<Department, DepartmentStats> departments = null!;
@@ -31,6 +35,7 @@ namespace CorporateChaos
         
         // Quarterly summary tracking
         private List<string> currentQuarterEvents = null!;
+        private List<string> previousQuarterEvents = null!; // Events from the quarter that just ended
         private bool hasNewEvents = false;
         
         // Peak performance tracking
@@ -41,10 +46,44 @@ namespace CorporateChaos
             InitializeComponent();
             dataManager = new DataManager();
             saveLoadManager = new SaveLoadManager();
+            
+            // Initialize and start background music
+            System.Diagnostics.Debug.WriteLine("Initializing background music manager...");
+            backgroundMusicManager = new BackgroundMusicManager();
+            
+            // Add window closing event handler for cleanup
+            this.Closing += MainWindow_Closing;
+            
             InitializeGame();
+            
+            // Update music toggle button and start music after UI is loaded
+            this.Loaded += (s, e) => 
+            {
+                UpdateMusicToggleButton();
+                // Start music with a small delay to ensure UI is fully loaded
+                this.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    backgroundMusicManager.StartBackgroundMusic();
+                }), System.Windows.Threading.DispatcherPriority.Background);
+            };
         }
 
-        private void InitializeGame()
+        private void MainWindow_Closing(object? sender, CancelEventArgs e)
+        {
+            // Clean up background music
+            backgroundMusicManager?.StopBackgroundMusic();
+            backgroundMusicManager?.Dispose();
+        }
+
+        private void StartStoryMode()
+        {
+            InitializeGame(true);
+            MainMenuGrid.Visibility = Visibility.Collapsed;
+            CorporateGameGrid.Visibility = Visibility.Visible;
+            StartCorporateGame();
+        }
+
+        private void InitializeGame(bool isStoryMode = false)
         {
             var config = dataManager.GetConfig();
             company = new Company();
@@ -53,6 +92,19 @@ namespace CorporateChaos
             decisions = new DecisionSystem();
             gameLog = new StringBuilder();
             quarterNumber = 1;
+            
+            // Initialize Story Mode Manager
+            storyModeManager = new StoryModeManager(company);
+            
+            if (isStoryMode)
+            {
+                storyModeManager.StartNewStoryMode();
+            }
+            else
+            {
+                // Ensure story mode is explicitly disabled for sandbox
+                storyModeManager.ResetStoryMode();
+            }
             
             // Initialize departments
             departments = new Dictionary<Department, DepartmentStats>();
@@ -64,8 +116,15 @@ namespace CorporateChaos
             // Initialize hired employees list
             hiredEmployees = new List<Employee>();
             
+            // Setup starting employees for story mode
+            if (isStoryMode)
+            {
+                storyModeManager.SetupStartingEmployees(departments, hiredEmployees);
+            }
+            
             // Initialize quarterly events tracking
             currentQuarterEvents = new List<string>();
+            previousQuarterEvents = new List<string>();
             
             // Initialize game run record
             currentGameRun = new GameRunRecord
@@ -84,12 +143,87 @@ namespace CorporateChaos
             // Set initial peak values
             UpdatePeakPerformance();
             
+            // Load Joan's avatar
+            LoadJoanAvatar();
+            
             // Update UI with initial values
             UpdateUI();
         }
 
+        private void LoadJoanAvatar()
+        {
+            try
+            {
+                // Try to load assistant.png first
+                var assistantUri = new Uri("pack://application:,,,/images/assistant.png");
+                var assistantImage = new BitmapImage();
+                assistantImage.BeginInit();
+                assistantImage.UriSource = assistantUri;
+                assistantImage.CacheOption = BitmapCacheOption.OnLoad;
+                assistantImage.EndInit();
+                
+                JoanMainAvatar.Source = assistantImage;
+            }
+            catch
+            {
+                try
+                {
+                    // Fallback to human_resources.png
+                    var fallbackUri = new Uri("pack://application:,,,/images/human_resources.png");
+                    var fallbackImage = new BitmapImage();
+                    fallbackImage.BeginInit();
+                    fallbackImage.UriSource = fallbackUri;
+                    fallbackImage.CacheOption = BitmapCacheOption.OnLoad;
+                    fallbackImage.EndInit();
+                    
+                    JoanMainAvatar.Source = fallbackImage;
+                }
+                catch
+                {
+                    // If all else fails, leave it empty
+                }
+            }
+        }
+
         // Main Menu Navigation
-        private void NewGameBtn_Click(object sender, RoutedEventArgs e)
+        private void StoryModeBtn_Click(object sender, RoutedEventArgs e)
+        {
+            // Show development warning first
+            var warningResult = MessageBox.Show("⚠️ STORY MODE - DEVELOPMENT WARNING ⚠️\n\n" +
+                          "Story Mode is currently under active development and expansion.\n\n" +
+                          "You may experience:\n" +
+                          "• Bugs and unexpected behavior\n" +
+                          "• Incomplete features or storylines\n" +
+                          "• Inconsistent gameplay mechanics\n" +
+                          "• Save file compatibility issues\n" +
+                          "• Missing dialogue or narrative elements\n\n" +
+                          "We recommend using Sandbox Mode for the most stable experience.\n\n" +
+                          "Do you still want to proceed with Story Mode?",
+                          "Story Mode - Development Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+            if (warningResult != MessageBoxResult.Yes)
+            {
+                return; // User chose not to proceed
+            }
+
+            // Show the original Story Mode welcome message
+            var result = MessageBox.Show("📖 Welcome to Story Mode!\n\n" +
+                          "In Story Mode, you'll learn corporate management through guided tutorials with Secretary Joan.\n\n" +
+                          "Features:\n" +
+                          "• Step-by-step tutorials over 8 quarters\n" +
+                          "• Gradual unlock of game mechanics\n" +
+                          "• Narrative-driven scenarios\n" +
+                          "• Personal guidance from Secretary Joan\n\n" +
+                          "Would you like to start Story Mode?",
+                          "Story Mode", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                StartStoryMode();
+            }
+        }
+
+        private void SandboxModeBtn_Click(object sender, RoutedEventArgs e)
         {
             MainMenuGrid.Visibility = Visibility.Collapsed;
             SaveSlotsGrid.Visibility = Visibility.Visible;
@@ -119,6 +253,15 @@ namespace CorporateChaos
         // Save Slots Navigation
         private void CorporateBtn_Click(object sender, RoutedEventArgs e)
         {
+            isEndlessMode = false;
+            SaveSlotsGrid.Visibility = Visibility.Collapsed;
+            CorporateGameGrid.Visibility = Visibility.Visible;
+            StartCorporateGame();
+        }
+
+        private void EndlessModeBtn_Click(object sender, RoutedEventArgs e)
+        {
+            isEndlessMode = true;
             SaveSlotsGrid.Visibility = Visibility.Collapsed;
             CorporateGameGrid.Visibility = Visibility.Visible;
             StartCorporateGame();
@@ -140,21 +283,58 @@ namespace CorporateChaos
         // Corporate Game Logic
         private void StartCorporateGame()
         {
+            InitializeControlKnobs(); // Initialize the new dynamic control knobs
             UpdateUI();
             UpdateCurrentSettings();
             gameLog.Clear();
-            gameLog.AppendLine("🏢 === CORPORATE EXECUTIVE DASHBOARD ACTIVATED ===");
-            gameLog.AppendLine("Welcome to your new corporate adventure! Make strategic decisions each quarter.");
+            
+            // Clear previous quarter events when starting a new game
+            currentQuarterEvents.Clear();
+            previousQuarterEvents.Clear();
+            hasNewEvents = false;
+            NewEventsIndicator.Visibility = Visibility.Collapsed;
+            
+            // Debug: Log the current mode status
+            System.Diagnostics.Debug.WriteLine($"StartCorporateGame - IsStoryMode: {storyModeManager.IsStoryMode}, IsEndlessMode: {isEndlessMode}");
+            
+            if (storyModeManager.IsStoryMode)
+            {
+                gameLog.AppendLine("📖 === STORY MODE ACTIVATED ===");
+                gameLog.AppendLine("Welcome to your corporate journey with Secretary Joan as your guide!");
+                
+                // Show initial story event
+                if (storyModeManager.ShouldShowStoryEvent(quarterNumber))
+                {
+                    storyModeManager.ShowStoryGuide(quarterNumber, this);
+                }
+            }
+            else
+            {
+                string modeText = isEndlessMode ? "ENDLESS MODE" : "CORPORATE CHALLENGE";
+                gameLog.AppendLine($"🏢 === {modeText} ACTIVATED ===");
+                gameLog.AppendLine("Welcome to your new corporate adventure! Make strategic decisions each quarter.");
+                gameLog.AppendLine("💡 All features are unlocked - hire employees, make executive decisions, and build your empire!");
+            }
+            
             gameLog.AppendLine("💡 Tip: Assign employees to departments for maximum efficiency!");
             gameLog.AppendLine();
         }
 
-        private void UpdateUI()
+        public void UpdateUI()
         {
-            // Update header with retirement progress
+            // Update header with retirement progress (unless endless mode)
             int yearsCompleted = (quarterNumber - 1) / 4;
             int currentQuarterInYear = ((quarterNumber - 1) % 4) + 1;
-            QuarterCounterText.Text = $"Y{yearsCompleted + 1} Q{currentQuarterInYear} ({quarterNumber}/120)";
+            
+            if (isEndlessMode)
+            {
+                QuarterCounterText.Text = $"Y{yearsCompleted + 1} Q{currentQuarterInYear} (Endless)";
+            }
+            else
+            {
+                QuarterCounterText.Text = $"Y{yearsCompleted + 1} Q{currentQuarterInYear} ({quarterNumber}/120)";
+            }
+            
             HeaderCapitalText.Text = $"${company.Capital:N0}";
             
             // Update company stats with new -100 to 100 ranges
@@ -175,8 +355,10 @@ namespace CorporateChaos
             // Update quarterly financials
             QuarterlyRevenueText.Text = $"${company.QuarterlyRevenue:N0}";
             QuarterlyExpensesText.Text = $"${company.QuarterlyExpenses:N0}";
-            double netProfit = company.QuarterlyRevenue - company.QuarterlyExpenses;
+            NetLossText.Text = $"${company.NetLoss:N0}";
+            double netProfit = company.QuarterlyRevenue - (company.QuarterlyExpenses + company.NetLoss);
             NetProfitText.Text = $"${netProfit:N0}";
+            NetProfitText.Foreground = netProfit >= 0 ? System.Windows.Media.Brushes.LightGreen : System.Windows.Media.Brushes.LightCoral;
             
             // Update crisis status
             CrisisStatusText.Text = chaos.GetCrisisStatusSummary();
@@ -184,8 +366,17 @@ namespace CorporateChaos
             // Update department button tooltips with employee counts
             UpdateDepartmentButtonTooltips();
             
+            // Update progressive unlocking for story mode
+            UpdateProgressiveUnlocking();
+            
             // Ensure values stay within bounds
             company.ClampValues();
+        }
+
+        // Public method for external classes to refresh UI state
+        public void RefreshUI()
+        {
+            UpdateUI();
         }
 
         private void UpdateDepartmentButtonTooltips()
@@ -207,42 +398,162 @@ namespace CorporateChaos
             ResearchEmployeeCount.Text = departments[Department.Research].GetEmployeeCount().ToString();
         }
 
+        private void UpdateProgressiveUnlocking()
+        {
+            // Debug logging
+            System.Diagnostics.Debug.WriteLine($"UpdateProgressiveUnlocking - IsStoryMode: {storyModeManager?.IsStoryMode ?? false}");
+            
+            // In sandbox/endless mode, all buttons are always enabled
+            if (storyModeManager == null || !storyModeManager.IsStoryMode)
+            {
+                HireEmployeesBtn.IsEnabled = true;
+                ExecutiveDecisionsBtn.IsEnabled = true;
+                HireEmployeesBtn.Opacity = 1.0;
+                ExecutiveDecisionsBtn.Opacity = 1.0;
+                HireEmployeesBtn.Content = "🎯 Hire New Employees";
+                ExecutiveDecisionsBtn.Content = "📈 Executive Decisions";
+                HireEmployeesBtn.ToolTip = "Hire new employees for your departments";
+                ExecutiveDecisionsBtn.ToolTip = "Make strategic executive decisions";
+                System.Diagnostics.Debug.WriteLine("Sandbox mode - all buttons enabled");
+                return;
+            }
+
+            // Progressive unlocking for story mode only
+            bool hiringUnlocked = storyModeManager.IsMechanicUnlocked(MechanicType.EmployeeHiring);
+            bool executiveUnlocked = storyModeManager.IsMechanicUnlocked(MechanicType.ExecutiveDecisions);
+
+            System.Diagnostics.Debug.WriteLine($"Story mode - Quarter {quarterNumber} - Hiring unlocked: {hiringUnlocked}, Executive unlocked: {executiveUnlocked}");
+            System.Diagnostics.Debug.WriteLine($"Unlocked mechanics: {string.Join(", ", storyModeManager.StoryData.UnlockedMechanics)}");
+
+            HireEmployeesBtn.IsEnabled = hiringUnlocked;
+            ExecutiveDecisionsBtn.IsEnabled = executiveUnlocked;
+            
+            // Visual feedback for locked buttons
+            HireEmployeesBtn.Opacity = hiringUnlocked ? 1.0 : 0.4;
+            ExecutiveDecisionsBtn.Opacity = executiveUnlocked ? 1.0 : 0.4;
+
+            // Update button content to show lock status
+            if (!hiringUnlocked)
+            {
+                HireEmployeesBtn.Content = "🔒 Hire New Employees";
+                HireEmployeesBtn.ToolTip = "🔒 Unlocks in Quarter 2 - Employee Hiring Tutorial";
+            }
+            else
+            {
+                HireEmployeesBtn.Content = "🎯 Hire New Employees";
+                HireEmployeesBtn.ToolTip = "Hire new employees for your departments";
+            }
+
+            if (!executiveUnlocked)
+            {
+                ExecutiveDecisionsBtn.Content = "🔒 Executive Decisions";
+                ExecutiveDecisionsBtn.ToolTip = "🔒 Unlocks in Quarter 4 - Executive Decisions Tutorial";
+            }
+            else
+            {
+                ExecutiveDecisionsBtn.Content = "📈 Executive Decisions";
+                ExecutiveDecisionsBtn.ToolTip = "Make strategic executive decisions";
+            }
+        }
+
         private void UpdateCurrentSettings()
         {
             // This method can be removed or simplified since we removed the settings display
         }
 
-        // Control Knob Event Handlers
-        private void RiskAppetiteCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        // Control Knob Event Handlers - Dynamic Button System
+        private void RiskAppetite_Click(object sender, RoutedEventArgs e)
         {
-            if (company != null && RiskAppetiteCombo.SelectedItem is ComboBoxItem item && item.Tag != null)
+            if (sender is Button button && button.Tag != null && company != null)
             {
-                company.RiskAppetite = Enum.Parse<RiskAppetite>(item.Tag.ToString()!);
+                var riskType = button.Tag.ToString()!;
+                company.RiskAppetite = Enum.Parse<RiskAppetite>(riskType);
+                UpdateControlKnobVisuals("Risk", riskType);
             }
         }
 
-        private void BudgetAllocationCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void BudgetAllocation_Click(object sender, RoutedEventArgs e)
         {
-            if (company != null && BudgetAllocationCombo.SelectedItem is ComboBoxItem item && item.Tag != null)
+            if (sender is Button button && button.Tag != null && company != null)
             {
-                company.BudgetAllocation = Enum.Parse<InvestmentLevel>(item.Tag.ToString()!);
+                var budgetLevel = button.Tag.ToString()!;
+                company.BudgetAllocation = Enum.Parse<InvestmentLevel>(budgetLevel);
+                UpdateControlKnobVisuals("Budget", budgetLevel);
             }
         }
 
-        private void MarketStrategyCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void MarketStrategy_Click(object sender, RoutedEventArgs e)
         {
-            if (company != null && MarketStrategyCombo.SelectedItem is ComboBoxItem item && item.Tag != null)
+            if (sender is Button button && button.Tag != null && company != null)
             {
-                company.MarketStrategy = Enum.Parse<MarketStrategy>(item.Tag.ToString()!);
+                var strategy = button.Tag.ToString()!;
+                company.MarketStrategy = Enum.Parse<MarketStrategy>(strategy);
+                UpdateControlKnobVisuals("Market", strategy);
             }
         }
 
-        private void CrisisResponseCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void CrisisResponse_Click(object sender, RoutedEventArgs e)
         {
-            if (company != null && CrisisResponseCombo.SelectedItem is ComboBoxItem item && item.Tag != null)
+            if (sender is Button button && button.Tag != null && company != null)
             {
-                company.CrisisResponse = Enum.Parse<CrisisResponse>(item.Tag.ToString()!);
+                var response = button.Tag.ToString()!;
+                company.CrisisResponse = Enum.Parse<CrisisResponse>(response);
+                UpdateControlKnobVisuals("Crisis", response);
             }
+        }
+
+        private void UpdateControlKnobVisuals(string category, string selectedValue)
+        {
+            // Update button appearances to show selection
+            var activeColor = System.Windows.Media.Brushes.Green;
+            var activeBorderColor = System.Windows.Media.Brushes.LightGreen;
+            var inactiveColor = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(74, 74, 106));
+            var inactiveBorderColor = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(106, 106, 138));
+
+            switch (category)
+            {
+                case "Risk":
+                    RiskConservativeBtn.Background = selectedValue == "Conservative" ? activeColor : inactiveColor;
+                    RiskConservativeBtn.BorderBrush = selectedValue == "Conservative" ? activeBorderColor : inactiveBorderColor;
+                    RiskBalancedBtn.Background = selectedValue == "Balanced" ? activeColor : inactiveColor;
+                    RiskBalancedBtn.BorderBrush = selectedValue == "Balanced" ? activeBorderColor : inactiveBorderColor;
+                    RiskAggressiveBtn.Background = selectedValue == "Aggressive" ? activeColor : inactiveColor;
+                    RiskAggressiveBtn.BorderBrush = selectedValue == "Aggressive" ? activeBorderColor : inactiveBorderColor;
+                    break;
+                case "Budget":
+                    BudgetLowBtn.Background = selectedValue == "Low" ? activeColor : inactiveColor;
+                    BudgetLowBtn.BorderBrush = selectedValue == "Low" ? activeBorderColor : inactiveBorderColor;
+                    BudgetMediumBtn.Background = selectedValue == "Medium" ? activeColor : inactiveColor;
+                    BudgetMediumBtn.BorderBrush = selectedValue == "Medium" ? activeBorderColor : inactiveBorderColor;
+                    BudgetHighBtn.Background = selectedValue == "High" ? activeColor : inactiveColor;
+                    BudgetHighBtn.BorderBrush = selectedValue == "High" ? activeBorderColor : inactiveBorderColor;
+                    break;
+                case "Market":
+                    MarketCostBtn.Background = selectedValue == "Cost" ? activeColor : inactiveColor;
+                    MarketCostBtn.BorderBrush = selectedValue == "Cost" ? activeBorderColor : inactiveBorderColor;
+                    MarketQualityBtn.Background = selectedValue == "Quality" ? activeColor : inactiveColor;
+                    MarketQualityBtn.BorderBrush = selectedValue == "Quality" ? activeBorderColor : inactiveBorderColor;
+                    MarketInnovationBtn.Background = selectedValue == "Innovation" ? activeColor : inactiveColor;
+                    MarketInnovationBtn.BorderBrush = selectedValue == "Innovation" ? activeBorderColor : inactiveBorderColor;
+                    break;
+                case "Crisis":
+                    CrisisImmediateBtn.Background = selectedValue == "Immediate" ? activeColor : inactiveColor;
+                    CrisisImmediateBtn.BorderBrush = selectedValue == "Immediate" ? activeBorderColor : inactiveBorderColor;
+                    CrisisControlBtn.Background = selectedValue == "Control" ? activeColor : inactiveColor;
+                    CrisisControlBtn.BorderBrush = selectedValue == "Control" ? activeBorderColor : inactiveBorderColor;
+                    CrisisAbsorbBtn.Background = selectedValue == "Absorb" ? activeColor : inactiveColor;
+                    CrisisAbsorbBtn.BorderBrush = selectedValue == "Absorb" ? activeBorderColor : inactiveBorderColor;
+                    break;
+            }
+        }
+
+        private void InitializeControlKnobs()
+        {
+            // Set default selections
+            UpdateControlKnobVisuals("Risk", "Balanced");
+            UpdateControlKnobVisuals("Budget", "Medium");
+            UpdateControlKnobVisuals("Market", "Quality");
+            UpdateControlKnobVisuals("Crisis", "Control");
         }
 
         // Employee Management - New Hiring System
@@ -303,7 +614,7 @@ namespace CorporateChaos
 
         private void ShowQuarterlySummary()
         {
-            var quarterlySummary = new QuarterlySummary(quarterNumber - 1, company, departments, currentQuarterEvents);
+            var quarterlySummary = new QuarterlySummary(quarterNumber - 1, company, departments, previousQuarterEvents);
             quarterlySummary.Owner = this;
             quarterlySummary.ShowDialog();
         }
@@ -379,14 +690,96 @@ namespace CorporateChaos
                 gameLog.AppendLine(eventText);
             }
             
+            // Initialize event tracking for loaded games
+            currentQuarterEvents.Clear();
+            previousQuarterEvents.Clear();
+            
             // Update UI after loading
             UpdateUI();
+        }
+
+        // Secretary Joan Dialogue
+        private void JoanDialogueBtn_Click(object sender, RoutedEventArgs e)
+        {
+            // Show a choice between traditional and branching dialogue
+            var result = MessageBox.Show("Which dialogue mode would you like to try?\n\n" +
+                                       "Yes = Traditional Joan Dialogue\n" +
+                                       "No = New Branching Conversation (Demo)\n" +
+                                       "Cancel = Cancel",
+                                       "Joan Dialogue Mode", 
+                                       MessageBoxButton.YesNoCancel, 
+                                       MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                // Use adaptive dialogue if available, otherwise traditional
+                if (storyModeManager?.ShouldUseAdaptiveDialogue() == true)
+                {
+                    storyModeManager.ShowJoanAdaptiveDialogue(departments, this, "user_requested");
+                }
+                else
+                {
+                    // Traditional dialogue
+                    var joanDialogue = new JoanDialogue(company, departments, storyModeManager?.IsStoryMode ?? false, quarterNumber, storyModeManager);
+                    joanDialogue.Owner = this;
+                    joanDialogue.ShowDialog();
+                }
+            }
+            else if (result == MessageBoxResult.No)
+            {
+                // New branching dialogue demo
+                JoanDialogue.ShowBranchingDialogueExample(company, departments, quarterNumber, this);
+            }
+        }
+
+        // Music Toggle
+        private void MusicToggleBtn_Click(object sender, RoutedEventArgs e)
+        {
+            backgroundMusicManager?.ToggleMute();
+            UpdateMusicToggleButton();
+        }
+
+        private void UpdateMusicToggleButton()
+        {
+            if (backgroundMusicManager != null && MusicToggleBtn != null)
+            {
+                if (backgroundMusicManager.IsMuted())
+                {
+                    MusicToggleBtn.Content = "🔇";
+                    MusicToggleBtn.ToolTip = "Background music is muted - click to unmute";
+                }
+                else
+                {
+                    MusicToggleBtn.Content = "🔊";
+                    MusicToggleBtn.ToolTip = "Background music is playing - click to mute";
+                }
+            }
         }
 
         // Quarter End Processing
         private void EndQuarterBtn_Click(object sender, RoutedEventArgs e)
         {
+            // Clear previous quarter events (from 2 quarters ago) when starting a new quarter
+            previousQuarterEvents.Clear();
+            
+            // Show Joan's end-of-quarter dialogue first
+            ShowJoanEndQuarterDialogue();
             ProcessQuarterEnd();
+        }
+
+        private void ShowJoanEndQuarterDialogue()
+        {
+            // Use adaptive dialogue if available, otherwise traditional
+            if (storyModeManager?.ShouldUseAdaptiveDialogue() == true)
+            {
+                storyModeManager.ShowJoanAdaptiveDialogue(departments, this, "quarterly_review");
+            }
+            else
+            {
+                var joanDialogue = new JoanDialogue(company, departments, storyModeManager?.IsStoryMode ?? false, quarterNumber, storyModeManager);
+                joanDialogue.Owner = this;
+                joanDialogue.ShowDialog();
+            }
         }
 
         private void ProcessQuarterEnd()
@@ -394,8 +787,24 @@ namespace CorporateChaos
             // Process quarterly financials
             company.ProcessQuarterlyFinancials(departments);
             
-            // Apply the new chaotic events system
-            var chaosEvents = chaos.ApplyQuarterlyChaos(company, departments);
+            // Apply story mode specific events and get the event descriptions
+            if (storyModeManager.IsStoryMode)
+            {
+                var storyEvents = storyModeManager.ProcessStoryModeEvents(quarterNumber, departments);
+                currentQuarterEvents.AddRange(storyEvents);
+                
+                // Log story events
+                foreach (var eventText in storyEvents)
+                {
+                    LogEvent($"📖 {eventText}");
+                }
+            }
+            
+            // Apply the chaotic events system
+            // In story mode: only apply chaos after tutorial (Q10+)
+            // In sandbox mode: always apply chaos from the start
+            bool isInStoryTutorial = storyModeManager.IsStoryMode && storyModeManager.IsInTutorial;
+            var chaosEvents = chaos.ApplyQuarterlyChaos(company, departments, isInStoryTutorial, quarterNumber);
             
             // Add chaos events to current quarter tracking
             currentQuarterEvents.AddRange(chaosEvents);
@@ -415,6 +824,17 @@ namespace CorporateChaos
             // Update employee morale based on company performance
             UpdateEmployeeMorale();
             
+            // Move current quarter events to previous quarter events (for next quarter's summary)
+            previousQuarterEvents.Clear();
+            previousQuarterEvents.AddRange(currentQuarterEvents);
+            currentQuarterEvents.Clear();
+            
+            // Show story guide for current quarter BEFORE incrementing quarter number
+            if (storyModeManager.ShouldShowStoryEvent(quarterNumber))
+            {
+                storyModeManager.ShowStoryGuide(quarterNumber, this);
+            }
+            
             quarterNumber++;
             
             // Reset hiring refreshes for the new quarter
@@ -424,30 +844,55 @@ namespace CorporateChaos
                 company.LastRefreshQuarter = quarterNumber;
             }
             
+            // Complete quarter in story mode
+            if (storyModeManager.IsStoryMode)
+            {
+                storyModeManager.CompleteQuarter(quarterNumber);
+            }
+            
             UpdateUI();
             
-            // Show quarterly summary
+            // Show quarterly summary with events from the quarter that just ended
             ShowQuarterlySummary();
             
-            // Reset events for next quarter and show indicator
-            currentQuarterEvents.Clear();
+            // Show new events indicator for the events that just happened
             hasNewEvents = true;
             NewEventsIndicator.Visibility = Visibility.Visible;
             
             // Check for game over conditions
-            if (company.Capital <= 0)
+            
+            // Track bankruptcy quarters
+            if (company.Capital < 0)
             {
-                HandleGameOver("Bankruptcy - Ran out of capital");
+                company.ConsecutiveNegativeQuarters++;
             }
-            else if (company.MarketShare >= 70)
+            else
             {
-                HandleGameOver("Victory - Market Dominance Achieved (70% Market Share)");
+                company.ConsecutiveNegativeQuarters = 0; // Reset if capital is positive
             }
-            else if (company.EmployeeCount <= 0)
+            
+            // Bankruptcy condition: 2 consecutive quarters of negative capital
+            if (company.ConsecutiveNegativeQuarters >= 2)
             {
-                HandleGameOver("Business Failure - No employees left");
+                HandleGameOver("Bankruptcy - Company declared bankruptcy after 2 consecutive quarters of negative capital");
             }
-            else if (quarterNumber > 120)
+            // Win condition 1: 65% market share
+            else if (company.MarketShare >= 65)
+            {
+                HandleGameOver("Victory - Market Dominance Achieved (65% Market Share)");
+            }
+            // Win condition 2: $1 billion capital with sell company option
+            else if (company.Capital >= 1000000000) // $1 billion
+            {
+                HandleBillionaireWin();
+            }
+            // Lose condition: No employees left
+            else if (company.EmployeeCount <= 0 && quarterNumber > 1) // Allow Q1 to have 0 employees
+            {
+                HandleGameOver("Business Failure - No employees left to run the company");
+            }
+            // Retirement condition (unchanged)
+            else if (!isEndlessMode && quarterNumber > 120)
             {
                 HandleGameOver("Retirement - You've reached the end of your 30-year career!");
             }
@@ -483,6 +928,39 @@ namespace CorporateChaos
                         employee.Morale = Math.Max(0, employee.Morale - 10);
                     }
                 }
+            }
+        }
+
+        private void HandleBillionaireWin()
+        {
+            var result = MessageBox.Show(
+                "🎉 CONGRATULATIONS! 🎉\n\n" +
+                $"Your company has reached ${company.Capital:N0} in capital!\n\n" +
+                "A major conglomerate has approached you with an acquisition offer. " +
+                "They're willing to buy your company for a premium price, making you incredibly wealthy.\n\n" +
+                "Do you want to sell your company and retire as a billionaire, or continue building your empire?\n\n" +
+                "💰 SELL: Retire with massive wealth (Victory)\n" +
+                "🏢 CONTINUE: Keep building your business empire",
+                "Billionaire Decision", 
+                MessageBoxButton.YesNo, 
+                MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                HandleGameOver("Victory - Sold company to conglomerate and retired as a billionaire");
+            }
+            else
+            {
+                // Continue playing - just log the event
+                LogEvent("🏢 MAJOR DECISION: Declined acquisition offer - continuing to build the empire!");
+                MessageBox.Show(
+                    "You've chosen to continue building your empire!\n\n" +
+                    "The conglomerate respects your decision. Your company continues to grow, " +
+                    "and you remain in control of your destiny.\n\n" +
+                    "💡 You can still win by reaching 70% market share or retire at quarter 120.",
+                    "Empire Builder", 
+                    MessageBoxButton.OK, 
+                    MessageBoxImage.Information);
             }
         }
 
@@ -616,12 +1094,10 @@ namespace CorporateChaos
                 >= 60 => "Very High",
                 >= 40 => "High",
                 >= 20 => "Elevated",
-                >= 0 => "Moderate",
-                >= -20 => "Low",
-                >= -40 => "Very Low",
-                >= -60 => "Minimal",
-                >= -80 => "Negligible",
-                _ => "Ultra Safe"
+                >= 10 => "Moderate",
+                >= 5 => "Low",
+                >= 1 => "Very Low",
+                _ => "Minimal"
             };
         }
     }

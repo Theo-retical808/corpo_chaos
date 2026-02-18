@@ -1,0 +1,180 @@
+<Window x:Class="CorporateChaos.Views.JoanDialogue"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Secretary Joan - Your Assistant" Height="400" Width="600" 
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        Background="#1a1a2e">
+    
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header with Joan's Info -->
+        <Border Grid.Row="0" Background="#16213e" Padding="15" Margin="0,0,0,15">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- Joan's Avatar -->
+                <Border Grid.Column="0" Width="60" Height="60" 
+                       Background="White" Margin="0,0,15,0">
+                    <Image x:Name="JoanDialogueAvatar" Width="55" Height="55" 
+                          Stretch="UniformToFill" ClipToBounds="True">
+                        <Image.Clip>
+                            <EllipseGeometry Center="27.5,27.5" RadiusX="27.5" RadiusY="27.5"/>
+                        </Image.Clip>
+                    </Image>
+                </Border>
+                
+                <!-- Joan's Info -->
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="Secretary Joan" FontSize="18" FontWeight="Bold" 
+                              Foreground="White" Margin="0,0,0,3"/>
+                    <TextBlock x:Name="JoanRoleText" Text="Your Personal Corporate Assistant" 
+                              FontSize="12" Foreground="LightBlue"/>
+                    <TextBlock x:Name="JoanStatusText" Text="Ready to help!" 
+                              FontSize="10" Foreground="LightGray" Margin="0,3,0,0"/>
+                </StackPanel>
+                
+                <!-- Close Button -->
+                <Button Grid.Column="2" x:Name="CloseDialogueBtn" Content="✕" Width="30" Height="30" 
+                        Click="CloseDialogueBtn_Click" Background="#4d2a2a" Foreground="White"
+                        FontWeight="Bold" FontSize="14" BorderThickness="0">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Background" Value="#4d2a2a"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#6d3a3a"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </Grid>
+        </Border>
+        
+        <!-- Joan's Dialogue Content -->
+        <Border Grid.Row="1" Background="#2a2a4d" Padding="20">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <!-- Dialogue Text -->
+                    <Border Background="#16213e" Padding="15" Margin="0,0,0,15">
+                        <StackPanel>
+                            <TextBlock Text="💬 Joan says:" FontSize="14" FontWeight="Bold" 
+                                      Foreground="LightBlue" Margin="0,0,0,10"/>
+                            <TextBlock x:Name="JoanDialogueText" 
+                                      Text="Hello! I'm here to help you manage your company effectively..."
+                                      FontSize="13" Foreground="White" TextWrapping="Wrap" 
+                                      LineHeight="18"/>
+                        </StackPanel>
+                    </Border>
+                    
+                    <!-- Situation Analysis -->
+                    <Border Background="#2a4d2a" Padding="15" Margin="0,0,0,15">
+                        <StackPanel>
+                            <TextBlock Text="📊 Current Situation:" FontSize="14" FontWeight="Bold" 
+                                      Foreground="LightGreen" Margin="0,0,0,8"/>
+                            <TextBlock x:Name="SituationAnalysisText" 
+                                      Text="Analyzing your company's current state..."
+                                      FontSize="12" Foreground="White" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+                    
+                    <!-- Recommendations -->
+                    <Border Background="#4d2a4d" Padding="15">
+                        <StackPanel>
+                            <TextBlock Text="💡 My Recommendations:" FontSize="14" FontWeight="Bold" 
+                                      Foreground="LightPink" Margin="0,0,0,8"/>
+                            <TextBlock x:Name="RecommendationsText" 
+                                      Text="Based on your situation, here's what I suggest..."
+                                      FontSize="12" Foreground="White" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+        
+        <!-- Branching Conversation Choices Panel -->
+        <Border x:Name="BranchingChoicesPanel" Grid.Row="2" Background="#1a1a2e" 
+                Padding="15" Margin="0,15,0,0" Visibility="Collapsed">
+            <StackPanel>
+                <!-- Choice Instructions -->
+                <TextBlock Text="💭 How would you like to respond?" FontSize="14" FontWeight="Bold" 
+                          Foreground="LightBlue" Margin="0,0,0,15" HorizontalAlignment="Center"/>
+                
+                <!-- Dynamic Choice Buttons Container -->
+                <StackPanel x:Name="ChoiceButtonsContainer" Orientation="Vertical"/>
+                
+                <!-- Consequence Preview Panel -->
+                <Border x:Name="ConsequencePreviewPanel" Background="#2a2a4d" Padding="12" 
+                        Margin="0,15,0,0" Visibility="Collapsed">
+                    <StackPanel>
+                        <TextBlock Text="📋 Choice Preview:" FontSize="12" FontWeight="Bold" 
+                                  Foreground="LightYellow" Margin="0,0,0,8"/>
+                        <TextBlock x:Name="ConsequencePreviewText" FontSize="11" 
+                                  Foreground="White" TextWrapping="Wrap" LineHeight="16"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Border>
+        
+        <!-- Traditional Action Buttons (Legacy Mode) -->
+        <StackPanel x:Name="TraditionalButtonsPanel" Grid.Row="2" Orientation="Horizontal" 
+                    HorizontalAlignment="Center" Margin="0,15,0,0">
+            <Button x:Name="GetAdviceBtn" Content="🎯 Get Strategic Advice" Width="150" Height="35" 
+                    Margin="0,0,10,0" Click="GetAdviceBtn_Click" 
+                    Background="#2a4d3a" Foreground="White" BorderThickness="0"
+                    FontSize="12" FontWeight="SemiBold">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Background" Value="#2a4d3a"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#3a6d4a"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+            
+            <Button x:Name="CheckRemindersBtn" Content="⏰ Check Reminders" Width="130" Height="35" 
+                    Margin="0,0,10,0" Click="CheckRemindersBtn_Click" 
+                    Background="#4d3a2a" Foreground="White" BorderThickness="0"
+                    FontSize="12" FontWeight="SemiBold">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Background" Value="#4d3a2a"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#6d5a3a"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+            
+            <Button x:Name="DismissBtn" Content="Thanks Joan!" Width="100" Height="35" 
+                    Click="DismissBtn_Click" 
+                    Background="#2a4d4d" Foreground="White" BorderThickness="0"
+                    FontSize="12" FontWeight="SemiBold">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Background" Value="#2a4d4d"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#3a6d6d"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+        </StackPanel>
+    </Grid>
+</Window>

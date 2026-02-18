@@ -18,9 +18,9 @@
                       Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,10"/>
             <TextBlock x:Name="HiringInfoText" Text="Candidate experience levels depend on game progression and company reputation" 
                       FontSize="12" Foreground="LightGray" HorizontalAlignment="Center"/>
-            <TextBlock x:Name="TipTextBlock" Text="💡 Tip: Match candidate skills to department needs for optimal performance" 
+            <TextBlock x:Name="TipTextBlock" Text="💡 Tip: Look at skill keywords and stats to strategically determine department assignments!" 
                       FontSize="11" Foreground="LightBlue" HorizontalAlignment="Center" Margin="0,5,0,0"/>
-            <TextBlock x:Name="RefreshLimitText" Text="⚠️ You can refresh the candidate list up to 5 times per quarter" 
+            <TextBlock x:Name="RefreshLimitText" Text="⚠️ You can refresh the candidate list up to 3 times per quarter" 
                       FontSize="10" Foreground="Orange" HorizontalAlignment="Center" Margin="0,3,0,0"/>
         </StackPanel>
         
@@ -49,53 +49,81 @@
                                         <!-- Candidate Info -->
                                         <StackPanel Grid.Column="0">
                                             <TextBlock Text="{Binding Name}" FontSize="16" FontWeight="Bold" 
-                                                      Foreground="White" Margin="0,0,0,5"/>
+                                                      Foreground="White" Margin="0,0,0,8"/>
                                             
-                                            <!-- Position Description -->
-                                            <TextBlock Text="{Binding PositionDescription}" FontSize="12" 
-                                                      Foreground="LightBlue" Margin="0,0,0,8" TextWrapping="Wrap"/>
+                                            <!-- Core Stats Display -->
+                                            <Grid Margin="0,0,0,8">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                
+                                                <!-- Left Column Stats -->
+                                                <StackPanel Grid.Column="0">
+                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,3">
+                                                        <TextBlock Text="📈 Productivity: " FontSize="11" Foreground="Gray" Width="80"/>
+                                                        <TextBlock Text="{Binding Productivity}" FontSize="11" Foreground="LightGreen" FontWeight="Bold"/>
+                                                        <TextBlock Text="/100" FontSize="10" Foreground="Gray"/>
+                                                    </StackPanel>
+                                                    
+                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,3">
+                                                        <TextBlock Text="😊 Morale: " FontSize="11" Foreground="Gray" Width="80"/>
+                                                        <TextBlock Text="{Binding Morale}" FontSize="11" Foreground="Pink" FontWeight="Bold"/>
+                                                        <TextBlock Text="/100" FontSize="10" Foreground="Gray"/>
+                                                    </StackPanel>
+                                                    
+                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,3">
+                                                        <TextBlock Text="📅 Experience: " FontSize="11" Foreground="Gray" Width="80"/>
+                                                        <TextBlock Text="{Binding Experience}" FontSize="11" Foreground="Cyan" FontWeight="Bold"/>
+                                                        <TextBlock Text=" years" FontSize="11" Foreground="Gray"/>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                                
+                                                <!-- Right Column Stats -->
+                                                <StackPanel Grid.Column="1">
+                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,3">
+                                                        <TextBlock Text="🏆 Skill Level: " FontSize="11" Foreground="Gray" Width="80"/>
+                                                        <TextBlock Text="{Binding OverallSkill}" FontSize="11" Foreground="Yellow" FontWeight="Bold"/>
+                                                    </StackPanel>
+                                                    
+                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,3">
+                                                        <TextBlock Text="⚠️ Risk Level: " FontSize="11" Foreground="Gray" Width="80"/>
+                                                        <TextBlock Text="{Binding RiskLevel}" FontSize="11" Foreground="Orange" FontWeight="Bold"/>
+                                                    </StackPanel>
+                                                    
+                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,3">
+                                                        <TextBlock Text="💰 Salary: " FontSize="11" Foreground="Gray" Width="80"/>
+                                                        <TextBlock Text="{Binding Salary, StringFormat=${0:N0}}" FontSize="11" Foreground="LightGreen" FontWeight="Bold"/>
+                                                        <TextBlock Text="/mo" FontSize="10" Foreground="Gray"/>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </Grid>
                                             
-                                            <!-- Skills Keywords -->
-                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
-                                                <TextBlock Text="🔧 Skills: " FontSize="11" Foreground="Gray"/>
-                                                <ItemsControl ItemsSource="{Binding SkillKeywords}">
-                                                    <ItemsControl.ItemsPanel>
-                                                        <ItemsPanelTemplate>
-                                                            <StackPanel Orientation="Horizontal"/>
-                                                        </ItemsPanelTemplate>
-                                                    </ItemsControl.ItemsPanel>
-                                                    <ItemsControl.ItemTemplate>
-                                                        <DataTemplate>
-                                                            <Border Background="#3a3a5d" CornerRadius="3" Margin="0,0,5,0" Padding="4,2">
-                                                                <TextBlock Text="{Binding}" FontSize="10" Foreground="Yellow"/>
-                                                            </Border>
-                                                        </DataTemplate>
-                                                    </ItemsControl.ItemTemplate>
-                                                </ItemsControl>
-                                            </StackPanel>
+                                            <!-- General Description (Non-Department Specific) -->
+                                            <Border Background="#3a3a5d" CornerRadius="5" Padding="8,4" Margin="0,0,0,5">
+                                                <TextBlock Text="💼 Professional with diverse skill set and proven track record" 
+                                                          FontSize="11" Foreground="LightBlue" TextWrapping="Wrap"/>
+                                            </Border>
                                             
-                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,3">
-                                                <TextBlock Text="🏆 Level: " FontSize="11" Foreground="Gray"/>
-                                                <TextBlock Text="{Binding OverallSkill}" FontSize="11" Foreground="Yellow"/>
-                                                <TextBlock Text=" | 📅 Experience: " FontSize="11" Foreground="Gray" Margin="15,0,0,0"/>
-                                                <TextBlock Text="{Binding Experience}" FontSize="11" Foreground="Cyan"/>
-                                                <TextBlock Text=" years" FontSize="11" Foreground="Cyan"/>
-                                            </StackPanel>
+                                            <!-- Skill Keywords Display -->
+                                            <ItemsControl ItemsSource="{Binding SkillKeywords}" Margin="0,0,0,5">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <WrapPanel Orientation="Horizontal"/>
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Background="#4a4a6d" CornerRadius="3" Padding="4,2" Margin="0,0,3,2">
+                                                            <TextBlock Text="{Binding}" FontSize="9" Foreground="LightBlue" FontWeight="SemiBold"/>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
                                             
-                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,3">
-                                                <TextBlock Text="📈 Productivity: " FontSize="11" Foreground="Gray"/>
-                                                <TextBlock Text="{Binding Productivity}" FontSize="11" Foreground="LightGreen"/>
-                                                <TextBlock Text=" | 💰 Salary: $" FontSize="11" Foreground="Gray" Margin="15,0,0,0"/>
-                                                <TextBlock Text="{Binding Salary, StringFormat=N0}" FontSize="11" Foreground="LightGreen"/>
-                                                <TextBlock Text="/month" FontSize="11" Foreground="LightGreen"/>
-                                            </StackPanel>
-                                            
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="😊 Morale: " FontSize="11" Foreground="Gray"/>
-                                                <TextBlock Text="{Binding Morale}" FontSize="11" Foreground="Pink"/>
-                                                <TextBlock Text=" | ⚠️ Risk: " FontSize="11" Foreground="Gray" Margin="15,0,0,0"/>
-                                                <TextBlock Text="{Binding RiskLevel}" FontSize="11" Foreground="Orange"/>
-                                            </StackPanel>
+                                            <!-- Hiring Tip -->
+                                            <TextBlock Text="💡 Look at skill keywords and stats to determine the best department fit" 
+                                                      FontSize="10" Foreground="Gray" FontStyle="Italic" TextWrapping="Wrap"/>
                                         </StackPanel>
                                         
                                         <!-- Action Buttons -->

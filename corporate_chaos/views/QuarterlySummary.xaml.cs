@@ -15,7 +15,8 @@ namespace CorporateChaos.Views
             // Update financial data
             RevenueText.Text = $"${company.QuarterlyRevenue:N0}";
             ExpensesText.Text = $"${company.QuarterlyExpenses:N0}";
-            double netProfit = company.QuarterlyRevenue - company.QuarterlyExpenses;
+            NetLossText.Text = $"${company.NetLoss:N0}";
+            double netProfit = company.QuarterlyRevenue - (company.QuarterlyExpenses + company.NetLoss);
             NetProfitText.Text = $"${netProfit:N0}";
             NetProfitText.Foreground = netProfit >= 0 ? System.Windows.Media.Brushes.LightGreen : System.Windows.Media.Brushes.LightCoral;
             

@@ -30,8 +30,8 @@
               "Title": "MainWindow.xaml",
               "DocumentMoniker": "C:\\Users\\user\\OneDrive\\Desktop\\Test_Projects\\Corp_chaos_proto\\corporate_chaos\\corporate_chaos\\MainWindow.xaml",
               "RelativeDocumentMoniker": "corporate_chaos\\MainWindow.xaml",
-              "ToolTip": "C:\\Users\\user\\OneDrive\\Desktop\\Test_Projects\\Corp_chaos_proto\\corporate_chaos\\corporate_chaos\\MainWindow.xaml",
-              "RelativeToolTip": "corporate_chaos\\MainWindow.xaml",
+              "ToolTip": "C:\\Users\\user\\OneDrive\\Desktop\\Test_Projects\\Corp_chaos_proto\\corporate_chaos\\corporate_chaos\\MainWindow.xaml*",
+              "RelativeToolTip": "corporate_chaos\\MainWindow.xaml*",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
               "WhenOpened": "2026-01-24T06:44:10.998Z",
               "EditorCaption": ""
@@ -58,7 +58,8 @@
               "RelativeToolTip": "corporate_chaos\\MainWindow.xaml.cs",
               "ViewState": "AgIAAB0AAAAAAAAAAAAiwCkAAAAMAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-24T06:44:09.024Z"
+              "WhenOpened": "2026-01-24T06:44:09.024Z",
+              "EditorCaption": ""
             }
           ]
         }

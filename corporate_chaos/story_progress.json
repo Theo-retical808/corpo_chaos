@@ -1,0 +1,170 @@
+{
+  "characterRelationships": {
+    "joan": {
+      "trustLevel": 0,
+      "professionalRespect": 0,
+      "personalConnection": 0,
+      "sharedExperiences": [],
+      "conflictHistory": [],
+      "currentPhase": 0
+    },
+    "marcus_vey": {
+      "trustLevel": 0,
+      "professionalRespect": 0,
+      "personalConnection": 0,
+      "sharedExperiences": [],
+      "conflictHistory": [],
+      "currentPhase": 0
+    },
+    "evelyn_cross": {
+      "trustLevel": 0,
+      "professionalRespect": 0,
+      "personalConnection": 0,
+      "sharedExperiences": [],
+      "conflictHistory": [],
+      "currentPhase": 0
+    },
+    "vincent_duro": {
+      "trustLevel": 0,
+      "professionalRespect": 0,
+      "personalConnection": 0,
+      "sharedExperiences": [],
+      "conflictHistory": [],
+      "currentPhase": 0
+    },
+    "lucinda_vale": {
+      "trustLevel": 0,
+      "professionalRespect": 0,
+      "personalConnection": 0,
+      "sharedExperiences": [],
+      "conflictHistory": [],
+      "currentPhase": 0
+    },
+    "gregory_shaw": {
+      "trustLevel": 0,
+      "professionalRespect": 0,
+      "personalConnection": 0,
+      "sharedExperiences": [],
+      "conflictHistory": [],
+      "currentPhase": 0
+    },
+    "selena_park": {
+      "trustLevel": 0,
+      "professionalRespect": 0,
+      "personalConnection": 0,
+      "sharedExperiences": [],
+      "conflictHistory": [],
+      "currentPhase": 0
+    },
+    "harold_finch": {
+      "trustLevel": 0,
+      "professionalRespect": 0,
+      "personalConnection": 0,
+      "sharedExperiences": [],
+      "conflictHistory": [],
+      "currentPhase": 0
+    },
+    "sophie_kim": {
+      "trustLevel": 0,
+      "professionalRespect": 0,
+      "personalConnection": 0,
+      "sharedExperiences": [],
+      "conflictHistory": [],
+      "currentPhase": 0
+    }
+  },
+  "choiceHistory": [],
+  "currentAct": 0,
+  "activeStoryArcs": [],
+  "storyFlags": [],
+  "characterArcs": {
+    "joan": {
+      "characterId": "joan",
+      "currentPhase": 0,
+      "completedMilestones": [],
+      "availableMilestones": [],
+      "arcSpecificData": {},
+      "nextMilestoneQuarter": 1
+    },
+    "marcus_vey": {
+      "characterId": "marcus_vey",
+      "currentPhase": 0,
+      "completedMilestones": [],
+      "availableMilestones": [],
+      "arcSpecificData": {},
+      "nextMilestoneQuarter": 15
+    },
+    "evelyn_cross": {
+      "characterId": "evelyn_cross",
+      "currentPhase": 0,
+      "completedMilestones": [],
+      "availableMilestones": [],
+      "arcSpecificData": {},
+      "nextMilestoneQuarter": 20
+    },
+    "vincent_duro": {
+      "characterId": "vincent_duro",
+      "currentPhase": 0,
+      "completedMilestones": [],
+      "availableMilestones": [],
+      "arcSpecificData": {},
+      "nextMilestoneQuarter": 25
+    },
+    "lucinda_vale": {
+      "characterId": "lucinda_vale",
+      "currentPhase": 0,
+      "completedMilestones": [],
+      "availableMilestones": [],
+      "arcSpecificData": {},
+      "nextMilestoneQuarter": 30
+    },
+    "gregory_shaw": {
+      "characterId": "gregory_shaw",
+      "currentPhase": 0,
+      "completedMilestones": [],
+      "availableMilestones": [],
+      "arcSpecificData": {},
+      "nextMilestoneQuarter": 35
+    },
+    "selena_park": {
+      "characterId": "selena_park",
+      "currentPhase": 0,
+      "completedMilestones": [],
+      "availableMilestones": [],
+      "arcSpecificData": {},
+      "nextMilestoneQuarter": 40
+    },
+    "harold_finch": {
+      "characterId": "harold_finch",
+      "currentPhase": 0,
+      "completedMilestones": [],
+      "availableMilestones": [],
+      "arcSpecificData": {},
+      "nextMilestoneQuarter": 45
+    },
+    "sophie_kim": {
+      "characterId": "sophie_kim",
+      "currentPhase": 0,
+      "completedMilestones": [],
+      "availableMilestones": [],
+      "arcSpecificData": {},
+      "nextMilestoneQuarter": 12
+    }
+  },
+  "endingProgression": {
+    "viableEndings": [],
+    "endingProbabilities": {},
+    "endingRequirementsMet": [],
+    "endingBlockers": []
+  },
+  "currentQuarter": 1,
+  "currentPhase": 0,
+  "unlockedMechanics": [
+    0
+  ],
+  "completedTutorials": [],
+  "storyEvents": [
+    "quarter_1"
+  ],
+  "isStoryMode": true
+}

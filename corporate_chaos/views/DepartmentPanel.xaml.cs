@@ -88,15 +88,15 @@ namespace CorporateChaos.Views
                 RefreshEmployeeLists();
                 EmployeesChanged?.Invoke();
                 
-                // Show specialization bonus message if applicable
+                // Show assignment confirmation without revealing specialization
                 if (employee.Specialization == currentDepartment)
                 {
-                    MessageBox.Show($"✅ {employee.Name} assigned to {currentDepartment}!\n🎯 Specialization Match: +20% productivity bonus!", 
+                    MessageBox.Show($"✅ {employee.Name} assigned to {currentDepartment}!\n🎯 Great fit: This employee seems well-suited for this role!", 
                         "Employee Assigned", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 else
                 {
-                    MessageBox.Show($"✅ {employee.Name} assigned to {currentDepartment}!", 
+                    MessageBox.Show($"✅ {employee.Name} assigned to {currentDepartment}!\n💡 Monitor their performance to see how well they adapt to this role.", 
                         "Employee Assigned", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
@@ -126,6 +126,87 @@ namespace CorporateChaos.Views
                     
                     MessageBox.Show($"🔄 {employee.Name} transferred to {newDepartment}!", 
                         "Employee Transferred", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+        }
+
+        private void FireBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is Employee employee)
+            {
+                // Show confirmation dialog
+                var result = MessageBox.Show(
+                    $"Are you sure you want to fire {employee.Name}?\n\n" +
+                    $"This action cannot be undone and will:\n" +
+                    $"• Remove them from the company permanently\n" +
+                    $"• Potentially affect team morale\n" +
+                    $"• Save ${employee.Salary:N0}/month in salary costs\n\n" +
+                    $"⚠️ WARNING: If this leaves you with zero employees, your company will fail immediately!",
+                    "Confirm Employee Termination",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    // Check if this would leave the company with zero employees
+                    int totalEmployees = allHiredEmployees.Count;
+                    if (totalEmployees <= 1)
+                    {
+                        MessageBox.Show(
+                            "❌ Cannot fire this employee!\n\n" +
+                            "This would leave your company with zero employees, " +
+                            "which would result in immediate business failure.\n\n" +
+                            "You must maintain at least one employee to keep the company operational.",
+                            "Cannot Fire Last Employee",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Error);
+                        return;
+                    }
+
+                    // Remove from department if assigned
+                    if (employee.AssignedDepartment.HasValue)
+                    {
+                        departments[employee.AssignedDepartment.Value].Employees.Remove(employee);
+                    }
+
+                    // Remove from hired employees list
+                    allHiredEmployees.Remove(employee);
+
+                    // Apply morale impact to remaining employees
+                    ApplyFiringMoraleImpact(employee);
+
+                    RefreshEmployeeLists();
+                    EmployeesChanged?.Invoke();
+
+                    MessageBox.Show(
+                        $"🔥 {employee.Name} has been terminated.\n\n" +
+                        $"Salary savings: ${employee.Salary:N0}/month\n" +
+                        $"Remaining employees: {allHiredEmployees.Count}\n\n" +
+                        $"Team morale may be affected by this decision.",
+                        "Employee Terminated",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                }
+            }
+        }
+
+        private void ApplyFiringMoraleImpact(Employee firedEmployee)
+        {
+            // Calculate morale impact based on fired employee's characteristics
+            int moraleImpact = -5; // Base impact
+
+            // Higher impact for senior employees or those with high morale
+            if (firedEmployee.OverallSkill >= SkillLevel.Senior)
+                moraleImpact -= 3;
+            if (firedEmployee.Morale >= 80)
+                moraleImpact -= 2;
+
+            // Apply to all remaining employees
+            foreach (var dept in departments.Values)
+            {
+                foreach (var employee in dept.Employees)
+                {
+                    employee.Morale = Math.Max(10, employee.Morale + moraleImpact);
                 }
             }
         }

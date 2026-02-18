@@ -1,0 +1,17 @@
+{
+  "enabled": true,
+  "name": "Code Quality Analyzer",
+  "description": "Automatically analyzes modified C# and XAML files for code quality improvements, design patterns, best practices, and potential optimizations while maintaining existing functionality",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "*.cs",
+      "*.xaml"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Analyze the recently modified file for code quality improvements. Focus on:\n\n1. **Code Smells & Anti-patterns**: Identify long methods, duplicate code, complex conditionals, or violation of SOLID principles\n2. **Design Patterns**: Suggest appropriate patterns (MVVM, Factory, Observer, etc.) that could improve the architecture\n3. **Best Practices**: Check for proper error handling, resource disposal, async/await usage, and C#/.NET conventions\n4. **Performance**: Look for potential optimizations like unnecessary allocations, inefficient LINQ usage, or blocking operations\n5. **Readability & Maintainability**: Suggest improvements for naming, method extraction, documentation, and code organization\n6. **WPF/XAML Specific**: Check for proper data binding, resource usage, and UI performance considerations\n\nProvide specific, actionable suggestions while respecting the existing architecture and functionality. Focus on improvements that enhance code quality without breaking existing features."
+  }
+}

@@ -60,6 +60,9 @@ namespace CorporateChaos.Models
         [JsonPropertyName("risk")]
         public int Risk { get; set; }
 
+        [JsonPropertyName("netLoss")]
+        public double NetLoss { get; set; } // New field to track crisis/event losses
+
         [JsonPropertyName("employeeCount")]
         public int EmployeeCount { get; set; }
 
@@ -114,16 +117,21 @@ namespace CorporateChaos.Models
         [JsonPropertyName("lastRefreshQuarter")]
         public int LastRefreshQuarter { get; set; } = 0;
 
+        // Bankruptcy tracking
+        [JsonPropertyName("consecutiveNegativeQuarters")]
+        public int ConsecutiveNegativeQuarters { get; set; } = 0;
+
         public Company()
         {
             Capital = 500000; // Increased for quarterly system
             Reputation = 0; // Changed to start at 0 (-100 to 100 range)
             Morale = 0; // Changed to start at 0 (-100 to 100 range)
             MarketShare = 5;
-            Risk = 0; // Changed to start at 0 (-100 to 100 range)
+            Risk = 0; // Changed to start at 0 (0 to 100 range - no negative risk)
             EmployeeCount = 0; // Will be managed through departments
             QuarterlyRevenue = 0;
             QuarterlyExpenses = 0;
+            NetLoss = 0; // Initialize net loss tracking
 
             // Default settings
             RiskAppetite = RiskAppetite.Balanced;
@@ -180,33 +188,38 @@ namespace CorporateChaos.Models
         // New method: Calculate risk-based catastrophic event chance
         public double GetCatastrophicEventChance()
         {
-            // Risk ranges from -100 to 100
-            // At 0: 5% base chance
-            // At 100: 25% chance
-            // At -100: 0% chance (very safe)
-            double baseChance = 0.05; // 5% base chance
-            double riskModifier = Math.Max(0, Risk) / 100.0 * 0.20; // Up to 20% additional risk
-            return Math.Min(0.25, baseChance + riskModifier); // Cap at 25%
+            // Risk ranges from 0 to 100 (no negative risk)
+            // At 0: 2% base chance (reduced from 5% since challenges should come more often)
+            // At 100: 30% chance (increased from 25% for more frequent challenges)
+            double baseChance = 0.02; // 2% base chance
+            double riskModifier = Risk / 100.0 * 0.28; // Up to 28% additional risk
+            return Math.Min(0.30, baseChance + riskModifier); // Cap at 30%
         }
 
         // New method: Calculate morale-based employee turnover chance
         public double GetEmployeeTurnoverChance()
         {
             // Morale ranges from -100 to 100
+            // Above 80: 0% turnover chance (high morale = no quitting)
             // At 0: 10% base turnover chance
             // At -100: 30% turnover chance
-            // At 100: 2% turnover chance
+            
+            if (Morale > 80)
+            {
+                return 0.0; // No employee turnover when morale is very high
+            }
+            
             double baseTurnover = 0.10; // 10% base turnover
             double moraleModifier = (-Morale / 100.0) * 0.20; // -100 morale adds 20% turnover
-            return Math.Max(0.02, Math.Min(0.30, baseTurnover + moraleModifier));
+            return Math.Max(0.0, Math.Min(0.30, baseTurnover + moraleModifier));
         }
 
-        // Helper method to clamp values to -100 to 100 range
+        // Helper method to clamp values to proper ranges
         public void ClampValues()
         {
             Reputation = Math.Max(-100, Math.Min(100, Reputation));
             Morale = Math.Max(-100, Math.Min(100, Morale));
-            Risk = Math.Max(-100, Math.Min(100, Risk));
+            Risk = Math.Max(0, Math.Min(100, Risk)); // Risk now ranges from 0 to 100 (no negative)
             
             // Clamp market share to realistic bounds
             MarketShare = Math.Max(0, Math.Min(100, MarketShare));
@@ -215,16 +228,27 @@ namespace CorporateChaos.Models
         // Calculate market share gain with diminishing returns
         private double GetMarketShareGain(double baseGain)
         {
+            // Hard cap at 60% market share for marketing/R&D actions
+            if (MarketShare >= 60.0)
+            {
+                return 0.0; // No market share gain from marketing/R&D above 60%
+            }
+            
             // Diminishing returns formula: gain decreases as market share increases
             double diminishingFactor = 1.0 - (MarketShare / 100.0);
             
             // Additional competitive pressure at higher market shares
             double competitivePressure = 1.0;
-            if (MarketShare >= 50) competitivePressure = 0.5; // 50% harder above 50%
-            if (MarketShare >= 60) competitivePressure = 0.3; // 70% harder above 60%
-            if (MarketShare >= 65) competitivePressure = 0.2; // 80% harder above 65%
+            if (MarketShare >= 30) competitivePressure = 0.8; // 20% harder above 30%
+            if (MarketShare >= 40) competitivePressure = 0.6; // 40% harder above 40%
+            if (MarketShare >= 50) competitivePressure = 0.4; // 60% harder above 50%
+            if (MarketShare >= 55) competitivePressure = 0.2; // 80% harder above 55%
             
-            return baseGain * diminishingFactor * competitivePressure;
+            double finalGain = baseGain * diminishingFactor * competitivePressure;
+            
+            // Ensure we don't exceed 60% cap
+            double maxAllowedGain = Math.Max(0, 60.0 - MarketShare);
+            return Math.Min(finalGain, maxAllowedGain);
         }
 
         // Calculate market share loss (less severe than gains)
@@ -359,6 +383,9 @@ namespace CorporateChaos.Models
 
         public void ProcessQuarterlyFinancials(Dictionary<Department, DepartmentStats> departments)
         {
+            // Reset net loss for the new quarter
+            NetLoss = 0;
+            
             // Apply budget allocations first
             ApplyBudgetAllocations(departments);
             
@@ -367,7 +394,29 @@ namespace CorporateChaos.Models
             
             // Calculate quarterly expenses (salaries + operations)
             QuarterlyExpenses = departments.Values.Sum(d => d.GetQuarterlyCost());
-            QuarterlyExpenses += 50000; // Base operational costs
+            
+            // INCREASED BASE OPERATIONAL COSTS - scales with company size and market share
+            double baseOperationalCosts = 50000; // Base cost
+            double marketShareMultiplier = 1.0 + (MarketShare / 100.0); // 1.0 to 2.0 multiplier
+            double employeeScalingCosts = EmployeeCount * 2500; // $2,500 per employee in overhead
+            double capitalScalingCosts = Math.Max(0, Capital / 1000000) * 5000; // $5K per million in capital (infrastructure costs)
+            
+            // Additional late-game scaling costs
+            if (MarketShare > 30)
+            {
+                baseOperationalCosts += 25000; // Additional $25K for market leaders
+            }
+            if (MarketShare > 50)
+            {
+                baseOperationalCosts += 50000; // Additional $50K for dominant players
+            }
+            if (Capital > 1000000000) // $1B+
+            {
+                baseOperationalCosts += 75000; // Additional $75K for mega-corporations
+            }
+            
+            double totalOperationalCosts = (baseOperationalCosts + employeeScalingCosts + capitalScalingCosts) * marketShareMultiplier;
+            QuarterlyExpenses += totalOperationalCosts;
 
             // Calculate quarterly revenue based on market share and department performance
             double baseRevenue = MarketShare * 10000; // Base revenue per market share point
@@ -377,8 +426,9 @@ namespace CorporateChaos.Models
             double reputationModifier = GetReputationRevenueModifier();
             QuarterlyRevenue = baseRevenue * (1 + departmentBonus) * reputationModifier;
 
-            // Apply to capital
-            Capital += QuarterlyRevenue - QuarterlyExpenses;
+            // Apply to capital: Revenue - (Operations Cost + Net Loss) = Net Profit
+            double netProfit = QuarterlyRevenue - (QuarterlyExpenses + NetLoss);
+            Capital += netProfit;
 
             // Ensure values stay within bounds
             ClampValues();

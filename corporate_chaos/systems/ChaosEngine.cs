@@ -29,34 +29,103 @@ namespace CorporateChaos.Systems
         public List<CrisisEvent> GetActiveCrises() => _activeCrises;
         public List<string> GetCurrentEvents() => _currentEvents;
 
-        public List<string> ApplyQuarterlyChaos(Company company, Dictionary<Department, DepartmentStats> departments)
+        // Calculate progressive difficulty multiplier based on quarter number
+        private double GetProgressiveDifficultyMultiplier(int quarterNumber)
+        {
+            // Progressive difficulty from Q1 to Q40
+            // Q1-5: 0.2x multiplier (very easy)
+            // Q6-10: 0.4x multiplier (easy)
+            // Q11-20: 0.6x multiplier (moderate)
+            // Q21-30: 0.8x multiplier (challenging)
+            // Q31-40: 1.0x multiplier (full difficulty)
+            // Q40+: 1.0x multiplier (maximum balanced difficulty)
+            
+            if (quarterNumber <= 5) return 0.2; // Very easy early game
+            if (quarterNumber <= 10) return 0.4; // Easy
+            if (quarterNumber <= 20) return 0.6; // Moderate
+            if (quarterNumber <= 30) return 0.8; // Challenging
+            return 1.0; // Full difficulty from Q31+
+        }
+
+        public List<string> ApplyQuarterlyChaos(Company company, Dictionary<Department, DepartmentStats> departments, bool isStoryModeTutorial = false, int quarterNumber = 1)
         {
             var events = new List<string>();
             _currentEvents.Clear();
             _quartersSinceLastMajorEvent++;
 
+            // Skip chaos events during story mode tutorial (first 10 quarters)
+            if (isStoryModeTutorial)
+            {
+                // Only apply basic employee productivity changes and minimal events
+                events.AddRange(GenerateBasicStoryEvents(company, departments));
+                _currentEvents.AddRange(events);
+                return events;
+            }
+
+            // Get progressive difficulty multiplier based on quarter
+            double difficultyMultiplier = GetProgressiveDifficultyMultiplier(quarterNumber);
+
             // Process existing crises
             ProcessActiveCrises(company, departments, events);
 
-            // Generate new chaos events
-            events.AddRange(GenerateEmployeeEvents(company, departments));
-            events.AddRange(GenerateMarketEvents(company));
-            events.AddRange(GenerateCrisisEvents(company));
-            events.AddRange(GenerateReputationEvents(company, departments)); // New reputation-based events
-            events.AddRange(GenerateMoraleEvents(company, departments)); // New morale-based events
-            events.AddRange(GenerateRiskEvents(company, departments)); // New risk-based events
-            events.AddRange(GenerateRandomChaos(company, departments));
+            // Generate new chaos events with progressive difficulty
+            events.AddRange(GenerateEmployeeEvents(company, departments, difficultyMultiplier));
+            events.AddRange(GenerateMarketEvents(company, difficultyMultiplier));
+            events.AddRange(GenerateCrisisEvents(company, difficultyMultiplier));
+            events.AddRange(GenerateReputationEvents(company, departments, difficultyMultiplier));
+            events.AddRange(GenerateMoraleEvents(company, departments, difficultyMultiplier));
+            events.AddRange(GenerateRiskEvents(company, departments, difficultyMultiplier));
+            events.AddRange(GenerateRandomChaos(company, departments, difficultyMultiplier));
 
-            // Check for catastrophic events based on risk level
-            if (_random.NextDouble() < company.GetCatastrophicEventChance())
+            // Check for catastrophic events based on risk level (with progressive difficulty)
+            double catastrophicChance = company.GetCatastrophicEventChance() * difficultyMultiplier;
+            if (_random.NextDouble() < catastrophicChance)
             {
                 events.AddRange(GenerateCatastrophicEvent(company, departments));
             }
 
-            // Check for employee turnover based on morale
-            events.AddRange(ProcessMoraleBasedTurnover(company, departments));
+            // Check for employee turnover based on morale (with progressive difficulty)
+            events.AddRange(ProcessMoraleBasedTurnover(company, departments, difficultyMultiplier));
 
             _currentEvents.AddRange(events);
+            return events;
+        }
+
+        private List<string> GenerateBasicStoryEvents(Company company, Dictionary<Department, DepartmentStats> departments)
+        {
+            var events = new List<string>();
+
+            // Only generate very mild, educational events during tutorial
+            if (_random.NextDouble() < 0.3) // 30% chance of any event
+            {
+                var eventType = _random.Next(4);
+                switch (eventType)
+                {
+                    case 0:
+                        events.Add("📈 Market research shows positive trends for your industry sector.");
+                        company.Reputation += _random.Next(1, 4);
+                        break;
+                    case 1:
+                        events.Add("💼 Your team completed a successful project, boosting productivity.");
+                        foreach (var dept in departments.Values)
+                        {
+                            foreach (var employee in dept.Employees)
+                            {
+                                employee.Productivity = Math.Min(100, employee.Productivity + _random.Next(1, 3));
+                            }
+                        }
+                        break;
+                    case 2:
+                        events.Add("🤝 Positive client feedback improves company reputation.");
+                        company.Reputation += _random.Next(2, 6);
+                        break;
+                    case 3:
+                        events.Add("⚡ Minor operational improvements reduce risk levels.");
+                        company.Risk = Math.Max(-100, company.Risk - _random.Next(1, 4));
+                        break;
+                }
+            }
+
             return events;
         }
 
@@ -82,7 +151,7 @@ namespace CorporateChaos.Systems
             }
         }
 
-        private List<string> GenerateEmployeeEvents(Company company, Dictionary<Department, DepartmentStats> departments)
+        private List<string> GenerateEmployeeEvents(Company company, Dictionary<Department, DepartmentStats> departments, double difficultyMultiplier = 1.0)
         {
             var events = new List<string>();
             
@@ -90,8 +159,8 @@ namespace CorporateChaos.Systems
             {
                 if (dept.Employees.Count == 0) continue;
 
-                // Employee scouting events
-                if (_random.NextDouble() < 0.15) // 15% chance per department
+                // Employee scouting events (reduced by difficulty multiplier)
+                if (_random.NextDouble() < (0.15 * difficultyMultiplier)) // 15% chance per department
                 {
                     var targetEmployee = dept.Employees[_random.Next(dept.Employees.Count)];
                     if (targetEmployee.OverallSkill >= SkillLevel.Senior)
@@ -100,15 +169,15 @@ namespace CorporateChaos.Systems
                     }
                 }
 
-                // Employee fumble/mistake events
-                if (_random.NextDouble() < 0.12) // 12% chance per department
+                // Employee fumble/mistake events (reduced by difficulty multiplier)
+                if (_random.NextDouble() < (0.12 * difficultyMultiplier)) // 12% chance per department
                 {
                     var fumbleEmployee = dept.Employees[_random.Next(dept.Employees.Count)];
                     events.Add(HandleEmployeeFumble(fumbleEmployee, dept, company));
                 }
 
-                // Employee retirement events
-                if (_random.NextDouble() < 0.08) // 8% chance per department
+                // Employee retirement events (reduced by difficulty multiplier)
+                if (_random.NextDouble() < (0.08 * difficultyMultiplier)) // 8% chance per department
                 {
                     var retiringEmployee = dept.Employees.Where(e => e.Experience > 10).FirstOrDefault();
                     if (retiringEmployee != null)
@@ -117,8 +186,8 @@ namespace CorporateChaos.Systems
                     }
                 }
 
-                // Employee breakthrough/innovation events
-                if (_random.NextDouble() < 0.10) // 10% chance per department
+                // Employee breakthrough/innovation events (positive events not reduced)
+                if (_random.NextDouble() < 0.10) // 10% chance per department (unchanged)
                 {
                     var innovativeEmployee = dept.Employees.Where(e => e.OverallSkill >= SkillLevel.Mid).FirstOrDefault();
                     if (innovativeEmployee != null)
@@ -147,8 +216,10 @@ namespace CorporateChaos.Systems
                 // Employee stays but demands raise
                 double raise = employee.Salary * 0.3;
                 employee.Salary += raise;
-                company.Capital -= raise * 4; // Quarterly impact
-                return $"💰 RETENTION BONUS! {employee.Name} received a ${raise:N0}/month raise to stay. Quarterly cost: ${raise * 3:N0}";
+                double quarterlyCost = raise * 4; // Quarterly impact
+                company.Capital -= quarterlyCost;
+                company.NetLoss += quarterlyCost; // Track as net loss
+                return $"💰 RETENTION BONUS! {employee.Name} received a ${raise:N0}/month raise to stay. Quarterly cost: ${quarterlyCost:N0}";
             }
         }
 
@@ -177,6 +248,7 @@ namespace CorporateChaos.Systems
             }
 
             company.Capital -= financialImpact;
+            company.NetLoss += financialImpact; // Track as net loss
             company.Reputation -= reputationLoss;
             company.Morale -= moraleLoss;
             employee.Morale -= 15; // Personal impact
@@ -195,6 +267,7 @@ namespace CorporateChaos.Systems
             // Retirement party costs
             double partyCost = _random.Next(2000, 8000);
             company.Capital -= partyCost;
+            company.NetLoss += partyCost; // Track as net loss
             company.Morale += 3; // Party boosts morale slightly
 
             return $"👴 RETIREMENT! {employee.Name} from {dept.Department} retired after {employee.Experience} years. Knowledge loss: {knowledgeLoss:F1}, Party cost: ${partyCost:N0}";
@@ -226,11 +299,11 @@ namespace CorporateChaos.Systems
             return $"💡 BREAKTHROUGH! {employee.Name} ({dept.Department}) {breakthrough}! Benefit: ${benefit:N0}, Reputation +{reputationGain}, Morale +{moraleGain}";
         }
 
-        private List<string> GenerateMarketEvents(Company company)
+        private List<string> GenerateMarketEvents(Company company, double difficultyMultiplier = 1.0)
         {
             var events = new List<string>();
             
-            // Aggressive market events based on risk appetite
+            // Aggressive market events based on risk appetite (with progressive difficulty)
             double chaosMultiplier = company.RiskAppetite switch
             {
                 RiskAppetite.Conservative => 0.7,
@@ -239,14 +312,23 @@ namespace CorporateChaos.Systems
                 _ => 1.0
             };
 
-            if (_random.NextDouble() < 0.25 * chaosMultiplier)
+            // Apply progressive difficulty to market events
+            double finalMultiplier = chaosMultiplier * difficultyMultiplier;
+
+            if (_random.NextDouble() < (0.25 * finalMultiplier))
             {
                 events.Add(GenerateMarketDisruption(company));
             }
 
-            if (_random.NextDouble() < 0.20 * chaosMultiplier)
+            if (_random.NextDouble() < (0.20 * finalMultiplier))
             {
                 events.Add(GenerateCompetitorAction(company));
+            }
+
+            // Add new financial crisis events to threaten capital hoarding (with progressive difficulty)
+            if (_random.NextDouble() < (0.15 * finalMultiplier))
+            {
+                events.Add(GenerateFinancialCrisis(company));
             }
 
             return events;
@@ -261,26 +343,43 @@ namespace CorporateChaos.Systems
                 "💱 Currency fluctuations affect international business",
                 "🛒 E-commerce platform changes algorithms",
                 "📺 Viral social media trend impacts brand perception",
-                "🔬 Scientific breakthrough makes products obsolete"
+                "🔬 Scientific breakthrough makes products obsolete",
+                "🌍 Global supply chain disruption",
+                "⚡ Energy crisis affects operational costs",
+                "🦠 Health crisis changes consumer behavior"
             };
 
             string disruption = disruptions[_random.Next(disruptions.Length)];
             
-            if (_random.NextDouble() < 0.5) // 50% negative, 50% positive
+            if (_random.NextDouble() < 0.7) // 70% negative, 30% positive (increased negative chance)
             {
-                double loss = company.Capital * (_random.NextDouble() * 0.10 + 0.05); // 0.05 to 0.15 multiplier
-                int marketShareLoss = _random.Next(2, 6); // Increased from 1-4 to 2-6
+                double lossPercentage = _random.NextDouble() * 0.20 + 0.12; // 12-32% of capital (increased from 8-23%)
+                double loss = company.Capital * lossPercentage;
+                loss = Math.Max(loss, 50000); // Increased minimum impact
+                
+                int marketShareLoss = _random.Next(4, 12); // Increased from 3-8 to 4-12
+                int reputationLoss = _random.Next(8, 18); // Increased from 5-12 to 8-18
+                int riskIncrease = 15; // Increased from 10 to 15
+                
                 company.Capital -= loss;
+                company.NetLoss += loss; // Track this as net loss
                 company.MarketShare -= marketShareLoss;
-                return $"📉 MARKET DISRUPTION: {disruption} Capital -${loss:N0}, Market Share -{marketShareLoss}%";
+                company.Reputation -= reputationLoss;
+                company.Risk = Math.Min(100, company.Risk + riskIncrease); // Ensure risk doesn't exceed 100
+                
+                return $"📉 MARKET DISRUPTION: {disruption} Capital -${loss:N0}, Market Share -{marketShareLoss}%, Reputation -{reputationLoss}, Risk +{riskIncrease}";
             }
             else
             {
-                double gain = _random.Next(20000, 60000);
-                double marketShareGain = _random.NextDouble() * 1.0 + 0.5; // Reduced from 1-3 to 0.5-1.5
+                double gain = _random.Next(25000, 80000); // Keep positive impact same
+                double marketShareGain = _random.NextDouble() * 1.2 + 0.8; // 0.8-2.0%
+                int reputationGain = _random.Next(8, 15);
+                
                 company.Capital += gain;
                 company.MarketShare += marketShareGain;
-                return $"📈 MARKET OPPORTUNITY: {disruption} Capital +${gain:N0}, Market Share +{marketShareGain:F1}%";
+                company.Reputation += reputationGain;
+                
+                return $"📈 MARKET OPPORTUNITY: {disruption} Capital +${gain:N0}, Market Share +{marketShareGain:F1}%, Reputation +{reputationGain}";
             }
         }
 
@@ -299,6 +398,7 @@ namespace CorporateChaos.Systems
             string action = actions[_random.Next(actions.Length)];
             double impact = _random.Next(10000, 40000);
             int reputationImpact = _random.Next(2, 7);
+            int riskIncrease = 5;
             
             // Competitors target market leaders more aggressively
             double marketShareLoss = 0.5 + (_random.NextDouble() * 1.0); // Base 0.5-1.5%
@@ -307,19 +407,58 @@ namespace CorporateChaos.Systems
             if (company.MarketShare >= 60) marketShareLoss *= 2.5; // 150% more aggressive
             
             company.Capital -= impact;
+            company.NetLoss += impact; // Track as net loss
             company.Reputation -= reputationImpact;
             company.MarketShare -= marketShareLoss;
-            company.Risk += 5;
+            company.Risk = Math.Min(100, company.Risk + riskIncrease); // Ensure risk doesn't exceed 100
 
-            return $"🏢 COMPETITOR ATTACK: Major competitor {action}! Capital -${impact:N0}, Reputation -{reputationImpact}, Market Share -{marketShareLoss:F1}%, Risk +5";
+            return $"🏢 COMPETITOR ATTACK: Major competitor {action}! Capital -${impact:N0}, Reputation -{reputationImpact}, Market Share -{marketShareLoss:F1}%, Risk +{riskIncrease}";
         }
 
-        private List<string> GenerateCrisisEvents(Company company)
+        private string GenerateFinancialCrisis(Company company)
+        {
+            string[] crises = {
+                "💸 Major client defaults on payment",
+                "🏦 Bank increases interest rates on business loans",
+                "📉 Stock market crash affects investment portfolio",
+                "💰 Tax audit results in additional penalties",
+                "🔧 Critical equipment failure requires emergency replacement",
+                "⚖️ Lawsuit settlement requires immediate payment",
+                "🌊 Insurance premium spike due to industry claims",
+                "💳 Credit line reduced by financial institution",
+                "🏭 Factory lease renewal at 40% higher rate",
+                "📊 Accounting error reveals hidden liabilities",
+                "🚛 Supply chain disruption requires expensive alternatives",
+                "💻 IT system failure requires costly emergency repairs"
+            };
+
+            string crisis = crises[_random.Next(crises.Length)];
+            
+            // Scale financial impact based on company size (capital) - INCREASED IMPACT
+            double impactPercentage = _random.NextDouble() * 0.18 + 0.12; // 12-30% of capital (increased from 8-20%)
+            double financialImpact = company.Capital * impactPercentage;
+            
+            // Minimum impact to prevent trivial amounts - INCREASED
+            financialImpact = Math.Max(financialImpact, 40000); // Increased from 25000
+            
+            // Additional effects - INCREASED
+            int riskIncrease = _random.Next(12, 20); // Increased from 8-15
+            int reputationImpact = _random.Next(5, 12); // Increased from 3-8
+            
+            company.Capital -= financialImpact;
+            company.NetLoss += financialImpact; // Track as net loss
+            company.Risk = Math.Min(100, company.Risk + riskIncrease); // Ensure risk doesn't exceed 100
+            company.Reputation -= reputationImpact;
+            
+            return $"💥 FINANCIAL CRISIS: {crisis}! Cost: ${financialImpact:N0}, Risk +{riskIncrease}, Reputation -{reputationImpact}";
+        }
+
+        private List<string> GenerateCrisisEvents(Company company, double difficultyMultiplier = 1.0)
         {
             var events = new List<string>();
             
-            // Generate new crisis warnings
-            if (_random.NextDouble() < 0.15 && _activeCrises.Count < 2) // Max 2 active crises
+            // Generate new crisis warnings (with progressive difficulty)
+            if (_random.NextDouble() < (0.15 * difficultyMultiplier) && _activeCrises.Count < 2) // Max 2 active crises
             {
                 var newCrisis = GenerateNewCrisis(company);
                 _activeCrises.Add(newCrisis);
@@ -357,10 +496,10 @@ namespace CorporateChaos.Systems
         {
             double impact = crisis.Level switch
             {
-                CrisisLevel.Warning => 0.05,
-                CrisisLevel.Critical => 0.15,
-                CrisisLevel.Catastrophic => 0.30,
-                _ => 0.05
+                CrisisLevel.Warning => 0.08,      // Increased from 0.05
+                CrisisLevel.Critical => 0.22,     // Increased from 0.15
+                CrisisLevel.Catastrophic => 0.40, // Increased from 0.30
+                _ => 0.08
             };
 
             // Crisis response affects outcome
@@ -368,13 +507,13 @@ namespace CorporateChaos.Systems
             {
                 CrisisResponse.Immediate => 0.6, // Best response
                 CrisisResponse.Control => 0.8,   // Moderate response
-                CrisisResponse.Absorb => 1.2,    // Worst response
+                CrisisResponse.Absorb => 1.4,    // Increased from 1.2 - worse response
                 _ => 1.0
             };
 
             double capitalLoss = company.Capital * impact * responseMultiplier;
-            int moraleLoss = (int)(20 * impact * responseMultiplier);
-            int reputationLoss = (int)(15 * impact * responseMultiplier);
+            int moraleLoss = (int)(25 * impact * responseMultiplier); // Increased from 20
+            int reputationLoss = (int)(20 * impact * responseMultiplier); // Increased from 15
 
             company.Capital -= capitalLoss;
             company.Morale -= moraleLoss;
@@ -408,12 +547,12 @@ namespace CorporateChaos.Systems
             }
         }
 
-        private List<string> GenerateRandomChaos(Company company, Dictionary<Department, DepartmentStats> departments)
+        private List<string> GenerateRandomChaos(Company company, Dictionary<Department, DepartmentStats> departments, double difficultyMultiplier = 1.0)
         {
             var events = new List<string>();
             
-            // Pure chaos - completely unpredictable events
-            if (_random.NextDouble() < 0.20) // 20% chance of pure chaos
+            // Pure chaos - completely unpredictable events (with progressive difficulty)
+            if (_random.NextDouble() < (0.20 * difficultyMultiplier)) // 20% chance of pure chaos
             {
                 string[] chaosEvents = {
                     "🎲 A viral TikTok about your company goes viral (randomly positive or negative)",
@@ -444,6 +583,7 @@ namespace CorporateChaos.Systems
                     double loss = _random.Next(3000, 15000);
                     int moraleLoss = _random.Next(2, 8);
                     company.Capital -= loss;
+                    company.NetLoss += loss;
                     company.Morale -= moraleLoss;
                     events.Add($"🤪 RANDOM CHAOS: {chaosEvent} Unexpected cost: -${loss:N0}, Morale -{moraleLoss}");
                 }
@@ -474,23 +614,23 @@ namespace CorporateChaos.Systems
         }
 
         // New method: Generate reputation-based events (scandals, PR issues)
-        private List<string> GenerateReputationEvents(Company company, Dictionary<Department, DepartmentStats> departments)
+        private List<string> GenerateReputationEvents(Company company, Dictionary<Department, DepartmentStats> departments, double difficultyMultiplier = 1.0)
         {
             var events = new List<string>();
 
-            // Scandal events (more likely with low reputation)
-            if (_random.NextDouble() < 0.15)
+            // Scandal events (more likely with low reputation) - with progressive difficulty
+            if (_random.NextDouble() < (0.15 * difficultyMultiplier))
             {
                 events.Add(GenerateScandal(company));
             }
 
-            // Mismanagement events
-            if (_random.NextDouble() < 0.12)
+            // Mismanagement events - with progressive difficulty
+            if (_random.NextDouble() < (0.12 * difficultyMultiplier))
             {
                 events.Add(GenerateMismanagement(company, departments));
             }
 
-            // Positive PR events (more likely with high reputation)
+            // Positive PR events (more likely with high reputation) - not reduced by difficulty
             if (company.Reputation > 20 && _random.NextDouble() < 0.08)
             {
                 events.Add(GeneratePositivePR(company));
@@ -517,13 +657,15 @@ namespace CorporateChaos.Systems
             int reputationLoss = _random.Next(15, 35);
             int moraleLoss = _random.Next(10, 20);
             double financialImpact = _random.Next(50000, 150000);
+            int riskIncrease = 10;
 
             company.Reputation -= reputationLoss;
             company.Morale -= moraleLoss;
             company.Capital -= financialImpact;
-            company.Risk += 10;
+            company.NetLoss += financialImpact; // Track as net loss
+            company.Risk = Math.Min(100, company.Risk + riskIncrease); // Ensure risk doesn't exceed 100
 
-            return $"📰 SCANDAL! Company {scandal}! Reputation -{reputationLoss}, Morale -{moraleLoss}, Cost: ${financialImpact:N0}, Risk +10";
+            return $"📰 SCANDAL! Company {scandal}! Reputation -{reputationLoss}, Morale -{moraleLoss}, Cost: ${financialImpact:N0}, Risk +{riskIncrease}";
         }
 
         private string GenerateMismanagement(Company company, Dictionary<Department, DepartmentStats> departments)
@@ -543,13 +685,15 @@ namespace CorporateChaos.Systems
             int moraleLoss = _random.Next(8, 18);
             int reputationLoss = _random.Next(5, 12);
             double financialImpact = _random.Next(25000, 75000);
+            int riskIncrease = 5;
 
             company.Morale -= moraleLoss;
             company.Reputation -= reputationLoss;
             company.Capital -= financialImpact;
-            company.Risk += 5;
+            company.NetLoss += financialImpact; // Track as net loss
+            company.Risk = Math.Min(100, company.Risk + riskIncrease); // Ensure risk doesn't exceed 100
 
-            return $"🤦 MISMANAGEMENT! {mismanagement}! Morale -{moraleLoss}, Reputation -{reputationLoss}, Cost: ${financialImpact:N0}, Risk +5";
+            return $"🤦 MISMANAGEMENT! {mismanagement}! Morale -{moraleLoss}, Reputation -{reputationLoss}, Cost: ${financialImpact:N0}, Risk +{riskIncrease}";
         }
 
         private string GeneratePositivePR(Company company)
@@ -578,17 +722,17 @@ namespace CorporateChaos.Systems
         }
 
         // New method: Generate morale-based events
-        private List<string> GenerateMoraleEvents(Company company, Dictionary<Department, DepartmentStats> departments)
+        private List<string> GenerateMoraleEvents(Company company, Dictionary<Department, DepartmentStats> departments, double difficultyMultiplier = 1.0)
         {
             var events = new List<string>();
 
-            // Miscommunication events (more likely with low morale)
-            if (company.Morale < -20 && _random.NextDouble() < 0.18)
+            // Miscommunication events (more likely with low morale) - with progressive difficulty
+            if (company.Morale < -20 && _random.NextDouble() < (0.18 * difficultyMultiplier))
             {
                 events.Add(GenerateMiscommunication(company, departments));
             }
 
-            // Team building success (more likely with decent morale)
+            // Team building success (more likely with decent morale) - not reduced by difficulty
             if (company.Morale > 10 && _random.NextDouble() < 0.10)
             {
                 events.Add(GenerateTeamBuildingSuccess(company));
@@ -646,18 +790,18 @@ namespace CorporateChaos.Systems
         }
 
         // New method: Generate risk-based events (product defects, quality issues)
-        private List<string> GenerateRiskEvents(Company company, Dictionary<Department, DepartmentStats> departments)
+        private List<string> GenerateRiskEvents(Company company, Dictionary<Department, DepartmentStats> departments, double difficultyMultiplier = 1.0)
         {
             var events = new List<string>();
 
-            // Product defect events (more likely with high risk)
-            if (_random.NextDouble() < 0.12)
+            // Product defect events (more likely with high risk) - with progressive difficulty
+            if (_random.NextDouble() < (0.12 * difficultyMultiplier))
             {
                 events.Add(GenerateProductDefect(company));
             }
 
-            // Quality control success (more likely with low risk)
-            if (company.Risk < -10 && _random.NextDouble() < 0.08)
+            // Quality control success (more likely with low risk) - not reduced by difficulty
+            if (company.Risk < 10 && _random.NextDouble() < 0.08)
             {
                 events.Add(GenerateQualitySuccess(company));
             }
@@ -766,10 +910,10 @@ namespace CorporateChaos.Systems
         }
 
         // New method: Process morale-based employee turnover
-        private List<string> ProcessMoraleBasedTurnover(Company company, Dictionary<Department, DepartmentStats> departments)
+        private List<string> ProcessMoraleBasedTurnover(Company company, Dictionary<Department, DepartmentStats> departments, double difficultyMultiplier = 1.0)
         {
             var events = new List<string>();
-            double turnoverChance = company.GetEmployeeTurnoverChance();
+            double turnoverChance = company.GetEmployeeTurnoverChance() * difficultyMultiplier;
 
             foreach (var dept in departments.Values)
             {
@@ -779,8 +923,17 @@ namespace CorporateChaos.Systems
                 {
                     // Individual employee morale also affects turnover
                     double individualTurnoverChance = turnoverChance;
-                    if (employee.Morale < 30) individualTurnoverChance *= 1.5;
-                    if (employee.Morale < 10) individualTurnoverChance *= 2.0;
+                    
+                    // High individual morale prevents quitting
+                    if (employee.Morale > 80)
+                    {
+                        individualTurnoverChance = 0.0; // No quitting when individual morale is high
+                    }
+                    else
+                    {
+                        if (employee.Morale < 30) individualTurnoverChance *= 1.5;
+                        if (employee.Morale < 10) individualTurnoverChance *= 2.0;
+                    }
 
                     if (_random.NextDouble() < individualTurnoverChance)
                     {

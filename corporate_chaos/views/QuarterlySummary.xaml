@@ -28,7 +28,50 @@
         </Grid>
         
         <!-- Main Content -->
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" 
+                      ScrollViewer.CanContentScroll="True"
+                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+            <ScrollViewer.Resources>
+                <Style TargetType="ScrollBar">
+                    <Setter Property="Background" Value="#2a2a3e"/>
+                    <Setter Property="BorderBrush" Value="#4a4a5e"/>
+                    <Setter Property="Foreground" Value="#6a6a7e"/>
+                    <Setter Property="Width" Value="12"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="ScrollBar">
+                                <Grid>
+                                    <Border Background="{TemplateBinding Background}" 
+                                            BorderBrush="{TemplateBinding BorderBrush}" 
+                                            BorderThickness="1" CornerRadius="6"/>
+                                    <Track Name="PART_Track" IsDirectionReversed="True">
+                                        <Track.Thumb>
+                                            <Thumb>
+                                                <Thumb.Template>
+                                                    <ControlTemplate TargetType="Thumb">
+                                                        <Border Background="#5a5a7e" CornerRadius="6" 
+                                                                BorderBrush="#7a7a9e" BorderThickness="1">
+                                                            <Border.Style>
+                                                                <Style TargetType="Border">
+                                                                    <Style.Triggers>
+                                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                                            <Setter Property="Background" Value="#7a7a9e"/>
+                                                                        </Trigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Border.Style>
+                                                        </Border>
+                                                    </ControlTemplate>
+                                                </Thumb.Template>
+                                            </Thumb>
+                                        </Track.Thumb>
+                                    </Track>
+                                </Grid>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </ScrollViewer.Resources>
             <StackPanel>
                 <!-- Financial Performance -->
                 <Border Background="#16213e" CornerRadius="10" Padding="12" Margin="0,0,0,10">
@@ -38,6 +81,7 @@
                         
                         <Grid>
                             <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
@@ -54,6 +98,11 @@
                             </StackPanel>
                             
                             <StackPanel Grid.Column="2">
+                                <TextBlock Text="Net Loss" FontSize="11" Foreground="Gray"/>
+                                <TextBlock x:Name="NetLossText" Text="$0" FontSize="14" FontWeight="Bold" Foreground="Orange"/>
+                            </StackPanel>
+                            
+                            <StackPanel Grid.Column="3">
                                 <TextBlock Text="Net Profit" FontSize="11" Foreground="Gray"/>
                                 <TextBlock x:Name="NetProfitText" Text="$0" FontSize="14" FontWeight="Bold" Foreground="White"/>
                             </StackPanel>
@@ -104,7 +153,49 @@
                         <TextBlock Text="📰 RECENT EVENTS" FontSize="14" FontWeight="Bold" 
                                   Foreground="White" Margin="0,0,0,10"/>
                         
-                        <ScrollViewer Height="150" VerticalScrollBarVisibility="Auto">
+                        <ScrollViewer Height="150" VerticalScrollBarVisibility="Auto"
+                                      ScrollViewer.CanContentScroll="True">
+                            <ScrollViewer.Resources>
+                                <Style TargetType="ScrollBar">
+                                    <Setter Property="Background" Value="#1a1a2e"/>
+                                    <Setter Property="BorderBrush" Value="#3a3a4e"/>
+                                    <Setter Property="Foreground" Value="#5a5a6e"/>
+                                    <Setter Property="Width" Value="10"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ScrollBar">
+                                                <Grid>
+                                                    <Border Background="{TemplateBinding Background}" 
+                                                            BorderBrush="{TemplateBinding BorderBrush}" 
+                                                            BorderThickness="1" CornerRadius="5"/>
+                                                    <Track Name="PART_Track" IsDirectionReversed="True">
+                                                        <Track.Thumb>
+                                                            <Thumb>
+                                                                <Thumb.Template>
+                                                                    <ControlTemplate TargetType="Thumb">
+                                                                        <Border Background="#4a4a6e" CornerRadius="5" 
+                                                                                BorderBrush="#6a6a8e" BorderThickness="1">
+                                                                            <Border.Style>
+                                                                                <Style TargetType="Border">
+                                                                                    <Style.Triggers>
+                                                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                                                            <Setter Property="Background" Value="#6a6a8e"/>
+                                                                                        </Trigger>
+                                                                                    </Style.Triggers>
+                                                                                </Style>
+                                                                            </Border.Style>
+                                                                        </Border>
+                                                                    </ControlTemplate>
+                                                                </Thumb.Template>
+                                                            </Thumb>
+                                                        </Track.Thumb>
+                                                    </Track>
+                                                </Grid>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ScrollViewer.Resources>
                             <TextBlock x:Name="EventsText" Text="No events this quarter." 
                                       FontSize="10" Foreground="White" TextWrapping="Wrap"/>
                         </ScrollViewer>

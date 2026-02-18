@@ -20,6 +20,8 @@ namespace CorporateChaos.Views
             
             InitializeBudgetSliders();
             UpdateCompanyStatus();
+            UpdateRetreatCosts();
+            UpdateDynamicPricing(); // Add dynamic pricing updates
         }
 
         private void InitializeBudgetSliders()
@@ -72,19 +74,166 @@ namespace CorporateChaos.Views
             CompanyStatusText.Text = $"Capital: ${company.Capital:N0} | Reputation: {company.Reputation} | Morale: {company.Morale} | Risk: {company.Risk}";
         }
 
+        private void UpdateRetreatCosts()
+        {
+            int totalEmployees = departments.Values.Sum(d => d.GetEmployeeCount());
+            
+            // Calculate weekend retreat cost
+            double weekendCost = 15000 + (totalEmployees * 800);
+            RetreatWeekendBtn.Content = $"Weekend (${weekendCost:N0})";
+            RetreatWeekendBtn.ToolTip = $"Cost: ${weekendCost:N0} (${15000:N0} base + ${800:N0} × {totalEmployees} employees)";
+            
+            // Calculate week-long retreat cost
+            double weekCost = 35000 + (totalEmployees * 1500);
+            RetreatWeekBtn.Content = $"Week (${weekCost:N0})";
+            RetreatWeekBtn.ToolTip = $"Cost: ${weekCost:N0} (${35000:N0} base + ${1500:N0} × {totalEmployees} employees)";
+        }
+
+        private void UpdateDynamicPricing()
+        {
+            // Update Crisis Management pricing based on risk level
+            double consultantCost = CalculateConsultantCost();
+            CrisisManagementBtn.Content = $"Hire Consultants (${consultantCost:N0})";
+            CrisisManagementBtn.ToolTip = $"Cost scales with risk level. Current risk: {company.Risk}";
+
+            // Update Employee Bonus pricing based on employee count and positions
+            var bonusCosts = CalculateBonusCosts();
+            BonusSmallBtn.Content = $"Small (${bonusCosts.Small:N0})";
+            BonusLargeBtn.Content = $"Large (${bonusCosts.Large:N0})";
+            BonusSmallBtn.ToolTip = $"Cost based on {GetTotalEmployeeCount()} employees and their positions";
+            BonusLargeBtn.ToolTip = $"Cost based on {GetTotalEmployeeCount()} employees and their positions";
+
+            // Update Marketing pricing based on reputation
+            var marketingCosts = CalculateMarketingCosts();
+            MarketingLocalBtn.Content = $"Local (${marketingCosts.Local:N0})";
+            MarketingNationalBtn.Content = $"National (${marketingCosts.National:N0})";
+            MarketingLocalBtn.ToolTip = $"Cost affected by reputation ({company.Reputation}). Lower reputation = higher cost";
+            MarketingNationalBtn.ToolTip = $"Cost affected by reputation ({company.Reputation}). Lower reputation = higher cost";
+        }
+
+        private double CalculateConsultantCost()
+        {
+            double baseCost = 100000;
+            
+            // Risk-based pricing: higher risk = more expensive consultants
+            // Risk ranges from -100 to 100, but we focus on positive risk
+            double riskMultiplier = 1.0;
+            
+            if (company.Risk <= 0)
+                riskMultiplier = 0.7; // 30% discount for low/negative risk
+            else if (company.Risk <= 25)
+                riskMultiplier = 1.0; // Base price for moderate risk
+            else if (company.Risk <= 50)
+                riskMultiplier = 1.5; // 50% more expensive for high risk
+            else if (company.Risk <= 75)
+                riskMultiplier = 2.0; // 100% more expensive for very high risk
+            else
+                riskMultiplier = 3.0; // 200% more expensive for extreme risk
+            
+            return baseCost * riskMultiplier;
+        }
+
+        private (double Small, double Large) CalculateBonusCosts()
+        {
+            int totalEmployees = GetTotalEmployeeCount();
+            double positionMultiplier = CalculatePositionMultiplier();
+            
+            // Base costs scale with employee count and position levels
+            double baseSmall = 25000 + (totalEmployees * 2000); // $2K per employee base
+            double baseLarge = 75000 + (totalEmployees * 5000); // $5K per employee base
+            
+            // Apply position multiplier (higher for senior employees)
+            double smallCost = baseSmall * positionMultiplier;
+            double largeCost = baseLarge * positionMultiplier;
+            
+            return (smallCost, largeCost);
+        }
+
+        private (double Local, double National) CalculateMarketingCosts()
+        {
+            double baseLocal = 100000;
+            double baseNational = 275000;
+            
+            // Reputation-based pricing: lower reputation = higher marketing costs
+            // Reputation ranges from -100 to 100
+            double reputationMultiplier = 1.0;
+            
+            if (company.Reputation >= 50)
+                reputationMultiplier = 0.7; // 30% discount for excellent reputation
+            else if (company.Reputation >= 20)
+                reputationMultiplier = 0.85; // 15% discount for good reputation
+            else if (company.Reputation >= 0)
+                reputationMultiplier = 1.0; // Base price for neutral reputation
+            else if (company.Reputation >= -25)
+                reputationMultiplier = 1.3; // 30% more expensive for poor reputation
+            else if (company.Reputation >= -50)
+                reputationMultiplier = 1.6; // 60% more expensive for bad reputation
+            else
+                reputationMultiplier = 2.0; // 100% more expensive for terrible reputation
+            
+            return (baseLocal * reputationMultiplier, baseNational * reputationMultiplier);
+        }
+
+        private int GetTotalEmployeeCount()
+        {
+            return departments.Values.Sum(d => d.GetEmployeeCount());
+        }
+
+        private double CalculatePositionMultiplier()
+        {
+            int totalEmployees = GetTotalEmployeeCount();
+            if (totalEmployees == 0) return 1.0;
+            
+            double totalMultiplier = 0;
+            int employeeCount = 0;
+            
+            foreach (var dept in departments.Values)
+            {
+                foreach (var employee in dept.Employees)
+                {
+                    // Position-based multiplier
+                    double positionMultiplier = employee.OverallSkill switch
+                    {
+                        SkillLevel.Trainee => 0.8,
+                        SkillLevel.Junior => 1.0,
+                        SkillLevel.Mid => 1.3,
+                        SkillLevel.Senior => 1.6,
+                        SkillLevel.Expert => 2.0,
+                        _ => 1.0
+                    };
+                    
+                    totalMultiplier += positionMultiplier;
+                    employeeCount++;
+                }
+            }
+            
+            return employeeCount > 0 ? totalMultiplier / employeeCount : 1.0;
+        }
+
         // Calculate market share gain with diminishing returns (same logic as Company class)
         private double GetMarketShareGain(double baseGain)
         {
+            // Hard cap at 60% market share for marketing/R&D actions
+            if (company.MarketShare >= 60.0)
+            {
+                return 0.0; // No market share gain from marketing/R&D above 60%
+            }
+            
             // Diminishing returns formula: gain decreases as market share increases
             double diminishingFactor = 1.0 - (company.MarketShare / 100.0);
             
             // Additional competitive pressure at higher market shares
             double competitivePressure = 1.0;
-            if (company.MarketShare >= 50) competitivePressure = 0.5; // 50% harder above 50%
-            if (company.MarketShare >= 60) competitivePressure = 0.3; // 70% harder above 60%
-            if (company.MarketShare >= 65) competitivePressure = 0.2; // 80% harder above 65%
+            if (company.MarketShare >= 30) competitivePressure = 0.8; // 20% harder above 30%
+            if (company.MarketShare >= 40) competitivePressure = 0.6; // 40% harder above 40%
+            if (company.MarketShare >= 50) competitivePressure = 0.4; // 60% harder above 50%
+            if (company.MarketShare >= 55) competitivePressure = 0.2; // 80% harder above 55%
             
-            return baseGain * diminishingFactor * competitivePressure;
+            double finalGain = baseGain * diminishingFactor * competitivePressure;
+            
+            // Ensure we don't exceed 60% cap
+            double maxAllowedGain = Math.Max(0, 60.0 - company.MarketShare);
+            return Math.Min(finalGain, maxAllowedGain);
         }
 
         // Financial Decisions
@@ -153,7 +302,9 @@ namespace CorporateChaos.Views
 
         private void BonusSmall_Click(object sender, RoutedEventArgs e)
         {
-            double cost = 50000;
+            var bonusCosts = CalculateBonusCosts();
+            double cost = bonusCosts.Small;
+            
             if (company.Capital < cost)
             {
                 MessageBox.Show("Not enough capital for employee bonuses!", "Insufficient Funds", 
@@ -176,11 +327,14 @@ namespace CorporateChaos.Views
             
             DecisionMade?.Invoke($"🎁 Small employee bonuses distributed! Cost ${cost:N0}, morale increased by 15, employee productivity boosted!");
             UpdateCompanyStatus();
+            UpdateDynamicPricing(); // Update pricing after action
         }
 
         private void BonusLarge_Click(object sender, RoutedEventArgs e)
         {
-            double cost = 150000;
+            var bonusCosts = CalculateBonusCosts();
+            double cost = bonusCosts.Large;
+            
             if (company.Capital < cost)
             {
                 MessageBox.Show("Not enough capital for large employee bonuses!", "Insufficient Funds", 
@@ -203,23 +357,48 @@ namespace CorporateChaos.Views
             
             DecisionMade?.Invoke($"🎁 Large employee bonuses distributed! Cost ${cost:N0}, morale increased by 25, significant productivity boost!");
             UpdateCompanyStatus();
+            UpdateDynamicPricing(); // Update pricing after action
         }
 
-        private void EmergencyLoan_Click(object sender, RoutedEventArgs e)
+        private void SmallLoan_Click(object sender, RoutedEventArgs e)
         {
-            double loanAmount = 200000;
+            double loanAmount = 100000;
+            company.Capital += loanAmount;
+            company.Risk += 10;
+            company.Reputation -= 5;
+            
+            DecisionMade?.Invoke($"🏦 Small business loan of ${loanAmount:N0} secured! Risk increased by 10, reputation decreased by 5.");
+            UpdateCompanyStatus();
+        }
+
+        private void MediumLoan_Click(object sender, RoutedEventArgs e)
+        {
+            double loanAmount = 500000;
             company.Capital += loanAmount;
             company.Risk += 20;
             company.Reputation -= 10;
             
-            DecisionMade?.Invoke($"🏦 Emergency loan of ${loanAmount:N0} secured! Risk increased by 20, reputation decreased by 10.");
+            DecisionMade?.Invoke($"🏦 Medium business loan of ${loanAmount:N0} secured! Risk increased by 20, reputation decreased by 10.");
+            UpdateCompanyStatus();
+        }
+
+        private void LargeLoan_Click(object sender, RoutedEventArgs e)
+        {
+            double loanAmount = 1000000;
+            company.Capital += loanAmount;
+            company.Risk += 35;
+            company.Reputation -= 20;
+            
+            DecisionMade?.Invoke($"🏦 Large business loan of ${loanAmount:N0} secured! Risk increased by 35, reputation decreased by 20.");
             UpdateCompanyStatus();
         }
 
         // Strategic Decisions
         private void MarketingLocal_Click(object sender, RoutedEventArgs e)
         {
-            double cost = 75000;
+            var marketingCosts = CalculateMarketingCosts();
+            double cost = marketingCosts.Local;
+            
             if (company.Capital < cost)
             {
                 MessageBox.Show("Not enough capital for marketing campaign!", "Insufficient Funds", 
@@ -238,11 +417,14 @@ namespace CorporateChaos.Views
             
             DecisionMade?.Invoke($"📢 Local marketing campaign launched! Cost ${cost:N0}, reputation increased, market share +{actualGain:F2}%, risk +5.");
             UpdateCompanyStatus();
+            UpdateDynamicPricing(); // Update pricing after action
         }
 
         private void MarketingNational_Click(object sender, RoutedEventArgs e)
         {
-            double cost = 200000;
+            var marketingCosts = CalculateMarketingCosts();
+            double cost = marketingCosts.National;
+            
             if (company.Capital < cost)
             {
                 MessageBox.Show("Not enough capital for national marketing campaign!", "Insufficient Funds", 
@@ -261,15 +443,21 @@ namespace CorporateChaos.Views
             
             DecisionMade?.Invoke($"📢 National marketing campaign launched! Cost ${cost:N0}, significant reputation boost, market share +{actualGain:F2}%, risk +12.");
             UpdateCompanyStatus();
+            UpdateDynamicPricing(); // Update pricing after action
         }
 
         private void RetreatWeekend_Click(object sender, RoutedEventArgs e)
         {
-            double cost = 30000;
+            // Scale cost with employee count: base cost + per-employee cost
+            int totalEmployees = departments.Values.Sum(d => d.GetEmployeeCount());
+            double baseCost = 15000; // Reduced base cost
+            double perEmployeeCost = 800; // Cost per employee
+            double cost = baseCost + (totalEmployees * perEmployeeCost);
+            
             if (company.Capital < cost)
             {
-                MessageBox.Show("Not enough capital for company retreat!", "Insufficient Funds", 
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show($"Not enough capital for company retreat! Cost: ${cost:N0} (${baseCost:N0} base + ${perEmployeeCost:N0} × {totalEmployees} employees)", 
+                    "Insufficient Funds", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -287,17 +475,22 @@ namespace CorporateChaos.Views
                 }
             }
             
-            DecisionMade?.Invoke($"🏖️ Weekend company retreat organized! Cost ${cost:N0}, morale boosted, risk reduced, team productivity improved!");
+            DecisionMade?.Invoke($"🏖️ Weekend company retreat organized! Cost ${cost:N0} ({totalEmployees} employees), morale boosted, risk reduced, team productivity improved!");
             UpdateCompanyStatus();
         }
 
         private void RetreatWeek_Click(object sender, RoutedEventArgs e)
         {
-            double cost = 80000;
+            // Scale cost with employee count: base cost + per-employee cost
+            int totalEmployees = departments.Values.Sum(d => d.GetEmployeeCount());
+            double baseCost = 35000; // Reduced base cost
+            double perEmployeeCost = 1500; // Cost per employee for week-long retreat
+            double cost = baseCost + (totalEmployees * perEmployeeCost);
+            
             if (company.Capital < cost)
             {
-                MessageBox.Show("Not enough capital for week-long retreat!", "Insufficient Funds", 
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show($"Not enough capital for week-long retreat! Cost: ${cost:N0} (${baseCost:N0} base + ${perEmployeeCost:N0} × {totalEmployees} employees)", 
+                    "Insufficient Funds", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -315,7 +508,7 @@ namespace CorporateChaos.Views
                 }
             }
             
-            DecisionMade?.Invoke($"🏖️ Week-long company retreat organized! Cost ${cost:N0}, major morale boost, risk significantly reduced, excellent team building!");
+            DecisionMade?.Invoke($"🏖️ Week-long company retreat organized! Cost ${cost:N0} ({totalEmployees} employees), major morale boost, risk significantly reduced, excellent team building!");
             UpdateCompanyStatus();
         }
 
@@ -344,7 +537,8 @@ namespace CorporateChaos.Views
 
         private void CrisisManagement_Click(object sender, RoutedEventArgs e)
         {
-            double cost = 100000;
+            double cost = CalculateConsultantCost();
+            
             if (company.Capital < cost)
             {
                 MessageBox.Show("Not enough capital for crisis management consultants!", "Insufficient Funds", 
@@ -358,6 +552,7 @@ namespace CorporateChaos.Views
             
             DecisionMade?.Invoke($"🚨 Crisis management consultants hired! Cost ${cost:N0}, risk reduced by 15, reputation improved through better crisis handling.");
             UpdateCompanyStatus();
+            UpdateDynamicPricing(); // Update pricing after action
         }
 
         // Department Budget Allocation

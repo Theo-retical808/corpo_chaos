@@ -96,20 +96,89 @@ namespace CorporateChaos.Models
             return Salary * 3; // Quarterly cost (3 months)
         }
 
-        public static Employee GenerateRandomEmployee(int currentQuarter)
+        public static Employee GenerateRandomEmployee(int currentQuarter, HashSet<string>? usedNames = null)
         {
             var random = new Random();
-            var names = new[]
+            
+            // Expanded name lists for unique generation
+            var firstNames = new[]
             {
-                "Alex Johnson", "Sarah Chen", "Michael Brown", "Emma Davis", "James Wilson",
-                "Lisa Garcia", "David Miller", "Anna Rodriguez", "Chris Taylor", "Maria Lopez",
-                "Robert Anderson", "Jennifer White", "Kevin Lee", "Amanda Clark", "Daniel Hall",
-                "Jessica Martinez", "Ryan Thompson", "Ashley Lewis", "Brandon Walker", "Nicole Young"
+                // Male names
+                "Alexander", "Andrew", "Anthony", "Benjamin", "Brandon", "Brian", "Carlos", "Charles", "Christopher", "Daniel",
+                "David", "Edward", "Eric", "Frank", "George", "Henry", "James", "Jason", "Jeffrey", "John",
+                "Jonathan", "Joseph", "Joshua", "Justin", "Kevin", "Mark", "Matthew", "Michael", "Nicholas", "Patrick",
+                "Paul", "Peter", "Richard", "Robert", "Ryan", "Samuel", "Scott", "Stephen", "Steven", "Thomas",
+                "Timothy", "William", "Aaron", "Adam", "Adrian", "Alan", "Albert", "Antonio", "Arthur", "Austin",
+                "Blake", "Bruce", "Carl", "Christian", "Craig", "Derek", "Douglas", "Eugene", "Gabriel", "Gary",
+                "Gregory", "Harold", "Ian", "Isaac", "Jacob", "Jeremy", "Jesse", "Joel", "Jordan", "Kenneth",
+                "Kyle", "Lawrence", "Louis", "Lucas", "Marcus", "Martin", "Nathan", "Noah", "Oliver", "Oscar",
+                "Philip", "Ralph", "Raymond", "Roger", "Sean", "Simon", "Victor", "Walter", "Wayne", "Zachary",
+                
+                // Female names
+                "Amanda", "Amy", "Andrea", "Angela", "Anna", "Ashley", "Barbara", "Betty", "Brenda", "Carol",
+                "Catherine", "Christine", "Deborah", "Diana", "Donna", "Dorothy", "Elizabeth", "Emily", "Emma", "Frances",
+                "Helen", "Jennifer", "Jessica", "Karen", "Kimberly", "Laura", "Linda", "Lisa", "Margaret", "Maria",
+                "Marie", "Mary", "Michelle", "Nancy", "Patricia", "Rebecca", "Ruth", "Sandra", "Sarah", "Sharon",
+                "Stephanie", "Susan", "Teresa", "Virginia", "Abigail", "Alice", "Allison", "Amber", "Andrea", "Angela",
+                "Ann", "Anne", "Annie", "April", "Beverly", "Bonnie", "Carolyn", "Cheryl", "Christina", "Cynthia",
+                "Debra", "Denise", "Diane", "Doris", "Evelyn", "Gloria", "Grace", "Hannah", "Heather", "Irene",
+                "Jacqueline", "Jane", "Janet", "Janice", "Jean", "Joan", "Joyce", "Judith", "Julie", "Kathleen",
+                "Kathryn", "Kelly", "Lori", "Louise", "Megan", "Melissa", "Nicole", "Pamela", "Rachel", "Rose",
+                "Samantha", "Sara", "Shannon", "Shirley", "Tiffany", "Victoria", "Wanda", "Wendy", "Yvonne"
             };
+
+            var lastNames = new[]
+            {
+                "Adams", "Alexander", "Allen", "Anderson", "Baker", "Barnes", "Bell", "Bennett", "Brooks", "Brown",
+                "Butler", "Campbell", "Carter", "Clark", "Collins", "Cook", "Cooper", "Davis", "Edwards", "Evans",
+                "Fisher", "Foster", "Garcia", "Gonzalez", "Gray", "Green", "Hall", "Harris", "Henderson", "Hill",
+                "Howard", "Hughes", "Jackson", "James", "Johnson", "Jones", "Kelly", "King", "Lee", "Lewis",
+                "Lopez", "Martin", "Martinez", "Miller", "Mitchell", "Moore", "Morgan", "Murphy", "Nelson", "Parker",
+                "Patterson", "Perez", "Peterson", "Phillips", "Powell", "Price", "Reed", "Richardson", "Rivera", "Roberts",
+                "Robinson", "Rodriguez", "Rogers", "Ross", "Russell", "Sanchez", "Scott", "Smith", "Stewart", "Taylor",
+                "Thomas", "Thompson", "Torres", "Turner", "Walker", "Ward", "Washington", "Watson", "White", "Williams",
+                "Wilson", "Wood", "Wright", "Young", "Bailey", "Bryant", "Coleman", "Cox", "Diaz", "Ellis",
+                "Flores", "Ford", "Freeman", "Gibson", "Graham", "Griffin", "Hayes", "Henry", "Hernandez", "Hunt",
+                "Jenkins", "Jordan", "Knight", "Lawrence", "Long", "Mason", "McDonald", "Murray", "Owens", "Palmer",
+                "Perry", "Porter", "Reynolds", "Rice", "Rose", "Sanders", "Simmons", "Stone", "Sullivan", "Webb",
+                "Wells", "West", "Woods", "Adams", "Armstrong", "Austin", "Bishop", "Black", "Boyd", "Bradley",
+                "Burns", "Burton", "Carpenter", "Chapman", "Cole", "Crawford", "Cross", "Curtis", "Duncan", "Elliott",
+                "Ferguson", "Fields", "Fleming", "Fletcher", "Fox", "Francis", "Franklin", "Gardner", "George", "Gilbert",
+                "Gordon", "Grant", "Greene", "Hamilton", "Hansen", "Harper", "Harrison", "Hart", "Harvey", "Hawkins"
+            };
+
+            // Generate unique name
+            string fullName;
+            int attempts = 0;
+            do
+            {
+                string firstName = firstNames[random.Next(firstNames.Length)];
+                string lastName = lastNames[random.Next(lastNames.Length)];
+                fullName = $"{firstName} {lastName}";
+                attempts++;
+                
+                // Fallback: add middle initial if we can't find unique name after many attempts
+                if (attempts > 50)
+                {
+                    char middleInitial = (char)('A' + random.Next(26));
+                    fullName = $"{firstName} {middleInitial}. {lastName}";
+                }
+                
+                // Ultimate fallback: add number suffix
+                if (attempts > 100)
+                {
+                    fullName = $"{firstName} {lastName} {random.Next(1, 100)}";
+                    break;
+                }
+            }
+            while (usedNames != null && usedNames.Contains(fullName));
+
+            // Add name to used names set
+            usedNames?.Add(fullName);
 
             var employee = new Employee
             {
-                Name = names[random.Next(names.Length)],
+                Name = fullName,
                 Productivity = random.Next(40, 96), // 40-95
                 RiskLevel = (RiskLevel)random.Next(1, 6),
                 Specialization = (Department)random.Next(0, 6),

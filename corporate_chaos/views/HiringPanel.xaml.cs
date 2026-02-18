@@ -12,7 +12,13 @@ namespace CorporateChaos.Views
         private Random random = new Random();
         private int currentQuarter;
         private int refreshesUsed = 0;
-        private const int MAX_REFRESHES_PER_QUARTER = 5;
+        private const int MAX_REFRESHES_PER_QUARTER = 3;
+        
+        // Static set to track used names across all game sessions
+        private static HashSet<string> usedNames = new HashSet<string>();
+        
+        // Static dictionary to persist candidates per quarter to prevent refresh exploit
+        private static Dictionary<int, List<Employee>> quarterCandidates = new Dictionary<int, List<Employee>>();
         
         public event Action<Employee>? EmployeeHired;
         public event Action<Employee>? EmployeePassed;
@@ -28,10 +34,28 @@ namespace CorporateChaos.Views
             // Load refresh count for this quarter from company data
             LoadRefreshCount();
             
-            GenerateCandidates();
+            // Load existing candidates for this quarter or generate new ones if first time
+            LoadOrGenerateCandidates();
             RefreshCandidatesList();
             UpdateHiringInfo();
             UpdateRefreshButton();
+        }
+
+        private void LoadOrGenerateCandidates()
+        {
+            // Check if we already have candidates for this quarter
+            if (quarterCandidates.ContainsKey(currentQuarter) && quarterCandidates[currentQuarter].Count > 0)
+            {
+                // Load existing candidates for this quarter
+                availableCandidates = new List<Employee>(quarterCandidates[currentQuarter]);
+            }
+            else
+            {
+                // Generate new candidates for this quarter (first time opening)
+                GenerateCandidates();
+                // Store them for this quarter
+                quarterCandidates[currentQuarter] = new List<Employee>(availableCandidates);
+            }
         }
 
         private void GenerateCandidates()
@@ -82,32 +106,17 @@ namespace CorporateChaos.Views
 
         private Employee GenerateQualityCandidate(double hiringQuality)
         {
-            var names = new[]
-            {
-                "Alex Johnson", "Sarah Chen", "Michael Brown", "Emma Davis", "James Wilson",
-                "Lisa Garcia", "David Miller", "Anna Rodriguez", "Chris Taylor", "Maria Lopez",
-                "Robert Anderson", "Jennifer White", "Kevin Lee", "Amanda Clark", "Daniel Hall",
-                "Jessica Martinez", "Ryan Thompson", "Ashley Lewis", "Brandon Walker", "Nicole Young",
-                "Thomas Moore", "Rachel Kim", "Steven Wright", "Michelle Turner", "Jason Scott",
-                "Laura Adams", "Mark Phillips", "Stephanie Hill", "Andrew Green", "Samantha Baker"
-            };
+            // Use the improved Employee generation with unique names
+            var employee = Employee.GenerateRandomEmployee(currentQuarter, usedNames);
 
-            var employee = new Employee
-            {
-                Name = names[random.Next(names.Length)],
-                Specialization = (Department)random.Next(0, 6),
-                QuarterHired = 0 // Will be set when hired
-            };
+            // Adjust employee quality based on hiring quality
+            AdjustEmployeeQuality(employee, hiringQuality);
 
-            // Get current quarter from company (assuming we can access it)
-            int currentQuarter = GetCurrentQuarter();
+            return employee;
+        }
 
-            // Apply quarter-based skill restrictions
-            ApplyQuarterBasedSkillRestrictions(employee, currentQuarter, hiringQuality);
-
-            // Generate position description and skills
-            GeneratePositionDetails(employee, random);
-
+        private void AdjustEmployeeQuality(Employee employee, double hiringQuality)
+        {
             // Set risk level (lower quality hiring = higher risk candidates)
             if (hiringQuality >= 0.7)
             {
@@ -122,16 +131,25 @@ namespace CorporateChaos.Views
                 employee.RiskLevel = (RiskLevel)random.Next(2, 6); // Low to VeryHigh
             }
 
-            // Calculate salary based on skill, experience, and productivity
-            double baseSalary = 3000; // Monthly base
-            double skillMultiplier = (int)employee.OverallSkill * 0.3;
-            double experienceMultiplier = employee.Experience * 0.1;
-            double productivityMultiplier = employee.Productivity / 100.0;
-            
-            employee.Salary = baseSalary * (1 + skillMultiplier + experienceMultiplier) * productivityMultiplier;
-            employee.Salary = Math.Round(employee.Salary, 0);
+            // Adjust productivity based on hiring quality
+            if (hiringQuality >= 0.8)
+            {
+                employee.Productivity = Math.Min(100, employee.Productivity + random.Next(5, 15));
+            }
+            else if (hiringQuality <= 0.3)
+            {
+                employee.Productivity = Math.Max(30, employee.Productivity - random.Next(5, 15));
+            }
 
-            return employee;
+            // Adjust morale based on hiring quality
+            if (hiringQuality >= 0.7)
+            {
+                employee.Morale = Math.Min(100, employee.Morale + random.Next(5, 10));
+            }
+            else if (hiringQuality <= 0.4)
+            {
+                employee.Morale = Math.Max(40, employee.Morale - random.Next(5, 10));
+            }
         }
 
         private int GetCurrentQuarter()
@@ -139,214 +157,7 @@ namespace CorporateChaos.Views
             return currentQuarter;
         }
 
-        private void ApplyQuarterBasedSkillRestrictions(Employee employee, int currentQuarter, double hiringQuality)
-        {
-            // Base skill distribution based on quarter
-            SkillLevel baseSkill;
-            int baseExperience;
-            int baseProductivity;
-            int baseMorale;
 
-            if (currentQuarter <= 5) // Early game (Q1-5): Mostly entry-level
-            {
-                // 70% Trainee/Junior, 25% Mid, 5% Senior, 0% Expert
-                double roll = random.NextDouble();
-                if (roll < 0.70)
-                {
-                    baseSkill = random.NextDouble() < 0.6 ? SkillLevel.Trainee : SkillLevel.Junior;
-                    baseExperience = random.Next(0, 3);
-                    baseProductivity = random.Next(30, 70);
-                }
-                else if (roll < 0.95)
-                {
-                    baseSkill = SkillLevel.Mid;
-                    baseExperience = random.Next(2, 6);
-                    baseProductivity = random.Next(50, 80);
-                }
-                else
-                {
-                    baseSkill = SkillLevel.Senior;
-                    baseExperience = random.Next(5, 10);
-                    baseProductivity = random.Next(70, 90);
-                }
-            }
-            else if (currentQuarter <= 20) // Mid game (Q6-20): More balanced
-            {
-                // 40% Trainee/Junior, 35% Mid, 20% Senior, 5% Expert
-                double roll = random.NextDouble();
-                if (roll < 0.40)
-                {
-                    baseSkill = random.NextDouble() < 0.5 ? SkillLevel.Trainee : SkillLevel.Junior;
-                    baseExperience = random.Next(0, 4);
-                    baseProductivity = random.Next(35, 75);
-                }
-                else if (roll < 0.75)
-                {
-                    baseSkill = SkillLevel.Mid;
-                    baseExperience = random.Next(2, 8);
-                    baseProductivity = random.Next(55, 85);
-                }
-                else if (roll < 0.95)
-                {
-                    baseSkill = SkillLevel.Senior;
-                    baseExperience = random.Next(5, 12);
-                    baseProductivity = random.Next(70, 95);
-                }
-                else
-                {
-                    baseSkill = SkillLevel.Expert;
-                    baseExperience = random.Next(8, 15);
-                    baseProductivity = random.Next(80, 98);
-                }
-            }
-            else // Late game (Q21+): Access to all levels
-            {
-                // 20% Trainee/Junior, 30% Mid, 35% Senior, 15% Expert
-                double roll = random.NextDouble();
-                if (roll < 0.20)
-                {
-                    baseSkill = random.NextDouble() < 0.4 ? SkillLevel.Trainee : SkillLevel.Junior;
-                    baseExperience = random.Next(0, 5);
-                    baseProductivity = random.Next(40, 80);
-                }
-                else if (roll < 0.50)
-                {
-                    baseSkill = SkillLevel.Mid;
-                    baseExperience = random.Next(3, 10);
-                    baseProductivity = random.Next(60, 90);
-                }
-                else if (roll < 0.85)
-                {
-                    baseSkill = SkillLevel.Senior;
-                    baseExperience = random.Next(6, 15);
-                    baseProductivity = random.Next(75, 98);
-                }
-                else
-                {
-                    baseSkill = SkillLevel.Expert;
-                    baseExperience = random.Next(10, 20);
-                    baseProductivity = random.Next(85, 100);
-                }
-            }
-
-            // Apply hiring quality modifiers
-            if (hiringQuality >= 0.8) // Excellent hiring
-            {
-                baseProductivity = Math.Min(100, baseProductivity + random.Next(5, 15));
-                baseMorale = random.Next(75, 95);
-                // Chance to upgrade skill level
-                if (random.NextDouble() < 0.3 && baseSkill < SkillLevel.Expert)
-                {
-                    baseSkill = (SkillLevel)((int)baseSkill + 1);
-                    baseExperience += random.Next(1, 3);
-                }
-            }
-            else if (hiringQuality >= 0.6) // Good hiring
-            {
-                baseProductivity = Math.Min(100, baseProductivity + random.Next(0, 10));
-                baseMorale = random.Next(65, 85);
-            }
-            else if (hiringQuality >= 0.4) // Average hiring
-            {
-                baseMorale = random.Next(55, 80);
-            }
-            else // Poor hiring
-            {
-                baseProductivity = Math.Max(20, baseProductivity - random.Next(5, 15));
-                baseMorale = random.Next(40, 70);
-                // Chance to downgrade skill level
-                if (random.NextDouble() < 0.2 && baseSkill > SkillLevel.Trainee)
-                {
-                    baseSkill = (SkillLevel)((int)baseSkill - 1);
-                    baseExperience = Math.Max(0, baseExperience - random.Next(1, 3));
-                }
-            }
-
-            employee.OverallSkill = baseSkill;
-            employee.Experience = baseExperience;
-            employee.Productivity = baseProductivity;
-            employee.Morale = baseMorale;
-        }
-
-        private void GeneratePositionDetails(Employee employee, Random random)
-        {
-            var positionTemplates = new Dictionary<Department, (string[] descriptions, string[] keywords)>
-            {
-                [Department.Marketing] = (
-                    new[] {
-                        "Brand strategist with creative campaign experience",
-                        "Digital marketing specialist focused on social media growth",
-                        "Market research analyst with consumer behavior expertise",
-                        "Content creator with strong storytelling abilities",
-                        "SEO/SEM specialist with data-driven approach",
-                        "Public relations coordinator with media connections"
-                    },
-                    new[] { "campaigns", "branding", "social media", "analytics", "content", "SEO", "PR", "creative" }
-                ),
-                [Department.Operations] = (
-                    new[] {
-                        "Process optimization expert with lean methodology background",
-                        "Supply chain coordinator with vendor management skills",
-                        "Quality assurance specialist focused on continuous improvement",
-                        "Project manager with cross-functional team experience",
-                        "Operations analyst with efficiency optimization focus",
-                        "Logistics coordinator with distribution expertise"
-                    },
-                    new[] { "processes", "supply chain", "quality", "logistics", "efficiency", "lean", "coordination" }
-                ),
-                [Department.Finance] = (
-                    new[] {
-                        "Financial analyst with budgeting and forecasting expertise",
-                        "Accounting specialist with regulatory compliance knowledge",
-                        "Investment advisor with portfolio management experience",
-                        "Cost analyst focused on expense optimization",
-                        "Tax specialist with corporate finance background",
-                        "Risk management analyst with audit experience"
-                    },
-                    new[] { "budgeting", "forecasting", "compliance", "investments", "analysis", "auditing", "taxation" }
-                ),
-                [Department.HR] = (
-                    new[] {
-                        "Talent acquisition specialist with recruitment expertise",
-                        "Employee relations coordinator focused on workplace culture",
-                        "Training and development specialist with learning programs",
-                        "Compensation analyst with benefits administration skills",
-                        "HR generalist with policy development experience",
-                        "Organizational development consultant with change management"
-                    },
-                    new[] { "recruitment", "culture", "training", "benefits", "policies", "development", "relations" }
-                ),
-                [Department.IT] = (
-                    new[] {
-                        "Software developer with full-stack development skills",
-                        "Systems administrator with network infrastructure expertise",
-                        "Cybersecurity specialist focused on threat prevention",
-                        "Database administrator with data management experience",
-                        "IT support technician with troubleshooting abilities",
-                        "DevOps engineer with automation and deployment skills"
-                    },
-                    new[] { "programming", "systems", "security", "databases", "support", "automation", "networks" }
-                ),
-                [Department.Research] = (
-                    new[] {
-                        "Research scientist with experimental design expertise",
-                        "Data scientist with machine learning and analytics skills",
-                        "Product development specialist with innovation focus",
-                        "Market research analyst with statistical analysis background",
-                        "R&D engineer with prototype development experience",
-                        "Innovation consultant with emerging technology knowledge"
-                    },
-                    new[] { "research", "data science", "innovation", "analysis", "development", "experimentation", "technology" }
-                )
-            };
-
-            var (descriptions, keywords) = positionTemplates[employee.Specialization];
-            employee.PositionDescription = descriptions[random.Next(descriptions.Length)];
-            
-            // Add 2-4 relevant keywords
-            var shuffledKeywords = keywords.OrderBy(x => random.Next()).Take(random.Next(2, 5)).ToList();
-            employee.SkillKeywords = shuffledKeywords;
-        }
 
         private void UpdateHiringInfo()
         {
@@ -363,18 +174,18 @@ namespace CorporateChaos.Views
 
             string quarterInfo = currentQuarter switch
             {
-                <= 5 => "Early Career (Q1-5): Mostly entry-level candidates (70% Trainee/Junior)",
-                <= 20 => "Mid Career (Q6-20): Balanced experience levels available",
+                <= 5 => "Early Career (Q1-5): Mostly entry-level candidates available",
+                <= 20 => "Mid Career (Q6-20): Balanced experience levels available", 
                 _ => "Late Career (Q21+): Access to all experience levels including experts"
             };
             
             HiringInfoText.Text = $"Hiring Quality: {quality:P0} ({qualityText}) | Refreshes: {remainingRefreshes}/{MAX_REFRESHES_PER_QUARTER}";
             
-            // Update the tip text with quarter-specific information
+            // Update the tip text with strategic hiring information
             var tipTextBlock = (TextBlock)this.FindName("TipTextBlock");
             if (tipTextBlock != null)
             {
-                tipTextBlock.Text = $"💡 {quarterInfo}";
+                tipTextBlock.Text = $"💡 {quarterInfo} | Use skill keywords to identify department fit!";
             }
         }
 
@@ -390,6 +201,9 @@ namespace CorporateChaos.Views
             {
                 // Remove from available candidates
                 availableCandidates.Remove(employee);
+                // Update persistent storage
+                quarterCandidates[currentQuarter] = new List<Employee>(availableCandidates);
+                
                 RefreshCandidatesList();
                 
                 // Notify parent window
@@ -406,6 +220,9 @@ namespace CorporateChaos.Views
             {
                 // Remove from available candidates
                 availableCandidates.Remove(employee);
+                // Update persistent storage
+                quarterCandidates[currentQuarter] = new List<Employee>(availableCandidates);
+                
                 RefreshCandidatesList();
                 
                 // Notify parent window
@@ -426,6 +243,9 @@ namespace CorporateChaos.Views
             SaveRefreshCount();
             
             GenerateCandidates();
+            // Update the persistent storage with new candidates
+            quarterCandidates[currentQuarter] = new List<Employee>(availableCandidates);
+            
             RefreshCandidatesList();
             UpdateHiringInfo();
             UpdateRefreshButton();

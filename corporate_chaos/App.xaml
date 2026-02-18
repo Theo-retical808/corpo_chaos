@@ -4,6 +4,6 @@
              xmlns:local="clr-namespace:CorporateChaos"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <DropShadowEffect x:Key="DropShadowEffect" Color="Black" BlurRadius="3" ShadowDepth="1" Opacity="0.8"/>
     </Application.Resources>
 </Application>
