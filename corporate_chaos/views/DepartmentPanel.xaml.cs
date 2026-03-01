@@ -62,6 +62,12 @@ namespace CorporateChaos.Views
 
         private void RefreshEmployeeLists()
         {
+            // Ensure all employees have profile data
+            foreach (var employee in allHiredEmployees)
+            {
+                employee.EnsureProfileData();
+            }
+            
             // Current department employees
             var departmentEmployees = departments[currentDepartment].Employees.ToList();
             DepartmentEmployeesItemsControl.ItemsSource = null;

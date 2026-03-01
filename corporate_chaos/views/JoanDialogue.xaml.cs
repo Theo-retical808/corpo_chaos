@@ -22,6 +22,7 @@ namespace CorporateChaos.Views
         private bool isBranchingMode = false;
         private Dictionary<string, CharacterRelationship> characterRelationships = new Dictionary<string, CharacterRelationship>();
         private List<string> activeStoryFlags = new List<string>();
+        private string currentCharacterId = "joan"; // Track which character is speaking
 
         public JoanDialogue(Company company, Dictionary<Department, DepartmentStats> departments, bool isStoryMode = false, int quarter = 1, StoryModeManager? storyModeManager = null)
         {
@@ -356,6 +357,13 @@ namespace CorporateChaos.Views
         {
             if (currentConversation == null) return;
 
+            // Detect which character is speaking from the conversation
+            if (currentConversation.Participants != null && currentConversation.Participants.Count > 0)
+            {
+                // Find the non-player character
+                currentCharacterId = currentConversation.Participants.FirstOrDefault(p => p != "player") ?? "joan";
+            }
+
             // Get the current dialogue node
             if (currentConversation.Nodes.ContainsKey(currentConversation.CurrentNodeId))
             {
@@ -383,19 +391,38 @@ namespace CorporateChaos.Views
 
         private void UpdateCharacterInfoForBranching()
         {
-            if (!characterRelationships.ContainsKey("joan")) return;
-            
-            var relationship = characterRelationships["joan"];
-            
-            // Update role text based on relationship phase
-            JoanRoleText.Text = relationship.CurrentPhase switch
+            // Get character info from StoryScript
+            if (StoryScript.Characters.ContainsKey(currentCharacterId))
             {
-                RelationshipPhase.ProfessionalAcquaintance => "Your Professional Corporate Assistant",
-                RelationshipPhase.TrustedColleague => "Your Trusted Corporate Advisor", 
-                RelationshipPhase.PersonalFriend => "Your Personal Confidant & Advisor",
-                RelationshipPhase.LifelongBond => "Your Lifelong Friend & Trusted Partner",
-                _ => "Your Personal Corporate Assistant"
-            };
+                var character = StoryScript.Characters[currentCharacterId];
+                CharacterNameText.Text = character.Name;
+                Title = $"{character.Name} - Conversation";
+                
+                // Load character avatar
+                LoadCharacterAvatar(currentCharacterId);
+            }
+            
+            if (!characterRelationships.ContainsKey(currentCharacterId)) return;
+            
+            var relationship = characterRelationships[currentCharacterId];
+            
+            // Update role text based on character
+            if (currentCharacterId == "joan")
+            {
+                JoanRoleText.Text = relationship.CurrentPhase switch
+                {
+                    RelationshipPhase.ProfessionalAcquaintance => "Your Professional Corporate Assistant",
+                    RelationshipPhase.TrustedColleague => "Your Trusted Corporate Advisor", 
+                    RelationshipPhase.PersonalFriend => "Your Personal Confidant & Advisor",
+                    RelationshipPhase.LifelongBond => "Your Lifelong Friend & Trusted Partner",
+                    _ => "Your Personal Corporate Assistant"
+                };
+            }
+            else if (StoryScript.Characters.ContainsKey(currentCharacterId))
+            {
+                var character = StoryScript.Characters[currentCharacterId];
+                JoanRoleText.Text = character.Role;
+            }
             
             // Update status based on relationship levels
             if (relationship.TrustLevel >= 80)
@@ -408,6 +435,38 @@ namespace CorporateChaos.Views
                 JoanStatusText.Text = "Still getting to know you";
             else
                 JoanStatusText.Text = "Cautious about your decisions";
+        }
+        
+        private void LoadCharacterAvatar(string characterId)
+        {
+            try
+            {
+                string imagePath = characterId switch
+                {
+                    "joan" => "images/assistant.png",
+                    "marcus_vey" => "images/char/marcus_vey.png",
+                    "evelyn_cross" => "images/char/evelyn_cross.png",
+                    "vincent_duro" => "images/char/vincent_duro.png",
+                    "lucinda_vale" => "images/char/lucinda_vale.png",
+                    "gregory_shaw" => "images/char/gregory_shaw.png",
+                    "selena_park" => "images/char/selena_park.png",
+                    "harold_finch" => "images/char/harold_finch.png",
+                    "sophie_kim" => "images/char/sophie_kim.png",
+                    _ => "images/assistant.png"
+                };
+                
+                var uri = new Uri($"pack://application:,,,/{imagePath}");
+                var bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.UriSource = uri;
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.EndInit();
+                JoanDialogueAvatar.Source = bitmap;
+            }
+            catch
+            {
+                // Fallback to default
+            }
         }
 
         private string GenerateBranchingSituationAnalysis()
@@ -495,11 +554,14 @@ namespace CorporateChaos.Views
                 FontWeight = FontWeights.SemiBold,
                 HorizontalContentAlignment = HorizontalAlignment.Left,
                 Padding = new Thickness(15, 8, 15, 8),
-                Tag = choice
+                Tag = choice,
+                Cursor = System.Windows.Input.Cursors.Hand,
+                IsHitTestVisible = true,
+                Focusable = true
             };
             
             // Create button content with tone indicator and risk level
-            var content = new StackPanel { Orientation = Orientation.Horizontal };
+            var content = new StackPanel { Orientation = Orientation.Horizontal, IsHitTestVisible = false };
             
             // Tone indicator
             var toneIndicator = new TextBlock
@@ -507,7 +569,8 @@ namespace CorporateChaos.Views
                 Text = choice.GetToneIndicator(),
                 FontSize = 16,
                 Margin = new Thickness(0, 0, 8, 0),
-                VerticalAlignment = VerticalAlignment.Center
+                VerticalAlignment = VerticalAlignment.Center,
+                IsHitTestVisible = false
             };
             content.Children.Add(toneIndicator);
             
@@ -517,7 +580,8 @@ namespace CorporateChaos.Views
                 Text = choice.GetRiskIndicator(),
                 FontSize = 14,
                 Margin = new Thickness(0, 0, 8, 0),
-                VerticalAlignment = VerticalAlignment.Center
+                VerticalAlignment = VerticalAlignment.Center,
+                IsHitTestVisible = false
             };
             content.Children.Add(riskIndicator);
             
@@ -527,20 +591,35 @@ namespace CorporateChaos.Views
                 Text = choice.ChoiceText,
                 TextWrapping = TextWrapping.Wrap,
                 VerticalAlignment = VerticalAlignment.Center,
-                MaxWidth = 450
+                MaxWidth = 450,
+                IsHitTestVisible = false
             };
             content.Children.Add(choiceText);
             
             button.Content = content;
             
-            // Add hover effects
-            button.MouseEnter += (s, e) => ShowChoicePreview(choice);
-            button.MouseLeave += (s, e) => HideChoicePreview();
+            // Add click handler
             button.Click += (s, e) => HandleChoiceSelection(choice);
             
-            // Add hover style
+            // Add hover style with proper template
             var style = new Style(typeof(Button));
             style.Setters.Add(new Setter(Button.BackgroundProperty, GetToneColor(choice.Tone)));
+            style.Setters.Add(new Setter(Button.CursorProperty, System.Windows.Input.Cursors.Hand));
+            
+            // Create control template for better button rendering
+            var template = new ControlTemplate(typeof(Button));
+            var borderFactory = new FrameworkElementFactory(typeof(Border));
+            borderFactory.SetValue(Border.BackgroundProperty, new TemplateBindingExtension(Button.BackgroundProperty));
+            borderFactory.SetValue(Border.CornerRadiusProperty, new CornerRadius(6));
+            borderFactory.SetValue(Border.PaddingProperty, new TemplateBindingExtension(Button.PaddingProperty));
+            
+            var contentPresenterFactory = new FrameworkElementFactory(typeof(ContentPresenter));
+            contentPresenterFactory.SetValue(ContentPresenter.HorizontalAlignmentProperty, HorizontalAlignment.Left);
+            contentPresenterFactory.SetValue(ContentPresenter.VerticalAlignmentProperty, VerticalAlignment.Center);
+            
+            borderFactory.AppendChild(contentPresenterFactory);
+            template.VisualTree = borderFactory;
+            style.Setters.Add(new Setter(Button.TemplateProperty, template));
             
             var trigger = new Trigger { Property = Button.IsMouseOverProperty, Value = true };
             trigger.Setters.Add(new Setter(Button.BackgroundProperty, GetToneHoverColor(choice.Tone)));
@@ -579,50 +658,16 @@ namespace CorporateChaos.Views
             };
         }
 
-        private void ShowChoicePreview(DialogueChoice choice)
-        {
-            var preview = new List<string>();
-            
-            // Add tone description
-            if (!string.IsNullOrEmpty(choice.ToneDescription))
-            {
-                preview.Add($"Tone: {choice.ToneDescription}");
-            }
-            
-            // Add consequence preview
-            var consequences = choice.GetConsequencePreview();
-            if (consequences.Any())
-            {
-                preview.AddRange(consequences);
-            }
-            
-            // Add relationship impact
-            if (characterRelationships.ContainsKey("joan"))
-            {
-                var impact = choice.CalculateTotalRelationshipImpact("joan");
-                if (impact != 0)
-                {
-                    var impactText = impact > 0 ? $"Improves relationship (+{impact})" : $"Strains relationship ({impact})";
-                    preview.Add(impactText);
-                }
-            }
-            
-            if (preview.Any())
-            {
-                ConsequencePreviewText.Text = string.Join("\n", preview);
-                ConsequencePreviewPanel.Visibility = Visibility.Visible;
-            }
-        }
-
-        private void HideChoicePreview()
-        {
-            ConsequencePreviewPanel.Visibility = Visibility.Collapsed;
-        }
-
         private void HandleChoiceSelection(DialogueChoice choice)
         {
             // Apply relationship changes
             ApplyChoiceConsequences(choice);
+            
+            // Record the choice in story mode
+            if (storyModeManager != null && storyModeManager.IsStoryMode)
+            {
+                RecordStoryChoice(choice);
+            }
             
             // Add choice to conversation history
             if (currentConversation != null)
@@ -646,6 +691,31 @@ namespace CorporateChaos.Views
                 // Navigate to next dialogue node (for future implementation)
                 NavigateToNextNode(choice.NextNodeId);
             }
+        }
+
+        private void RecordStoryChoice(DialogueChoice choice)
+        {
+            if (storyModeManager == null) return;
+            
+            // Determine the character ID (default to "joan" for now)
+            string characterId = currentDialogueNode?.CharacterId ?? "joan";
+            
+            // Determine the event ID
+            string eventId = currentConversation?.ConversationId ?? $"dialogue_q{currentQuarter}";
+            
+            // Create the choice record
+            var choiceRecord = new StoryChoiceRecord
+            {
+                Quarter = currentQuarter,
+                EventId = eventId,
+                ChoiceId = choice.ChoiceId,
+                ChoiceText = choice.ChoiceText,
+                RelationshipImpacts = new Dictionary<string, int>(choice.RelationshipChanges),
+                ConsequenceFlags = new List<string>(choice.ConsequenceFlags)
+            };
+            
+            // Record the choice through the story mode manager
+            storyModeManager.RecordPlayerChoice(choiceRecord);
         }
 
         private void ApplyChoiceConsequences(DialogueChoice choice)
@@ -676,6 +746,14 @@ namespace CorporateChaos.Views
             // Apply gameplay effects (for future integration with game systems)
             foreach (var effect in choice.GameplayEffects)
             {
+                // Handle advice-specific effects
+                if (effect.Key == "advice_object" && effect.Value is CharacterAdvice advice)
+                {
+                    bool followed = choice.GameplayEffects.ContainsKey("advice_followed") && 
+                                   (bool)choice.GameplayEffects["advice_followed"];
+                    ApplyAdviceEffect(advice, followed);
+                }
+                
                 // This would integrate with the main game systems
                 // For now, we'll just track the effects
                 Console.WriteLine($"Gameplay effect: {effect.Key} = {effect.Value}");
@@ -689,6 +767,15 @@ namespace CorporateChaos.Views
             
             // Update recommendations to show the impact
             RecommendationsText.Text = "Your choice has been noted. Joan will remember this interaction.";
+        }
+
+        private void ApplyAdviceEffect(CharacterAdvice advice, bool followed)
+        {
+            // Get the advice system from the narrative engine
+            if (storyModeManager?.NarrativeEngine?.AdviceSystem != null)
+            {
+                storyModeManager.NarrativeEngine.AdviceSystem.ApplyAdviceEffect(advice, followed);
+            }
         }
 
         private void NavigateToNextNode(string nextNodeId)

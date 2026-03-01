@@ -9,6 +9,9 @@ namespace CorporateChaos.Systems
         private Company company;
         private CharacterManager characterManager;
         private StoryBranchingSystem branchingSystem;
+        private EmotionalBeatManager emotionalBeatManager;
+        private StoryContentDistributor? contentDistributor;
+        private CharacterAdviceSystem? adviceSystem;
         private Random random = new Random();
 
         // Event generation parameters
@@ -24,9 +27,50 @@ namespace CorporateChaos.Systems
             this.company = company;
             this.characterManager = characterManager;
             this.branchingSystem = new StoryBranchingSystem(storyData, company, characterManager);
+            this.emotionalBeatManager = new EmotionalBeatManager(storyData, company);
         }
 
         public StoryBranchingSystem BranchingSystem => branchingSystem;
+        public EmotionalBeatManager EmotionalBeatManager => emotionalBeatManager;
+        public StoryContentDistributor? ContentDistributor => contentDistributor;
+        public CharacterAdviceSystem? AdviceSystem => adviceSystem;
+
+        /// <summary>
+        /// Initializes the content distributor (called after NarrativeEngine is fully constructed)
+        /// </summary>
+        public void InitializeContentDistributor()
+        {
+            if (contentDistributor == null)
+            {
+                contentDistributor = new StoryContentDistributor(storyData, company, this, emotionalBeatManager);
+            }
+        }
+
+        /// <summary>
+        /// Initializes the advice system (called after NarrativeEngine is fully constructed)
+        /// </summary>
+        public void InitializeAdviceSystem(EndingProbabilityTracker endingTracker)
+        {
+            if (adviceSystem == null)
+            {
+                adviceSystem = new CharacterAdviceSystem(company, storyData, endingTracker, random);
+            }
+        }
+
+        /// <summary>
+        /// Generates narrative events for the current quarter with content distribution management
+        /// </summary>
+        public List<NarrativeEvent> GenerateDistributedEventsForQuarter(int quarter)
+        {
+            // Initialize content distributor if not already done
+            if (contentDistributor == null)
+            {
+                InitializeContentDistributor();
+            }
+
+            // Use content distributor to get properly paced events
+            return contentDistributor!.GetDistributedContentForQuarter(quarter);
+        }
 
         /// <summary>
         /// Generates narrative events for the current quarter based on company state and player actions
@@ -41,6 +85,12 @@ namespace CorporateChaos.Systems
 
             // Generate character development events
             events.AddRange(GenerateCharacterDevelopmentEvents(quarter));
+
+            // Generate character advice events
+            if (adviceSystem != null)
+            {
+                events.AddRange(GenerateCharacterAdviceEvents(quarter));
+            }
 
             // Generate conflict events based on company performance
             events.AddRange(GenerateConflictEvents(quarter));
@@ -98,6 +148,41 @@ namespace CorporateChaos.Systems
                 if (ShouldGeneratePersonalChallenge(character.CharacterId, quarter))
                 {
                     events.Add(CreatePersonalChallengeEvent(character, quarter));
+                }
+            }
+
+            return events;
+        }
+
+        /// <summary>
+        /// Generates character advice events based on company state and character expertise
+        /// </summary>
+        private List<NarrativeEvent> GenerateCharacterAdviceEvents(int quarter)
+        {
+            var events = new List<NarrativeEvent>();
+
+            if (adviceSystem == null)
+                return events;
+
+            // Generate advice from introduced characters
+            foreach (var character in StoryScript.Characters.Values)
+            {
+                // Skip if character hasn't been introduced yet
+                if (quarter < character.IntroductionQuarter)
+                    continue;
+
+                // Skip Joan - she provides general guidance, not specific advice
+                if (character.CharacterId == "joan")
+                    continue;
+
+                // Generate advice with some randomness to avoid overwhelming player
+                if (random.NextDouble() < 0.3) // 30% chance per character per quarter
+                {
+                    var advice = adviceSystem.GenerateAdvice(character.CharacterId, quarter);
+                    if (advice != null)
+                    {
+                        events.Add(CreateCharacterAdviceEvent(advice, character));
+                    }
                 }
             }
 
@@ -192,6 +277,96 @@ namespace CorporateChaos.Systems
             {
                 events.Add(CreateAnniversaryMilestone(quarter, 15));
                 storyData.StoryFlags.Add("15_year_anniversary");
+            }
+
+            // Add seasonal events
+            events.AddRange(GenerateSeasonalEvents(quarter));
+
+            // Add company archetype-specific milestones
+            events.AddRange(GenerateArchetypeMilestones(quarter));
+
+            return events;
+        }
+
+        /// <summary>
+        /// Generates company archetype-specific milestone events
+        /// </summary>
+        private List<NarrativeEvent> GenerateArchetypeMilestones(int quarter)
+        {
+            var events = new List<NarrativeEvent>();
+
+            // Get active company archetypes from branching system
+            var activeBranches = branchingSystem.DeterminePrimaryBranches();
+
+            foreach (var branch in activeBranches)
+            {
+                // Generate archetype-specific milestones at key quarters
+                if (ShouldGenerateArchetypeMilestone(branch, quarter))
+                {
+                    var archetypeEvent = CreateArchetypeMilestoneEvent(branch, quarter);
+                    if (archetypeEvent != null)
+                    {
+                        events.Add(archetypeEvent);
+                        storyData.StoryFlags.Add($"archetype_milestone_{branch}_Q{quarter}");
+                    }
+                }
+            }
+
+            return events;
+        }
+
+        /// <summary>
+        /// Generates seasonal story events that mark the passage of time
+        /// </summary>
+        private List<NarrativeEvent> GenerateSeasonalEvents(int quarter)
+        {
+            var events = new List<NarrativeEvent>();
+
+            // Seasonal events occur every 4 quarters (yearly cycle)
+            var seasonIndex = quarter % 4;
+            var year = quarter / 4;
+
+            // Only generate seasonal events occasionally (not every season)
+            if (random.NextDouble() > 0.3)
+                return events;
+
+            // Skip if we've had a seasonal event recently
+            if (HasTriggeredMilestone($"seasonal_Q{quarter}"))
+                return events;
+
+            switch (seasonIndex)
+            {
+                case 0: // Q1 - New Year / Fresh Start
+                    if (quarter > 10) // Skip tutorial phase
+                    {
+                        events.Add(CreateNewYearEvent(quarter, year));
+                        storyData.StoryFlags.Add($"seasonal_Q{quarter}");
+                    }
+                    break;
+
+                case 1: // Q2 - Spring / Growth Season
+                    if (quarter > 10 && company.EmployeeCount > 20)
+                    {
+                        events.Add(CreateSpringGrowthEvent(quarter));
+                        storyData.StoryFlags.Add($"seasonal_Q{quarter}");
+                    }
+                    break;
+
+                case 2: // Q3 - Summer / Mid-Year Review
+                    if (quarter > 10)
+                    {
+                        events.Add(CreateMidYearReviewEvent(quarter, year));
+                        storyData.StoryFlags.Add($"seasonal_Q{quarter}");
+                    }
+                    break;
+
+                case 3: // Q4 - Year End / Reflection
+                    if (quarter > 10)
+                    {
+                        events.Add(CreateYearEndEvent(quarter, year));
+                        storyData.StoryFlags.Add($"seasonal_Q{quarter}");
+                    }
+                    break;
             }
 
             return events;
@@ -308,6 +483,32 @@ namespace CorporateChaos.Systems
                 {
                     ["personal_challenge"] = character.CharacterId,
                     ["emotional_investment"] = true
+                }
+            };
+        }
+
+        private NarrativeEvent CreateCharacterAdviceEvent(CharacterAdvice advice, StoryCharacter character)
+        {
+            return new NarrativeEvent
+            {
+                EventId = $"advice_{advice.CharacterId}_{advice.AdviceType}_Q{advice.Quarter}",
+                EventType = NarrativeEventType.CharacterAdvice,
+                TriggerQuarter = advice.Quarter,
+                InvolvedCharacters = new List<string> { advice.CharacterId },
+                Title = advice.Title,
+                Description = advice.Description,
+                Dialogue = new List<string>
+                {
+                    CharacterDialogue.GetCharacterDialogue(advice.CharacterId, "advice_context", company, random),
+                    advice.Description,
+                    $"Potential Impact: {advice.PotentialImpact}"
+                },
+                Choices = CreateAdviceChoices(advice),
+                GameplayEffects = new Dictionary<string, object>
+                {
+                    ["advice_type"] = advice.AdviceType,
+                    ["character_advice"] = advice.CharacterId,
+                    ["advice_object"] = advice
                 }
             };
         }
@@ -558,6 +759,219 @@ namespace CorporateChaos.Systems
             };
         }
 
+        private NarrativeEvent CreateNewYearEvent(int quarter, int year)
+        {
+            return new NarrativeEvent
+            {
+                EventId = $"new_year_Q{quarter}",
+                EventType = NarrativeEventType.EmotionalBeat,
+                TriggerQuarter = quarter,
+                InvolvedCharacters = new List<string> { "joan" },
+                Title = "New Year, New Opportunities",
+                Description = $"Starting year {year + 1} with fresh perspectives and renewed energy.",
+                Dialogue = new List<string>
+                {
+                    "A new year brings new opportunities and challenges.",
+                    "This is a perfect time to reflect on our goals and set new priorities.",
+                    "What do you want to accomplish in the year ahead?"
+                },
+                Choices = CreateSeasonalChoices("new_year"),
+                GameplayEffects = new Dictionary<string, object>
+                {
+                    ["seasonal_event"] = "new_year",
+                    ["year"] = year + 1
+                }
+            };
+        }
+
+        private NarrativeEvent CreateSpringGrowthEvent(int quarter)
+        {
+            return new NarrativeEvent
+            {
+                EventId = $"spring_growth_Q{quarter}",
+                EventType = NarrativeEventType.EmotionalBeat,
+                TriggerQuarter = quarter,
+                InvolvedCharacters = new List<string> { "joan", "evelyn_cross" },
+                Title = "Spring Growth Season",
+                Description = "The company is experiencing a period of growth and expansion.",
+                Dialogue = new List<string>
+                {
+                    "Spring is traditionally a time of growth and renewal.",
+                    "Our hiring initiatives are bringing fresh talent into the organization.",
+                    "This growth phase requires careful management to maintain our culture."
+                },
+                Choices = CreateSeasonalChoices("spring_growth"),
+                GameplayEffects = new Dictionary<string, object>
+                {
+                    ["seasonal_event"] = "spring_growth",
+                    ["growth_focus"] = true
+                }
+            };
+        }
+
+        private NarrativeEvent CreateMidYearReviewEvent(int quarter, int year)
+        {
+            return new NarrativeEvent
+            {
+                EventId = $"midyear_review_Q{quarter}",
+                EventType = NarrativeEventType.EmotionalBeat,
+                TriggerQuarter = quarter,
+                InvolvedCharacters = new List<string> { "joan", "marcus_vey" },
+                Title = "Mid-Year Performance Review",
+                Description = "Time to assess progress and adjust strategies for the second half of the year.",
+                Dialogue = new List<string>
+                {
+                    "We're halfway through the year - a good time to review our performance.",
+                    $"Our market share is at {company.MarketShare:F1}% and capital stands at ${company.Capital / 1000000:F0}M.",
+                    "Should we maintain our current course or make strategic adjustments?"
+                },
+                Choices = CreateSeasonalChoices("midyear_review"),
+                GameplayEffects = new Dictionary<string, object>
+                {
+                    ["seasonal_event"] = "midyear_review",
+                    ["performance_review"] = true
+                }
+            };
+        }
+
+        private NarrativeEvent CreateYearEndEvent(int quarter, int year)
+        {
+            return new NarrativeEvent
+            {
+                EventId = $"year_end_Q{quarter}",
+                EventType = NarrativeEventType.EmotionalBeat,
+                TriggerQuarter = quarter,
+                InvolvedCharacters = new List<string> { "joan" },
+                Title = "Year-End Reflection",
+                Description = $"Reflecting on the accomplishments and challenges of year {year + 1}.",
+                Dialogue = new List<string>
+                {
+                    $"As year {year + 1} comes to a close, it's time to reflect on what we've achieved.",
+                    "Every year brings its own lessons and growth opportunities.",
+                    "How do you feel about our progress this year?"
+                },
+                Choices = CreateSeasonalChoices("year_end"),
+                GameplayEffects = new Dictionary<string, object>
+                {
+                    ["seasonal_event"] = "year_end",
+                    ["year"] = year + 1,
+                    ["reflection"] = true
+                }
+            };
+        }
+
+        private NarrativeEvent? CreateArchetypeMilestoneEvent(string branch, int quarter)
+        {
+            return branch switch
+            {
+                "aggressive_growth" => CreateAggressiveGrowthMilestone(quarter),
+                "conservative_management" => CreateConservativeMilestone(quarter),
+                "employee_focused" => CreateEmployeeFocusedMilestone(quarter),
+                "profit_focused" => CreateProfitFocusedMilestone(quarter),
+                _ => null
+            };
+        }
+
+        private NarrativeEvent CreateAggressiveGrowthMilestone(int quarter)
+        {
+            return new NarrativeEvent
+            {
+                EventId = $"archetype_aggressive_Q{quarter}",
+                EventType = NarrativeEventType.EmotionalBeat,
+                TriggerQuarter = quarter,
+                InvolvedCharacters = new List<string> { "marcus_vey", "lucinda_vale" },
+                Title = "Aggressive Expansion Milestone",
+                Description = "Your aggressive growth strategy is showing significant results.",
+                Dialogue = new List<string>
+                {
+                    "Your bold, aggressive approach to growth is paying dividends.",
+                    "We're expanding faster than most competitors can match.",
+                    "This momentum creates both opportunities and risks we need to manage."
+                },
+                Choices = CreateArchetypeChoices("aggressive_growth"),
+                GameplayEffects = new Dictionary<string, object>
+                {
+                    ["archetype_milestone"] = "aggressive_growth",
+                    ["growth_acceleration"] = true
+                }
+            };
+        }
+
+        private NarrativeEvent CreateConservativeMilestone(int quarter)
+        {
+            return new NarrativeEvent
+            {
+                EventId = $"archetype_conservative_Q{quarter}",
+                EventType = NarrativeEventType.EmotionalBeat,
+                TriggerQuarter = quarter,
+                InvolvedCharacters = new List<string> { "harold_finch", "gregory_shaw" },
+                Title = "Steady Management Milestone",
+                Description = "Your conservative, risk-averse approach has built a stable foundation.",
+                Dialogue = new List<string>
+                {
+                    "Your careful, measured approach to management has created remarkable stability.",
+                    "While we may not be the fastest-growing company, we're certainly one of the most reliable.",
+                    "This foundation of stability gives us options for the future."
+                },
+                Choices = CreateArchetypeChoices("conservative_management"),
+                GameplayEffects = new Dictionary<string, object>
+                {
+                    ["archetype_milestone"] = "conservative_management",
+                    ["stability_bonus"] = true
+                }
+            };
+        }
+
+        private NarrativeEvent CreateEmployeeFocusedMilestone(int quarter)
+        {
+            return new NarrativeEvent
+            {
+                EventId = $"archetype_employee_Q{quarter}",
+                EventType = NarrativeEventType.EmotionalBeat,
+                TriggerQuarter = quarter,
+                InvolvedCharacters = new List<string> { "evelyn_cross", "joan" },
+                Title = "Employee-Centric Culture Milestone",
+                Description = "Your focus on employee wellbeing has created an exceptional workplace culture.",
+                Dialogue = new List<string>
+                {
+                    "Your commitment to employee wellbeing has created something special here.",
+                    $"With morale at {company.Morale}%, people genuinely want to work for this company.",
+                    "This culture of care translates directly into productivity and loyalty."
+                },
+                Choices = CreateArchetypeChoices("employee_focused"),
+                GameplayEffects = new Dictionary<string, object>
+                {
+                    ["archetype_milestone"] = "employee_focused",
+                    ["culture_bonus"] = true
+                }
+            };
+        }
+
+        private NarrativeEvent CreateProfitFocusedMilestone(int quarter)
+        {
+            return new NarrativeEvent
+            {
+                EventId = $"archetype_profit_Q{quarter}",
+                EventType = NarrativeEventType.EmotionalBeat,
+                TriggerQuarter = quarter,
+                InvolvedCharacters = new List<string> { "marcus_vey", "selena_park" },
+                Title = "Financial Excellence Milestone",
+                Description = "Your relentless focus on profitability has generated impressive financial results.",
+                Dialogue = new List<string>
+                {
+                    "Your laser focus on the bottom line has produced exceptional financial results.",
+                    $"With ${company.Capital / 1000000:F0}M in capital, we're in an enviable position.",
+                    "This financial strength opens doors that most companies can only dream of."
+                },
+                Choices = CreateArchetypeChoices("profit_focused"),
+                GameplayEffects = new Dictionary<string, object>
+                {
+                    ["archetype_milestone"] = "profit_focused",
+                    ["financial_bonus"] = true
+                }
+            };
+        }
+
         #endregion
 
         #region Choice Creation Methods
@@ -592,6 +1006,41 @@ namespace CorporateChaos.Systems
                 }
             });
             
+            return choices;
+        }
+
+        private List<DialogueChoice> CreateAdviceChoices(CharacterAdvice advice)
+        {
+            var choices = new List<DialogueChoice>();
+
+            foreach (var option in advice.Options)
+            {
+                var choiceId = option.IsFollowing ? $"follow_advice_{advice.AdviceType}" : $"decline_advice_{advice.AdviceType}";
+                
+                choices.Add(new DialogueChoice
+                {
+                    ChoiceId = choiceId,
+                    ChoiceText = option.Text,
+                    Tone = option.IsFollowing ? ChoiceTone.Supportive : ChoiceTone.Diplomatic,
+                    RelationshipImpact = new RelationshipImpact
+                    {
+                        PrimaryCharacter = advice.CharacterId,
+                        TrustChange = option.IsFollowing ? 5 : -3,
+                        RespectChange = option.IsFollowing ? 3 : -1
+                    },
+                    ConsequenceFlags = new List<string>
+                    {
+                        option.IsFollowing ? $"followed_{advice.CharacterId}_advice" : $"declined_{advice.CharacterId}_advice",
+                        $"advice_response_{advice.AdviceType}"
+                    },
+                    GameplayEffects = new Dictionary<string, object>
+                    {
+                        ["advice_followed"] = option.IsFollowing,
+                        ["advice_object"] = advice
+                    }
+                });
+            }
+
             return choices;
         }
 
@@ -958,6 +1407,254 @@ namespace CorporateChaos.Systems
             return choices;
         }
 
+        private List<DialogueChoice> CreateSeasonalChoices(string seasonalType)
+        {
+            var choices = new List<DialogueChoice>();
+            
+            switch (seasonalType)
+            {
+                case "new_year":
+                    choices.Add(new DialogueChoice
+                    {
+                        ChoiceId = "newyear_ambitious",
+                        ChoiceText = "Let's set ambitious goals and push for breakthrough results.",
+                        Tone = ChoiceTone.Professional,
+                        RelationshipImpact = new RelationshipImpact
+                        {
+                            PrimaryCharacter = "joan",
+                            RespectChange = 4
+                        }
+                    });
+                    choices.Add(new DialogueChoice
+                    {
+                        ChoiceId = "newyear_balanced",
+                        ChoiceText = "Let's focus on sustainable growth and team wellbeing.",
+                        Tone = ChoiceTone.Supportive,
+                        RelationshipImpact = new RelationshipImpact
+                        {
+                            PrimaryCharacter = "joan",
+                            PersonalConnectionChange = 3,
+                            SecondaryEffects = new Dictionary<string, int>
+                            {
+                                ["evelyn_cross"] = 3
+                            }
+                        }
+                    });
+                    break;
+
+                case "spring_growth":
+                    choices.Add(new DialogueChoice
+                    {
+                        ChoiceId = "spring_accelerate",
+                        ChoiceText = "Accelerate hiring to capitalize on this growth momentum.",
+                        Tone = ChoiceTone.Professional,
+                        RelationshipImpact = new RelationshipImpact
+                        {
+                            PrimaryCharacter = "evelyn_cross",
+                            RespectChange = 4
+                        }
+                    });
+                    choices.Add(new DialogueChoice
+                    {
+                        ChoiceId = "spring_careful",
+                        ChoiceText = "Grow carefully to maintain our culture and quality.",
+                        Tone = ChoiceTone.Diplomatic,
+                        RelationshipImpact = new RelationshipImpact
+                        {
+                            PrimaryCharacter = "evelyn_cross",
+                            TrustChange = 5,
+                            PersonalConnectionChange = 3
+                        }
+                    });
+                    break;
+
+                case "midyear_review":
+                    choices.Add(new DialogueChoice
+                    {
+                        ChoiceId = "midyear_stay_course",
+                        ChoiceText = "Our strategy is working. Let's stay the course.",
+                        Tone = ChoiceTone.Professional,
+                        RelationshipImpact = new RelationshipImpact
+                        {
+                            PrimaryCharacter = "marcus_vey",
+                            RespectChange = 3
+                        }
+                    });
+                    choices.Add(new DialogueChoice
+                    {
+                        ChoiceId = "midyear_adjust",
+                        ChoiceText = "Let's make strategic adjustments based on what we've learned.",
+                        Tone = ChoiceTone.Professional,
+                        RelationshipImpact = new RelationshipImpact
+                        {
+                            PrimaryCharacter = "marcus_vey",
+                            TrustChange = 4,
+                            RespectChange = 2
+                        }
+                    });
+                    break;
+
+                case "year_end":
+                    choices.Add(new DialogueChoice
+                    {
+                        ChoiceId = "yearend_proud",
+                        ChoiceText = "I'm proud of what we accomplished together this year.",
+                        Tone = ChoiceTone.Personal,
+                        RelationshipImpact = new RelationshipImpact
+                        {
+                            PrimaryCharacter = "joan",
+                            PersonalConnectionChange = 5,
+                            TrustChange = 3
+                        }
+                    });
+                    choices.Add(new DialogueChoice
+                    {
+                        ChoiceId = "yearend_forward",
+                        ChoiceText = "Good progress, but next year needs to be even better.",
+                        Tone = ChoiceTone.Professional,
+                        RelationshipImpact = new RelationshipImpact
+                        {
+                            PrimaryCharacter = "joan",
+                            RespectChange = 4
+                        }
+                    });
+                    break;
+            }
+            
+            return choices;
+        }
+
+        private List<DialogueChoice> CreateArchetypeChoices(string archetypeType)
+        {
+            var choices = new List<DialogueChoice>();
+            
+            switch (archetypeType)
+            {
+                case "aggressive_growth":
+                    choices.Add(new DialogueChoice
+                    {
+                        ChoiceId = "aggressive_double_down",
+                        ChoiceText = "Double down on our aggressive strategy. Push even harder.",
+                        Tone = ChoiceTone.Aggressive,
+                        RiskLevel = ConsequenceRisk.High,
+                        RelationshipImpact = new RelationshipImpact
+                        {
+                            PrimaryCharacter = "marcus_vey",
+                            RespectChange = 6,
+                            SecondaryEffects = new Dictionary<string, int>
+                            {
+                                ["lucinda_vale"] = 4
+                            }
+                        }
+                    });
+                    choices.Add(new DialogueChoice
+                    {
+                        ChoiceId = "aggressive_consolidate",
+                        ChoiceText = "Consolidate our gains before the next expansion phase.",
+                        Tone = ChoiceTone.Diplomatic,
+                        RelationshipImpact = new RelationshipImpact
+                        {
+                            PrimaryCharacter = "gregory_shaw",
+                            RespectChange = 5
+                        }
+                    });
+                    break;
+
+                case "conservative_management":
+                    choices.Add(new DialogueChoice
+                    {
+                        ChoiceId = "conservative_maintain",
+                        ChoiceText = "Maintain our careful, risk-averse approach.",
+                        Tone = ChoiceTone.Professional,
+                        RelationshipImpact = new RelationshipImpact
+                        {
+                            PrimaryCharacter = "harold_finch",
+                            RespectChange = 5,
+                            TrustChange = 4
+                        }
+                    });
+                    choices.Add(new DialogueChoice
+                    {
+                        ChoiceId = "conservative_calculated_risk",
+                        ChoiceText = "Take a calculated risk to accelerate growth.",
+                        Tone = ChoiceTone.Professional,
+                        RiskLevel = ConsequenceRisk.Medium,
+                        RelationshipImpact = new RelationshipImpact
+                        {
+                            PrimaryCharacter = "marcus_vey",
+                            RespectChange = 4
+                        }
+                    });
+                    break;
+
+                case "employee_focused":
+                    choices.Add(new DialogueChoice
+                    {
+                        ChoiceId = "employee_invest_more",
+                        ChoiceText = "Invest even more in employee programs and benefits.",
+                        Tone = ChoiceTone.Supportive,
+                        RelationshipImpact = new RelationshipImpact
+                        {
+                            PrimaryCharacter = "evelyn_cross",
+                            PersonalConnectionChange = 8,
+                            TrustChange = 5,
+                            SecondaryEffects = new Dictionary<string, int>
+                            {
+                                ["all_employees"] = 5
+                            }
+                        }
+                    });
+                    choices.Add(new DialogueChoice
+                    {
+                        ChoiceId = "employee_balance",
+                        ChoiceText = "Balance employee focus with business performance needs.",
+                        Tone = ChoiceTone.Diplomatic,
+                        RelationshipImpact = new RelationshipImpact
+                        {
+                            PrimaryCharacter = "evelyn_cross",
+                            RespectChange = 4,
+                            SecondaryEffects = new Dictionary<string, int>
+                            {
+                                ["marcus_vey"] = 3
+                            }
+                        }
+                    });
+                    break;
+
+                case "profit_focused":
+                    choices.Add(new DialogueChoice
+                    {
+                        ChoiceId = "profit_maximize",
+                        ChoiceText = "Continue maximizing profitability above all else.",
+                        Tone = ChoiceTone.Professional,
+                        RelationshipImpact = new RelationshipImpact
+                        {
+                            PrimaryCharacter = "marcus_vey",
+                            RespectChange = 6,
+                            SecondaryEffects = new Dictionary<string, int>
+                            {
+                                ["selena_park"] = 5
+                            }
+                        }
+                    });
+                    choices.Add(new DialogueChoice
+                    {
+                        ChoiceId = "profit_reinvest",
+                        ChoiceText = "Reinvest profits into long-term growth initiatives.",
+                        Tone = ChoiceTone.Professional,
+                        RelationshipImpact = new RelationshipImpact
+                        {
+                            PrimaryCharacter = "marcus_vey",
+                            TrustChange = 4,
+                            RespectChange = 3
+                        }
+                    });
+                    break;
+            }
+            
+            return choices;
+        }
+
         #endregion
 
         #region Helper Methods
@@ -1014,6 +1711,56 @@ namespace CorporateChaos.Systems
         private bool HasTriggeredMilestone(string milestoneFlag)
         {
             return storyData.StoryFlags.Contains(milestoneFlag);
+        }
+
+        private bool ShouldGenerateArchetypeMilestone(string branch, int quarter)
+        {
+            // Check if we've already triggered this archetype milestone recently
+            if (HasTriggeredMilestone($"archetype_milestone_{branch}_Q{quarter}"))
+                return false;
+
+            // Check if we've had any archetype milestone in the last 10 quarters
+            var recentArchetypeMilestones = storyData.StoryFlags
+                .Where(f => f.StartsWith("archetype_milestone_") && 
+                           f.Contains("_Q") &&
+                           int.TryParse(f.Split('_').Last().Substring(1), out int q) &&
+                           q > quarter - 10)
+                .Any();
+
+            if (recentArchetypeMilestones)
+                return false;
+
+            // Generate archetype milestones at key intervals (every 15-20 quarters)
+            // with some randomness
+            var quartersSinceLastArchetype = GetQuartersSinceLastArchetypeMilestone(quarter);
+            
+            if (quartersSinceLastArchetype < 15)
+                return false;
+
+            // Higher probability as more time passes
+            var probability = Math.Min(0.4, (quartersSinceLastArchetype - 15) * 0.05);
+            return random.NextDouble() < probability;
+        }
+
+        private int GetQuartersSinceLastArchetypeMilestone(int currentQuarter)
+        {
+            var lastArchetypeMilestone = storyData.StoryFlags
+                .Where(f => f.StartsWith("archetype_milestone_") && f.Contains("_Q"))
+                .Select(f => {
+                    var parts = f.Split('_');
+                    var qPart = parts.Last();
+                    if (qPart.StartsWith("Q") && int.TryParse(qPart.Substring(1), out int q))
+                        return q;
+                    return 0;
+                })
+                .Where(q => q > 0 && q < currentQuarter)
+                .OrderByDescending(q => q)
+                .FirstOrDefault();
+
+            if (lastArchetypeMilestone == 0)
+                return currentQuarter; // No previous archetype milestone
+
+            return currentQuarter - lastArchetypeMilestone;
         }
 
         private bool ShouldTriggerConsequenceEvent(string consequenceFlag, int currentQuarter, int choiceQuarter)

@@ -12,11 +12,15 @@ namespace CorporateChaos.Systems
         private ExtendedStoryModeData storyData = null!;
         private Company company;
         private CharacterManager? characterManager;
+        private NarrativeEngine? narrativeEngine;
+        private EndingProbabilityTracker? endingTracker;
         
         public ExtendedStoryModeData StoryData => storyData;
         public bool IsStoryMode => storyData.IsStoryMode;
         public bool IsInTutorial => storyData.CurrentPhase == StoryPhase.Tutorial;
         public CharacterManager? CharacterManager => characterManager;
+        public NarrativeEngine? NarrativeEngine => narrativeEngine;
+        public EndingProbabilityTracker? EndingTracker => endingTracker;
 
         public StoryModeManager(Company company)
         {
@@ -42,6 +46,16 @@ namespace CorporateChaos.Systems
             
             // Initialize character manager
             characterManager = new CharacterManager(storyData, company);
+            
+            // Initialize narrative engine
+            narrativeEngine = new NarrativeEngine(storyData, company, characterManager);
+            narrativeEngine.InitializeContentDistributor();
+            
+            // Initialize ending tracker
+            endingTracker = new EndingProbabilityTracker(storyData, company);
+            
+            // Initialize advice system
+            narrativeEngine.InitializeAdviceSystem(endingTracker);
             
             SaveStoryProgress();
         }
@@ -173,7 +187,7 @@ namespace CorporateChaos.Systems
                     System.Diagnostics.Debug.WriteLine($"Mechanic {storyEvent.IntroducedMechanic} already unlocked for Quarter {quarter}");
                 }
                 
-                var guideWindow = new StoryModeGuide(storyEvent, quarter);
+                var guideWindow = new StoryModeGuide(storyEvent, quarter, storyData);
                 guideWindow.Owner = owner;
                 
                 if (guideWindow.ShowDialog() == true)
@@ -219,6 +233,9 @@ namespace CorporateChaos.Systems
         {
             if (characterManager == null) return;
 
+            // Update Joan's relationship phase based on quarter progression
+            characterManager.UpdateJoanPhaseForQuarter(quarter);
+
             // Check for character introductions
             foreach (var character in StoryScript.Characters.Values)
             {
@@ -242,7 +259,7 @@ namespace CorporateChaos.Systems
 
         public List<string> GetCharacterAdvice(string characterId)
         {
-            return characterManager?.GetCharacterAdvice(characterId, company) ?? new List<string>();
+            return characterManager?.GetCharacterAdvice(characterId, company, storyData.CurrentQuarter) ?? new List<string>();
         }
 
         public bool IsCharacterAvailable(string characterId)
@@ -253,6 +270,14 @@ namespace CorporateChaos.Systems
             if (character == null) return false;
             
             return storyData.CurrentQuarter >= character.IntroductionQuarter;
+        }
+
+        /// <summary>
+        /// Checks if a character has been introduced (alias for IsCharacterAvailable)
+        /// </summary>
+        public bool IsCharacterIntroduced(string characterId)
+        {
+            return IsCharacterAvailable(characterId);
         }
 
         private void ShowGraduationMessage()
@@ -356,9 +381,9 @@ namespace CorporateChaos.Systems
                     break;
                     
                 case 6:
-                    // Trigger controlled supply chain crisis for tutorial
-                    company.Risk = Math.Min(35, company.Risk + 15);
-                    double capitalLoss = Math.Min(50000, company.Capital * 0.08);
+                    // Trigger controlled supply chain crisis for tutorial - REDUCED for balance
+                    company.Risk = Math.Min(25, company.Risk + 10); // Reduced from 35 and +15
+                    double capitalLoss = Math.Min(25000, company.Capital * 0.04); // Reduced from 50000 and 0.08
                     company.Capital -= capitalLoss;
                     storyEvents.Add($"⚠️ Supply chain disruption caused ${capitalLoss:N0} in losses and increased operational risk");
                     storyEvents.Add("📋 Crisis management protocols activated - this is a learning opportunity for handling challenges");
@@ -382,22 +407,22 @@ namespace CorporateChaos.Systems
                     break;
                     
                 case 8:
-                    // Market analysis tutorial - competitor pressure
-                    double marketLoss = Math.Max(company.MarketShare - 2.0, 7.0) - company.MarketShare;
-                    company.MarketShare = Math.Max(company.MarketShare - 2.0, 7.0);
-                    company.Reputation -= 8;
-                    company.Risk += 12;
+                    // Market analysis tutorial - competitor pressure - REDUCED for balance
+                    double marketLoss = Math.Max(company.MarketShare - 1.0, 8.0) - company.MarketShare; // Reduced from -2.0 and 7.0
+                    company.MarketShare = Math.Max(company.MarketShare - 1.0, 8.0);
+                    company.Reputation -= 4; // Reduced from 8
+                    company.Risk += 6; // Reduced from 12
                     storyEvents.Add($"🏢 Major competitor launched aggressive campaign - lost {Math.Abs(marketLoss):F1}% market share");
                     storyEvents.Add("📉 Reputation and risk levels affected by increased market competition");
                     storyEvents.Add("🎯 Strategic market analysis and competitive response now critical");
                     break;
                     
                 case 9:
-                    // Risk management tutorial - multiple challenges
-                    company.Risk += 20;
-                    double riskCapitalLoss = Math.Min(75000, company.Capital * 0.12);
+                    // Risk management tutorial - multiple challenges - REDUCED for balance
+                    company.Risk += 10; // Reduced from 20
+                    double riskCapitalLoss = Math.Min(35000, company.Capital * 0.06); // Reduced from 75000 and 0.12
                     company.Capital -= riskCapitalLoss;
-                    company.Morale -= 10;
+                    company.Morale -= 5; // Reduced from 10
                     storyEvents.Add($"🌪️ Multiple business challenges emerged simultaneously - ${riskCapitalLoss:N0} impact");
                     storyEvents.Add("⚠️ Risk levels elevated across all departments - comprehensive risk management needed");
                     storyEvents.Add("😰 Employee morale affected by uncertainty - leadership response crucial");
@@ -463,6 +488,16 @@ namespace CorporateChaos.Systems
                 if (storyData.IsStoryMode)
                 {
                     characterManager = new CharacterManager(storyData, company);
+                    
+                    // Initialize narrative engine
+                    narrativeEngine = new NarrativeEngine(storyData, company, characterManager);
+                    narrativeEngine.InitializeContentDistributor();
+                    
+                    // Initialize ending tracker
+                    endingTracker = new EndingProbabilityTracker(storyData, company);
+                    
+                    // Initialize advice system
+                    narrativeEngine.InitializeAdviceSystem(endingTracker);
                 }
             }
             catch
@@ -616,6 +651,83 @@ namespace CorporateChaos.Systems
                         $"Secondary effect from interaction with {characterId}"
                     );
                 }
+            }
+            
+            SaveStoryProgress();
+        }
+
+        public void RecordPlayerChoice(StoryChoiceRecord choiceRecord)
+        {
+            if (!IsStoryMode) return;
+            
+            // Add the choice to the history
+            storyData.ChoiceHistory.Add(choiceRecord);
+            
+            // Save the updated story progress
+            SaveStoryProgress();
+        }
+
+        public void TriggerChoiceConsequences(int currentQuarter)
+        {
+            if (!IsStoryMode) return;
+            
+            // Find choices that have consequences scheduled for this quarter
+            var relevantChoices = storyData.ChoiceHistory
+                .Where(c => c.ConsequenceFlags.Any(f => f.StartsWith($"trigger_q{currentQuarter}:")))
+                .ToList();
+            
+            foreach (var choice in relevantChoices)
+            {
+                // Process each consequence flag that's scheduled for this quarter
+                var quarterFlags = choice.ConsequenceFlags
+                    .Where(f => f.StartsWith($"trigger_q{currentQuarter}:"))
+                    .ToList();
+                
+                foreach (var flag in quarterFlags)
+                {
+                    // Extract the consequence type from the flag
+                    // Format: "trigger_q{quarter}:{consequence_type}"
+                    var parts = flag.Split(':');
+                    if (parts.Length >= 2)
+                    {
+                        var consequenceType = parts[1];
+                        ProcessChoiceConsequence(choice, consequenceType, currentQuarter);
+                    }
+                }
+            }
+        }
+
+        private void ProcessChoiceConsequence(StoryChoiceRecord choice, string consequenceType, int currentQuarter)
+        {
+            // Process different types of consequences
+            switch (consequenceType)
+            {
+                case "relationship_change":
+                    // Apply delayed relationship changes
+                    foreach (var impact in choice.RelationshipImpacts)
+                    {
+                        if (storyData.CharacterRelationships.ContainsKey(impact.Key))
+                        {
+                            var relationship = storyData.CharacterRelationships[impact.Key];
+                            relationship.TrustLevel = Math.Clamp(relationship.TrustLevel + impact.Value, -100, 100);
+                        }
+                    }
+                    break;
+                
+                case "story_event":
+                    // Trigger a story event based on the choice
+                    AddStoryFlag($"choice_consequence_{choice.ChoiceId}_q{currentQuarter}");
+                    break;
+                
+                case "character_reaction":
+                    // Mark that a character will react to this choice
+                    AddStoryFlag($"character_reaction_{choice.EventId}");
+                    break;
+                
+                default:
+                    // Generic consequence - just add a flag
+                    AddStoryFlag($"consequence_{consequenceType}_q{currentQuarter}");
+                    break;
             }
             
             SaveStoryProgress();

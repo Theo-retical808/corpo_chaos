@@ -1,0 +1,52 @@
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio cache/options
+.vs/
+.vscode/
+
+# Kiro IDE
+.kiro/
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+*.dll
+*.exe
+*.pdb
+*.cache
+
+# NuGet Packages
+*.nupkg
+*.snupkg
+**/packages/*
+
+# Game runtime files
+corporate_chaos/game_runs/*.json
+corporate_chaos/sv_game/*.json
+corporate_chaos/highscores.json
+corporate_chaos/runs_history.json
+corporate_chaos/settings.json
+
+# Temporary files
+*.tmp
+*.temp
+*_wpftmp.csproj

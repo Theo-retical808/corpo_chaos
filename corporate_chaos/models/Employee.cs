@@ -30,6 +30,12 @@ namespace CorporateChaos.Models
         VeryHigh = 5
     }
 
+    public enum Gender
+    {
+        Male,
+        Female
+    }
+
     public class Employee
     {
         [JsonPropertyName("id")]
@@ -74,6 +80,12 @@ namespace CorporateChaos.Models
         [JsonPropertyName("skillKeywords")]
         public List<string> SkillKeywords { get; set; } = new List<string>();
 
+        [JsonPropertyName("gender")]
+        public Gender Gender { get; set; }
+
+        [JsonPropertyName("profileImagePath")]
+        public string ProfileImagePath { get; set; } = string.Empty;
+
         public double GetEffectiveProductivity()
         {
             double baseProductivity = Productivity;
@@ -100,10 +112,12 @@ namespace CorporateChaos.Models
         {
             var random = new Random();
             
-            // Expanded name lists for unique generation
-            var firstNames = new[]
+            // Determine gender randomly
+            var gender = random.Next(2) == 0 ? Gender.Male : Gender.Female;
+            
+            // Male names
+            var maleFirstNames = new[]
             {
-                // Male names
                 "Alexander", "Andrew", "Anthony", "Benjamin", "Brandon", "Brian", "Carlos", "Charles", "Christopher", "Daniel",
                 "David", "Edward", "Eric", "Frank", "George", "Henry", "James", "Jason", "Jeffrey", "John",
                 "Jonathan", "Joseph", "Joshua", "Justin", "Kevin", "Mark", "Matthew", "Michael", "Nicholas", "Patrick",
@@ -112,9 +126,12 @@ namespace CorporateChaos.Models
                 "Blake", "Bruce", "Carl", "Christian", "Craig", "Derek", "Douglas", "Eugene", "Gabriel", "Gary",
                 "Gregory", "Harold", "Ian", "Isaac", "Jacob", "Jeremy", "Jesse", "Joel", "Jordan", "Kenneth",
                 "Kyle", "Lawrence", "Louis", "Lucas", "Marcus", "Martin", "Nathan", "Noah", "Oliver", "Oscar",
-                "Philip", "Ralph", "Raymond", "Roger", "Sean", "Simon", "Victor", "Walter", "Wayne", "Zachary",
-                
-                // Female names
+                "Philip", "Ralph", "Raymond", "Roger", "Sean", "Simon", "Victor", "Walter", "Wayne", "Zachary"
+            };
+            
+            // Female names
+            var femaleFirstNames = new[]
+            {
                 "Amanda", "Amy", "Andrea", "Angela", "Anna", "Ashley", "Barbara", "Betty", "Brenda", "Carol",
                 "Catherine", "Christine", "Deborah", "Diana", "Donna", "Dorothy", "Elizabeth", "Emily", "Emma", "Frances",
                 "Helen", "Jennifer", "Jessica", "Karen", "Kimberly", "Laura", "Linda", "Lisa", "Margaret", "Maria",
@@ -147,6 +164,9 @@ namespace CorporateChaos.Models
                 "Gordon", "Grant", "Greene", "Hamilton", "Hansen", "Harper", "Harrison", "Hart", "Harvey", "Hawkins"
             };
 
+            // Select first names based on gender
+            var firstNames = gender == Gender.Male ? maleFirstNames : femaleFirstNames;
+            
             // Generate unique name
             string fullName;
             int attempts = 0;
@@ -179,6 +199,7 @@ namespace CorporateChaos.Models
             var employee = new Employee
             {
                 Name = fullName,
+                Gender = gender,
                 Productivity = random.Next(40, 96), // 40-95
                 RiskLevel = (RiskLevel)random.Next(1, 6),
                 Specialization = (Department)random.Next(0, 6),
@@ -186,6 +207,18 @@ namespace CorporateChaos.Models
                 Morale = random.Next(60, 91), // Start with decent morale
                 QuarterHired = currentQuarter
             };
+            
+            // Assign random profile image based on gender
+            if (gender == Gender.Male)
+            {
+                int imageNumber = random.Next(1, 11); // 1-10
+                employee.ProfileImagePath = $"images/emp_male/emp{imageNumber}.png";
+            }
+            else
+            {
+                int imageNumber = random.Next(1, 11); // 1-10
+                employee.ProfileImagePath = $"images/emp_female/efp{imageNumber}.png";
+            }
 
             // Apply quarter-based skill restrictions
             ApplyQuarterBasedSkillRestrictions(employee, currentQuarter, random);
@@ -363,6 +396,41 @@ namespace CorporateChaos.Models
             // Add 2-4 relevant keywords
             var shuffledKeywords = keywords.OrderBy(x => random.Next()).Take(random.Next(2, 5)).ToList();
             employee.SkillKeywords = shuffledKeywords;
+        }
+
+        // Method to fix legacy employees loaded from old saves that don't have gender/profile image
+        public void EnsureProfileData()
+        {
+            // If gender is not set or profile image is missing, assign them
+            if (string.IsNullOrEmpty(ProfileImagePath))
+            {
+                var random = new Random(Name.GetHashCode()); // Use name as seed for consistency
+                
+                // Determine gender based on name if not set
+                if (Gender == default(Gender))
+                {
+                    // Simple heuristic: check if name is in common male/female names
+                    var maleNames = new[] { "Alexander", "Andrew", "Anthony", "Benjamin", "Brandon", "Brian", "Carlos", "Charles", "Christopher", "Daniel",
+                        "David", "Edward", "Eric", "Frank", "George", "Henry", "James", "Jason", "Jeffrey", "John",
+                        "Jonathan", "Joseph", "Joshua", "Justin", "Kevin", "Mark", "Matthew", "Michael", "Nicholas", "Patrick",
+                        "Paul", "Peter", "Richard", "Robert", "Ryan", "Samuel", "Scott", "Stephen", "Steven", "Thomas" };
+                    
+                    var firstName = Name.Split(' ')[0];
+                    Gender = maleNames.Contains(firstName) ? Gender.Male : Gender.Female;
+                }
+                
+                // Assign profile image based on gender
+                if (Gender == Gender.Male)
+                {
+                    int imageNumber = (random.Next(1, 11)); // 1-10
+                    ProfileImagePath = $"images/emp_male/emp{imageNumber}.png";
+                }
+                else
+                {
+                    int imageNumber = (random.Next(1, 11)); // 1-10
+                    ProfileImagePath = $"images/emp_female/efp{imageNumber}.png";
+                }
+            }
         }
     }
 

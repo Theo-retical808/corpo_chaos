@@ -4,6 +4,105 @@ namespace CorporateChaos.Systems
 {
     public static class CharacterDialogue
     {
+        // Joan - Secretary/Personal Assistant: Professional, supportive, gradually more personal
+        public static class Joan
+        {
+            public static readonly Dictionary<string, List<string>> DialogueByContext = new Dictionary<string, List<string>>
+            {
+                ["quarterly_review"] = new List<string>
+                {
+                    "Let me provide you with an overview of this quarter's performance and key metrics.",
+                    "I've compiled the quarterly results and have some observations to share with you.",
+                    "Here's what I'm seeing in our company's performance this quarter."
+                },
+                ["professional_assistant"] = new List<string>
+                {
+                    "Good day! Let me provide you with a professional assessment of our current business situation.",
+                    "I've prepared a comprehensive analysis of our company's performance this quarter.",
+                    "As your assistant, I've compiled the key metrics and strategic recommendations for your review."
+                },
+                ["trusted_advisor"] = new List<string>
+                {
+                    "I've been thinking about our strategic direction, and I have some insights to share with you.",
+                    "Based on our working relationship, I feel comfortable sharing some honest observations about our progress.",
+                    "You've shown excellent leadership so far. Let me share what I'm seeing from my perspective."
+                },
+                ["personal_confidant"] = new List<string>
+                {
+                    "I hope you don't mind me saying, but I've grown quite invested in our company's success - and your well-being.",
+                    "After all this time working together, I feel I can speak more personally about what I'm observing.",
+                    "You know, I've come to really care about both the business and how you're handling the pressures of leadership."
+                },
+                ["lifelong_friend"] = new List<string>
+                {
+                    "My dear friend, after all these years together, I want to share what's truly on my mind about our journey.",
+                    "You know, looking back on everything we've built together, I have some thoughts about where we're headed.",
+                    "As someone who's been by your side through thick and thin, let me share my deepest insights about our path forward."
+                },
+                ["crisis_support"] = new List<string>
+                {
+                    "I know this is challenging, but we've faced difficulties before. Let's work through this together.",
+                    "Don't panic - every CEO faces crises. It's how you respond that matters.",
+                    "I'm here to support you through this. Let's focus on what we can control."
+                },
+                ["success_celebration"] = new List<string>
+                {
+                    "Excellent work this quarter! Your leadership is really showing results.",
+                    "I'm impressed with how you've handled the company's growth. Well done!",
+                    "This is exactly the kind of progress we've been working toward. Congratulations!"
+                },
+                ["retirement_reflection"] = new List<string>
+                {
+                    "You know, I've been thinking... you've been at this for nearly 30 years now. How are you feeling?",
+                    "After all these years together, I feel I should mention - have you thought about your long-term plans?",
+                    "We're approaching the traditional retirement age. It's worth considering what comes next."
+                }
+            };
+
+            public static string GetDialogue(string context, Company company, Random random)
+            {
+                // Default to quarterly_review if context not found
+                if (!DialogueByContext.ContainsKey(context))
+                    context = "quarterly_review";
+
+                var dialogues = DialogueByContext[context];
+                return dialogues[random.Next(dialogues.Count)];
+            }
+
+            public static string GetDialogueForPhase(RelationshipPhase phase, Company company, Random random)
+            {
+                string context = phase switch
+                {
+                    RelationshipPhase.ProfessionalAcquaintance => "professional_assistant",
+                    RelationshipPhase.TrustedColleague => "trusted_advisor",
+                    RelationshipPhase.PersonalFriend => "personal_confidant",
+                    RelationshipPhase.LifelongBond => "lifelong_friend",
+                    _ => "quarterly_review"
+                };
+
+                return GetDialogue(context, company, random);
+            }
+
+            public static List<string> GetAdvice(Company company)
+            {
+                var advice = new List<string>();
+
+                if (company.Morale < 30)
+                    advice.Add("😟 Joan: 'Employee morale is concerning. Consider actions to improve workplace satisfaction.'");
+                
+                if (company.Risk > 70)
+                    advice.Add("⚠️ Joan: 'Risk levels are quite high. Perhaps we should focus on stability for a while.'");
+                
+                if (company.EmployeeCount < 5)
+                    advice.Add("👥 Joan: 'We're understaffed. Remember, you must never let employee count reach zero!'");
+                
+                if (company.Capital < 100000)
+                    advice.Add("💰 Joan: 'Capital is running low. We need to focus on revenue generation and cost management.'");
+
+                return advice;
+            }
+        }
+
         // Marcus Vey - CFO: Shrewd, numbers-driven, impatient, risk-loving
         public static class MarcusVey
         {
@@ -526,6 +625,7 @@ namespace CorporateChaos.Systems
         {
             return characterId switch
             {
+                "joan" => Joan.GetDialogue(context, company, random),
                 "marcus_vey" => MarcusVey.GetDialogue(context, company, random),
                 "evelyn_cross" => EvelynCross.GetDialogue(context, company, random),
                 "vincent_duro" => VincentDuro.GetDialogue(context, company, random),

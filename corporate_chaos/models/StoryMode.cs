@@ -45,7 +45,8 @@ namespace CorporateChaos.Models
         EmotionalBeat,
         ChoiceConsequence,
         ActTransition,
-        EndingSetup
+        EndingSetup,
+        CharacterAdvice
     }
 
     public enum ChoiceTone
@@ -84,6 +85,14 @@ namespace CorporateChaos.Models
         Medium,
         High,
         Critical
+    }
+
+    public enum EmotionalBeatCategory
+    {
+        Triumph,        // Positive moments of achievement and success
+        Challenge,      // Difficult moments requiring resilience
+        Bittersweet,    // Mixed emotions, reflection on change
+        Surprise        // Unexpected moments that create engagement
     }
 
     public class ConsequencePreview
@@ -214,6 +223,10 @@ namespace CorporateChaos.Models
         // Ending path tracking
         [JsonPropertyName("endingProgression")]
         public EndingPathData EndingProgression { get; set; } = new EndingPathData();
+        
+        // Emotional beat tracking
+        [JsonPropertyName("emotionalBeats")]
+        public List<EmotionalBeatData> EmotionalBeats { get; set; } = new List<EmotionalBeatData>();
     }
 
     public class CharacterRelationship
@@ -294,6 +307,30 @@ namespace CorporateChaos.Models
         public List<string> EndingBlockers { get; set; } = new List<string>();
     }
 
+    public class EmotionalBeatData
+    {
+        [JsonPropertyName("beatId")]
+        public string BeatId { get; set; } = string.Empty;
+        
+        [JsonPropertyName("category")]
+        public EmotionalBeatCategory Category { get; set; } = EmotionalBeatCategory.Triumph;
+        
+        [JsonPropertyName("quarter")]
+        public int Quarter { get; set; } = 1;
+        
+        [JsonPropertyName("intensity")]
+        public double Intensity { get; set; } = 0.5; // 0.0 to 1.0
+        
+        [JsonPropertyName("description")]
+        public string Description { get; set; } = string.Empty;
+        
+        [JsonPropertyName("involvedCharacters")]
+        public List<string> InvolvedCharacters { get; set; } = new List<string>();
+        
+        [JsonPropertyName("eventId")]
+        public string EventId { get; set; } = string.Empty;
+    }
+
     public class StoryCharacter
     {
         [JsonPropertyName("characterId")]
@@ -304,6 +341,9 @@ namespace CorporateChaos.Models
         
         [JsonPropertyName("role")]
         public string Role { get; set; } = string.Empty;
+        
+        [JsonPropertyName("imagePath")]
+        public string ImagePath { get; set; } = string.Empty;
         
         [JsonPropertyName("personalityTraits")]
         public List<string> PersonalityTraits { get; set; } = new List<string>();
@@ -1018,6 +1058,7 @@ namespace CorporateChaos.Models
                 CharacterId = "marcus_vey",
                 Name = "Marcus Vey",
                 Role = "Chief Financial Officer",
+                ImagePath = "images/char/marcus_vey.png",
                 PersonalityTraits = new List<string> { "shrewd", "numbers_driven", "impatient", "risk_loving" },
                 IntroductionQuarter = 15,
                 CharacterArcMilestones = new List<string> 
@@ -1030,6 +1071,7 @@ namespace CorporateChaos.Models
                 CharacterId = "evelyn_cross",
                 Name = "Evelyn Cross",
                 Role = "Head of Human Resources",
+                ImagePath = "images/char/evelyn_cross.png",
                 PersonalityTraits = new List<string> { "empathetic", "organized", "protective_of_employees" },
                 IntroductionQuarter = 20,
                 CharacterArcMilestones = new List<string> 
@@ -1042,6 +1084,7 @@ namespace CorporateChaos.Models
                 CharacterId = "vincent_duro",
                 Name = "Vincent Duro",
                 Role = "Rival CEO",
+                ImagePath = "images/char/vincent_duro.png",
                 PersonalityTraits = new List<string> { "aggressive", "cunning", "publicly_charming", "privately_cutthroat" },
                 IntroductionQuarter = 25,
                 CharacterArcMilestones = new List<string> 
@@ -1054,6 +1097,7 @@ namespace CorporateChaos.Models
                 CharacterId = "lucinda_vale",
                 Name = "Lucinda Vale",
                 Role = "PR & Marketing Head",
+                ImagePath = "images/char/lucinda_vale.png",
                 PersonalityTraits = new List<string> { "creative", "persuasive", "flamboyant", "headline_focused" },
                 IntroductionQuarter = 30,
                 CharacterArcMilestones = new List<string> 
@@ -1066,6 +1110,7 @@ namespace CorporateChaos.Models
                 CharacterId = "gregory_shaw",
                 Name = "Gregory Shaw",
                 Role = "Operations Manager",
+                ImagePath = "images/char/gregory_shaw.png",
                 PersonalityTraits = new List<string> { "calm", "methodical", "numbers_focused", "cynical" },
                 IntroductionQuarter = 35,
                 CharacterArcMilestones = new List<string> 
@@ -1078,6 +1123,7 @@ namespace CorporateChaos.Models
                 CharacterId = "selena_park",
                 Name = "Selena Park",
                 Role = "Venture Capitalist",
+                ImagePath = "images/char/selena_park.png",
                 PersonalityTraits = new List<string> { "persuasive", "strategic", "roi_focused" },
                 IntroductionQuarter = 40,
                 CharacterArcMilestones = new List<string> 
@@ -1090,6 +1136,7 @@ namespace CorporateChaos.Models
                 CharacterId = "harold_finch",
                 Name = "Harold Finch",
                 Role = "Legal Counsel",
+                ImagePath = "images/char/harold_finch.png",
                 PersonalityTraits = new List<string> { "precise", "pedantic", "highly_cautious" },
                 IntroductionQuarter = 45,
                 CharacterArcMilestones = new List<string> 
@@ -1102,6 +1149,7 @@ namespace CorporateChaos.Models
                 CharacterId = "sophie_kim",
                 Name = "Sophie Kim",
                 Role = "Junior Analyst",
+                ImagePath = "images/char/sophie_kim.png",
                 PersonalityTraits = new List<string> { "enthusiastic", "naive", "data_loving" },
                 IntroductionQuarter = 12,
                 CharacterArcMilestones = new List<string> 

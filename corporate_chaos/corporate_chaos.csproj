@@ -17,6 +17,9 @@
     <Resource Include="images\it.png" />
     <Resource Include="images\research.png" />
     <Resource Include="images\assistant.png" />
+    <Resource Include="images\char\*.png" />
+    <Resource Include="images\emp_male\*.png" />
+    <Resource Include="images\emp_female\*.png" />
     <Resource Include="audio\background.mp3" />
   </ItemGroup>
 

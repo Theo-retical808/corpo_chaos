@@ -66,8 +66,18 @@ namespace CorporateChaos.Systems
 
         private string GetAdaptedDialogue(string characterId, string context, CharacterRelationship relationship)
         {
-            // Get base dialogue from character-specific dialogue system
-            var baseDialogue = CharacterDialogue.GetCharacterDialogue(characterId, context, company, random);
+            string baseDialogue;
+            
+            // For Joan, use phase-specific dialogue
+            if (characterId == "joan")
+            {
+                baseDialogue = CharacterDialogue.Joan.GetDialogueForPhase(relationship.CurrentPhase, company, random);
+            }
+            else
+            {
+                // Get base dialogue from character-specific dialogue system
+                baseDialogue = CharacterDialogue.GetCharacterDialogue(characterId, context, company, random);
+            }
             
             // Adapt dialogue based on relationship level and phase
             return AdaptDialogueForRelationship(characterId, baseDialogue, relationship, context);

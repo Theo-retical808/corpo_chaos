@@ -6,7 +6,18 @@
         xmlns:local="clr-namespace:CorporateChaos"
         mc:Ignorable="d"
         Title="Corporate Chaos - Beta" Height="800" Width="1400" WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
         Icon="images/logo.png">
+    
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/styles/ScrollBarStyles.xaml"/>
+                <ResourceDictionary Source="/styles/ButtonStyles.xaml"/>
+                <ResourceDictionary Source="/styles/Typography.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
     
     <Grid>
         <!-- Main Menu Screen -->
@@ -32,6 +43,13 @@
                         Margin="0,10" Click="LoadGameBtn_Click"/>
                 <Button x:Name="ScoreBoardBtn" Content="🏆 Score Board" Height="50" FontSize="18" 
                         Margin="0,10" Click="ScoreBoardBtn_Click"/>
+                <Button x:Name="OptionsBtn" Content="⚙️ Options" Height="50" FontSize="18" 
+                        Margin="0,10" Click="OptionsBtn_Click"
+                        ToolTip="Adjust audio, display, and game settings"/>
+                <Button x:Name="QuitGameBtn" Content="🚪 Quit Game" Height="50" FontSize="18" 
+                        Margin="0,10" Click="QuitGameBtn_Click"
+                        Background="#4d2a2a" Foreground="White"
+                        ToolTip="Exit Corporate Chaos"/>
             </StackPanel>
         </Grid>
 
@@ -111,45 +129,7 @@
                 <Border Grid.Column="0" Background="#1a1a2e" CornerRadius="10" Margin="10,10,5,10">
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <ScrollViewer.Resources>
-                            <Style TargetType="ScrollBar">
-                                <Setter Property="Background" Value="Transparent"/>
-                                <Setter Property="BorderBrush" Value="Transparent"/>
-                                <Setter Property="Foreground" Value="#3a3a4e"/>
-                                <Setter Property="Width" Value="6"/>
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="ScrollBar">
-                                            <Grid>
-                                                <Border Background="Transparent" 
-                                                        BorderBrush="Transparent" 
-                                                        BorderThickness="0" CornerRadius="3"/>
-                                                <Track Name="PART_Track" IsDirectionReversed="True">
-                                                    <Track.Thumb>
-                                                        <Thumb>
-                                                            <Thumb.Template>
-                                                                <ControlTemplate TargetType="Thumb">
-                                                                    <Border Background="#2a2a3e" CornerRadius="3" 
-                                                                            BorderBrush="Transparent" BorderThickness="0">
-                                                                        <Border.Style>
-                                                                            <Style TargetType="Border">
-                                                                                <Style.Triggers>
-                                                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                                                        <Setter Property="Background" Value="#3a3a4e"/>
-                                                                                    </Trigger>
-                                                                                </Style.Triggers>
-                                                                            </Style>
-                                                                        </Border.Style>
-                                                                    </Border>
-                                                                </ControlTemplate>
-                                                            </Thumb.Template>
-                                                        </Thumb>
-                                                    </Track.Thumb>
-                                                </Track>
-                                            </Grid>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
+                            <Style TargetType="ScrollBar" BasedOn="{StaticResource CorporateChaosScrollBar}"/>
                         </ScrollViewer.Resources>
                         <StackPanel Margin="15">
                             <TextBlock Text="🎛️ EXECUTIVE CONTROLS" FontSize="16" FontWeight="Bold" 
@@ -562,50 +542,99 @@
                 <Border Grid.Column="2" Background="#1a1a2e" CornerRadius="10" Margin="5,10,10,10">
                     <Grid>
                         <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         
-                        <!-- Company Statistics -->
-                        <Border Grid.Row="0" Background="#16213e" CornerRadius="5" Margin="10">
-                            <StackPanel Margin="10">
-                                <TextBlock Text="📊 COMPANY STATS" FontSize="14" FontWeight="Bold" 
-                                          Foreground="White" Margin="0,0,0,10"/>
+                        <!-- Story Progress Panel (Story Mode Only) -->
+                        <Border x:Name="StoryProgressPanel" Grid.Row="0" Background="#2a1a3e" CornerRadius="5" 
+                                Margin="10,10,10,5" Padding="8" Visibility="Collapsed">
+                            <StackPanel>
+                                <TextBlock Text="📖 STORY PROGRESS" FontSize="12" FontWeight="Bold" 
+                                          Foreground="#b19cd9" Margin="0,0,0,8"/>
                                 
+                                <!-- Current Act -->
                                 <StackPanel Orientation="Horizontal" Margin="0,2">
-                                    <TextBlock Text="💰 Capital: " FontSize="11" Foreground="Gray" Width="80"/>
-                                    <TextBlock x:Name="CapitalText" Text="$500,000" FontSize="11" FontWeight="Bold" Foreground="LightGreen"/>
+                                    <TextBlock Text="Act: " FontSize="10" Foreground="Gray" Width="60"/>
+                                    <TextBlock x:Name="CurrentActText" Text="Tutorial" FontSize="10" 
+                                              FontWeight="Bold" Foreground="#d4a5ff"/>
                                 </StackPanel>
                                 
-                                <StackPanel Orientation="Horizontal" Margin="0,2">
-                                    <TextBlock Text="📈 Market Share: " FontSize="11" Foreground="Gray" Width="80"/>
-                                    <TextBlock x:Name="MarketShareText" Text="5%" FontSize="11" FontWeight="Bold" Foreground="LightBlue"/>
-                                </StackPanel>
-                                
-                                <StackPanel Orientation="Horizontal" Margin="0,2">
-                                    <TextBlock Text="⭐ Reputation: " FontSize="11" Foreground="Gray" Width="80"/>
-                                    <TextBlock x:Name="ReputationText" Text="50" FontSize="11" FontWeight="Bold" Foreground="Yellow"/>
-                                </StackPanel>
-                                
-                                <StackPanel Orientation="Horizontal" Margin="0,2">
-                                    <TextBlock Text="😊 Morale: " FontSize="11" Foreground="Gray" Width="80"/>
-                                    <TextBlock x:Name="MoraleText" Text="50" FontSize="11" FontWeight="Bold" Foreground="Pink"/>
-                                </StackPanel>
-                                
-                                <StackPanel Orientation="Horizontal" Margin="0,2">
-                                    <TextBlock Text="⚠️ Risk: " FontSize="11" Foreground="Gray" Width="80"/>
-                                    <TextBlock x:Name="RiskText" Text="10" FontSize="11" FontWeight="Bold" Foreground="Orange"/>
-                                </StackPanel>
-                                
-                                <StackPanel Orientation="Horizontal" Margin="0,2">
-                                    <TextBlock Text="👥 Employees: " FontSize="11" Foreground="Gray" Width="80"/>
-                                    <TextBlock x:Name="EmployeeCountText" Text="0" FontSize="11" FontWeight="Bold" Foreground="Cyan"/>
-                                </StackPanel>
+                                <!-- Act Progress Bar -->
+                                <Grid Margin="0,4,0,2">
+                                    <Border Background="#1a1a2e" CornerRadius="3" Height="6"/>
+                                    <Border x:Name="ActProgressBar" Background="#8b5cf6" CornerRadius="3" 
+                                            Height="6" HorizontalAlignment="Left" Width="0"/>
+                                </Grid>
+                                <TextBlock x:Name="ActProgressText" Text="Q1 of 10" FontSize="9" 
+                                          Foreground="LightGray" HorizontalAlignment="Center" Margin="0,2,0,0"/>
                             </StackPanel>
                         </Border>
                         
+                        <!-- Company Statistics -->
+                        <Border Grid.Row="1" Background="#16213e" CornerRadius="5" Margin="10,5,10,5">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <ScrollViewer.Resources>
+                                    <Style TargetType="ScrollBar" BasedOn="{StaticResource CorporateChaosScrollBar}"/>
+                                </ScrollViewer.Resources>
+                                <StackPanel Margin="10">
+                                    <TextBlock Text="📊 COMPANY STATS" FontSize="14" FontWeight="Bold" 
+                                              Foreground="White" Margin="0,0,0,10"/>
+                                    
+                                    <StackPanel Orientation="Horizontal" Margin="0,3">
+                                        <TextBlock Text="💰 Capital:" FontSize="11" Foreground="Gray" Width="90"/>
+                                        <TextBlock x:Name="CapitalText" Text="$500,000" FontSize="11" FontWeight="Bold" Foreground="LightGreen"/>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Orientation="Horizontal" Margin="0,3">
+                                        <TextBlock Text="📈 Market:" FontSize="11" Foreground="Gray" Width="90"/>
+                                        <TextBlock x:Name="MarketShareText" Text="5%" FontSize="11" FontWeight="Bold" Foreground="LightBlue"/>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Orientation="Horizontal" Margin="0,3">
+                                        <TextBlock Text="⭐ Reputation:" FontSize="11" Foreground="Gray" Width="90"/>
+                                        <TextBlock x:Name="ReputationText" Text="50" FontSize="11" FontWeight="Bold" Foreground="Yellow"/>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Orientation="Horizontal" Margin="0,3">
+                                        <TextBlock Text="😊 Morale:" FontSize="11" Foreground="Gray" Width="90"/>
+                                        <TextBlock x:Name="MoraleText" Text="50" FontSize="11" FontWeight="Bold" Foreground="Pink"/>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Orientation="Horizontal" Margin="0,3">
+                                        <TextBlock Text="⚠️ Risk:" FontSize="11" Foreground="Gray" Width="90"/>
+                                        <TextBlock x:Name="RiskText" Text="10" FontSize="11" FontWeight="Bold" Foreground="Orange"/>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Orientation="Horizontal" Margin="0,3">
+                                        <TextBlock Text="👥 Employees:" FontSize="11" Foreground="Gray" Width="90"/>
+                                        <TextBlock x:Name="EmployeeCountText" Text="0" FontSize="11" FontWeight="Bold" Foreground="Cyan"/>
+                                    </StackPanel>
+                                    
+                                    <!-- Story Mode: Relationships Button -->
+                                    <Button x:Name="RelationshipsBtn" Content="💕 Relationships" Height="35" 
+                                           Margin="0,10,0,0" Click="RelationshipsBtn_Click"
+                                           Background="#4d2a4d" Foreground="White" FontWeight="Bold"
+                                           Visibility="Collapsed"
+                                           ToolTip="View your relationships with story characters">
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Setter Property="Background" Value="#4d2a4d"/>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="#6d3a6d"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Border>
+                        
                         <!-- Current Events and Crisis Status -->
-                        <Grid Grid.Row="1" Margin="10">
+                        <Grid Grid.Row="2" Margin="10,5,10,10">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="*"/>
                                 <RowDefinition Height="*"/>
@@ -728,6 +757,24 @@
                                         <Style.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
                                                 <Setter Property="Background" Value="#3a6d4a"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                            
+                            <!-- Characters Button -->
+                            <Button x:Name="CharactersBtn" Content="👥" Width="30" Height="25" 
+                                   Background="#4d2a4d" Foreground="White" Margin="0,5,0,0"
+                                   BorderThickness="0" FontSize="12" Click="CharactersBtn_Click"
+                                   ToolTip="Talk to characters you've met"
+                                   Visibility="Collapsed">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Background" Value="#4d2a4d"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#6d3a6d"/>
                                             </Trigger>
                                         </Style.Triggers>
                                     </Style>

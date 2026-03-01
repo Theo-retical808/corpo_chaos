@@ -396,15 +396,15 @@ namespace CorporateChaos.Systems
             };
 
             string action = actions[_random.Next(actions.Length)];
-            double impact = _random.Next(10000, 40000);
-            int reputationImpact = _random.Next(2, 7);
-            int riskIncrease = 5;
+            double impact = _random.Next(5000, 20000); // Reduced from 10000-40000
+            int reputationImpact = _random.Next(1, 4); // Reduced from 2-7
+            int riskIncrease = 3; // Reduced from 5
             
-            // Competitors target market leaders more aggressively
-            double marketShareLoss = 0.5 + (_random.NextDouble() * 1.0); // Base 0.5-1.5%
-            if (company.MarketShare >= 30) marketShareLoss *= 1.5; // 50% more aggressive
-            if (company.MarketShare >= 50) marketShareLoss *= 2.0; // 100% more aggressive
-            if (company.MarketShare >= 60) marketShareLoss *= 2.5; // 150% more aggressive
+            // Competitors target market leaders more aggressively - REDUCED scaling
+            double marketShareLoss = 0.3 + (_random.NextDouble() * 0.5); // Base 0.3-0.8% (reduced from 0.5-1.5%)
+            if (company.MarketShare >= 30) marketShareLoss *= 1.2; // Reduced from 1.5x
+            if (company.MarketShare >= 50) marketShareLoss *= 1.5; // Reduced from 2.0x
+            if (company.MarketShare >= 60) marketShareLoss *= 1.8; // Reduced from 2.5x
             
             company.Capital -= impact;
             company.NetLoss += impact; // Track as net loss
@@ -434,16 +434,16 @@ namespace CorporateChaos.Systems
 
             string crisis = crises[_random.Next(crises.Length)];
             
-            // Scale financial impact based on company size (capital) - INCREASED IMPACT
-            double impactPercentage = _random.NextDouble() * 0.18 + 0.12; // 12-30% of capital (increased from 8-20%)
+            // Scale financial impact based on company size (capital) - REDUCED for balance
+            double impactPercentage = _random.NextDouble() * 0.08 + 0.04; // 4-12% of capital (reduced from 12-30%)
             double financialImpact = company.Capital * impactPercentage;
             
-            // Minimum impact to prevent trivial amounts - INCREASED
-            financialImpact = Math.Max(financialImpact, 40000); // Increased from 25000
+            // Minimum impact to prevent trivial amounts - REDUCED
+            financialImpact = Math.Max(financialImpact, 15000); // Reduced from 40000
             
-            // Additional effects - INCREASED
-            int riskIncrease = _random.Next(12, 20); // Increased from 8-15
-            int reputationImpact = _random.Next(5, 12); // Increased from 3-8
+            // Additional effects - REDUCED
+            int riskIncrease = _random.Next(5, 10); // Reduced from 12-20
+            int reputationImpact = _random.Next(2, 6); // Reduced from 5-12
             
             company.Capital -= financialImpact;
             company.NetLoss += financialImpact; // Track as net loss
@@ -524,13 +524,13 @@ namespace CorporateChaos.Systems
 
         private void ApplyCrisisEffects(CrisisEvent crisis, Company company, Dictionary<Department, DepartmentStats> departments)
         {
-            // Ongoing crisis effects
+            // Ongoing crisis effects - REDUCED for balance
             double stress = crisis.Level switch
             {
-                CrisisLevel.Warning => 1,
-                CrisisLevel.Critical => 3,
-                CrisisLevel.Catastrophic => 5,
-                _ => 1
+                CrisisLevel.Warning => 0.5,      // Reduced from 1
+                CrisisLevel.Critical => 1.5,     // Reduced from 3
+                CrisisLevel.Catastrophic => 3,   // Reduced from 5
+                _ => 0.5
             };
 
             company.Morale -= (int)stress;
@@ -654,10 +654,10 @@ namespace CorporateChaos.Systems
             };
 
             string scandal = scandals[_random.Next(scandals.Length)];
-            int reputationLoss = _random.Next(15, 35);
-            int moraleLoss = _random.Next(10, 20);
-            double financialImpact = _random.Next(50000, 150000);
-            int riskIncrease = 10;
+            int reputationLoss = _random.Next(8, 18); // Reduced from 15-35
+            int moraleLoss = _random.Next(5, 12); // Reduced from 10-20
+            double financialImpact = _random.Next(20000, 60000); // Reduced from 50000-150000
+            int riskIncrease = 5; // Reduced from 10
 
             company.Reputation -= reputationLoss;
             company.Morale -= moraleLoss;
@@ -823,33 +823,33 @@ namespace CorporateChaos.Systems
             };
 
             string defect = defects[_random.Next(defects.Length)];
-            bool massRecall = _random.NextDouble() < 0.3; // 30% chance of mass recall
+            bool massRecall = _random.NextDouble() < 0.2; // 20% chance of mass recall (reduced from 30%)
 
             if (massRecall)
             {
-                int reputationLoss = _random.Next(25, 45);
-                double recallCost = _random.Next(100000, 300000);
-                int moraleLoss = _random.Next(15, 25);
+                int reputationLoss = _random.Next(12, 25); // Reduced from 25-45
+                double recallCost = _random.Next(40000, 120000); // Reduced from 100000-300000
+                int moraleLoss = _random.Next(8, 15); // Reduced from 15-25
 
                 company.Reputation -= reputationLoss;
                 company.Capital -= recallCost;
                 company.Morale -= moraleLoss;
-                company.Risk += 15;
+                company.Risk += 8; // Reduced from 15
 
-                return $"🚨 MASS RECALL! {defect} triggers massive product recall! Reputation -{reputationLoss}, Cost: ${recallCost:N0}, Morale -{moraleLoss}, Risk +15";
+                return $"🚨 MASS RECALL! {defect} triggers massive product recall! Reputation -{reputationLoss}, Cost: ${recallCost:N0}, Morale -{moraleLoss}, Risk +8";
             }
             else
             {
-                int reputationLoss = _random.Next(8, 18);
-                double fixCost = _random.Next(20000, 60000);
-                int moraleLoss = _random.Next(5, 12);
+                int reputationLoss = _random.Next(4, 10); // Reduced from 8-18
+                double fixCost = _random.Next(10000, 30000); // Reduced from 20000-60000
+                int moraleLoss = _random.Next(3, 8); // Reduced from 5-12
 
                 company.Reputation -= reputationLoss;
                 company.Capital -= fixCost;
                 company.Morale -= moraleLoss;
-                company.Risk += 5;
+                company.Risk += 3; // Reduced from 5
 
-                return $"🔧 PRODUCT DEFECT! {defect}! Reputation -{reputationLoss}, Fix cost: ${fixCost:N0}, Morale -{moraleLoss}, Risk +5";
+                return $"🔧 PRODUCT DEFECT! {defect}! Reputation -{reputationLoss}, Fix cost: ${fixCost:N0}, Morale -{moraleLoss}, Risk +3";
             }
         }
 
@@ -895,16 +895,16 @@ namespace CorporateChaos.Systems
             };
 
             string catastrophe = catastrophicEvents[_random.Next(catastrophicEvents.Length)];
-            int reputationLoss = _random.Next(30, 60);
-            double financialImpact = company.Capital * (_random.NextDouble() * 0.15 + 0.10); // 10-25% of capital
-            int moraleLoss = _random.Next(20, 40);
+            int reputationLoss = _random.Next(15, 30); // Reduced from 30-60
+            double financialImpact = company.Capital * (_random.NextDouble() * 0.08 + 0.05); // 5-13% of capital (reduced from 10-25%)
+            int moraleLoss = _random.Next(10, 20); // Reduced from 20-40
 
             company.Reputation -= reputationLoss;
             company.Capital -= financialImpact;
             company.Morale -= moraleLoss;
-            company.Risk += 20;
+            company.Risk += 10; // Reduced from 20
 
-            events.Add($"💥 CATASTROPHIC EVENT! {catastrophe}! Reputation -{reputationLoss}, Cost: ${financialImpact:N0}, Morale -{moraleLoss}, Risk +20");
+            events.Add($"💥 CATASTROPHIC EVENT! {catastrophe}! Reputation -{reputationLoss}, Cost: ${financialImpact:N0}, Morale -{moraleLoss}, Risk +10");
 
             return events;
         }

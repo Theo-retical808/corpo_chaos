@@ -51,6 +51,9 @@ namespace CorporateChaos
             System.Diagnostics.Debug.WriteLine("Initializing background music manager...");
             backgroundMusicManager = new BackgroundMusicManager();
             
+            // Load and apply saved settings
+            LoadAndApplySettings();
+            
             // Add window closing event handler for cleanup
             this.Closing += MainWindow_Closing;
             
@@ -66,6 +69,27 @@ namespace CorporateChaos
                     backgroundMusicManager.StartBackgroundMusic();
                 }), System.Windows.Threading.DispatcherPriority.Background);
             };
+        }
+
+        private void LoadAndApplySettings()
+        {
+            var settings = SettingsManager.LoadSettings();
+            
+            // Apply audio settings
+            backgroundMusicManager.SetVolume(settings.IsMuted ? 0 : settings.Volume);
+            
+            // Apply display settings
+            if (settings.IsFullscreen)
+            {
+                this.WindowStyle = WindowStyle.None;
+                this.WindowState = WindowState.Maximized;
+                this.ResizeMode = ResizeMode.NoResize;
+            }
+            else
+            {
+                this.Width = settings.WindowWidth;
+                this.Height = settings.WindowHeight;
+            }
         }
 
         private void MainWindow_Closing(object? sender, CancelEventArgs e)
@@ -189,17 +213,20 @@ namespace CorporateChaos
         private void StoryModeBtn_Click(object sender, RoutedEventArgs e)
         {
             // Show development warning first
-            var warningResult = MessageBox.Show("⚠️ STORY MODE - DEVELOPMENT WARNING ⚠️\n\n" +
-                          "Story Mode is currently under active development and expansion.\n\n" +
-                          "You may experience:\n" +
-                          "• Bugs and unexpected behavior\n" +
-                          "• Incomplete features or storylines\n" +
-                          "• Inconsistent gameplay mechanics\n" +
-                          "• Save file compatibility issues\n" +
-                          "• Missing dialogue or narrative elements\n\n" +
-                          "We recommend using Sandbox Mode for the most stable experience.\n\n" +
-                          "Do you still want to proceed with Story Mode?",
-                          "Story Mode - Development Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            var warningResult = Views.ModernMessageBox.Show(
+                "Story Mode is currently under active development and expansion.\n\n" +
+                "You may experience:\n" +
+                "• Bugs and unexpected behavior\n" +
+                "• Incomplete features or storylines\n" +
+                "• Inconsistent gameplay mechanics\n" +
+                "• Save file compatibility issues\n" +
+                "• Missing dialogue or narrative elements\n\n" +
+                "We recommend using Sandbox Mode for the most stable experience.\n\n" +
+                "Do you still want to proceed with Story Mode?",
+                "Story Mode - Development Warning",
+                Views.ModernMessageBox.MessageBoxType.Warning,
+                Views.ModernMessageBox.MessageBoxButtons.YesNo,
+                this);
 
             if (warningResult != MessageBoxResult.Yes)
             {
@@ -207,15 +234,18 @@ namespace CorporateChaos
             }
 
             // Show the original Story Mode welcome message
-            var result = MessageBox.Show("📖 Welcome to Story Mode!\n\n" +
-                          "In Story Mode, you'll learn corporate management through guided tutorials with Secretary Joan.\n\n" +
-                          "Features:\n" +
-                          "• Step-by-step tutorials over 8 quarters\n" +
-                          "• Gradual unlock of game mechanics\n" +
-                          "• Narrative-driven scenarios\n" +
-                          "• Personal guidance from Secretary Joan\n\n" +
-                          "Would you like to start Story Mode?",
-                          "Story Mode", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            var result = Views.ModernMessageBox.Show(
+                "In Story Mode, you'll learn corporate management through guided tutorials with Secretary Joan.\n\n" +
+                "Features:\n" +
+                "• Step-by-step tutorials over 8 quarters\n" +
+                "• Gradual unlock of game mechanics\n" +
+                "• Narrative-driven scenarios\n" +
+                "• Personal guidance from Secretary Joan\n\n" +
+                "Would you like to start Story Mode?",
+                "📖 Welcome to Story Mode!",
+                Views.ModernMessageBox.MessageBoxType.Question,
+                Views.ModernMessageBox.MessageBoxButtons.YesNo,
+                this);
 
             if (result == MessageBoxResult.Yes)
             {
@@ -248,6 +278,25 @@ namespace CorporateChaos
             var highScoresWindow = new HighScoresWindow(dataManager);
             highScoresWindow.Owner = this;
             highScoresWindow.ShowDialog();
+        }
+
+        private void OptionsBtn_Click(object sender, RoutedEventArgs e)
+        {
+            var optionsWindow = new OptionsWindow(backgroundMusicManager, this);
+            optionsWindow.ShowDialog();
+        }
+
+        private void QuitGameBtn_Click(object sender, RoutedEventArgs e)
+        {
+            var result = Views.ModernMessageBox.ShowQuestion(
+                "Are you sure you want to quit Corporate Chaos?\n\nAny unsaved progress will be lost.",
+                "Quit Game",
+                this);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                Application.Current.Shutdown();
+            }
         }
 
         // Save Slots Navigation
@@ -369,6 +418,9 @@ namespace CorporateChaos
             // Update progressive unlocking for story mode
             UpdateProgressiveUnlocking();
             
+            // Update story progress UI (story mode only)
+            UpdateStoryProgressUI();
+            
             // Ensure values stay within bounds
             company.ClampValues();
         }
@@ -377,6 +429,126 @@ namespace CorporateChaos
         public void RefreshUI()
         {
             UpdateUI();
+        }
+
+        private void UpdateStoryProgressUI()
+        {
+            // Only show story progress panel in story mode
+            if (storyModeManager == null || !storyModeManager.IsStoryMode)
+            {
+                StoryProgressPanel.Visibility = Visibility.Collapsed;
+                return;
+            }
+            
+            StoryProgressPanel.Visibility = Visibility.Visible;
+            
+            // Update current act
+            var currentAct = storyModeManager.StoryData.CurrentAct;
+            CurrentActText.Text = GetActDisplayName(currentAct);
+            
+            // Calculate act progress
+            var (actStart, actEnd) = GetActQuarterRange(currentAct);
+            int actQuarter = quarterNumber - actStart + 1;
+            int actTotalQuarters = actEnd - actStart + 1;
+            double progressPercentage = (double)actQuarter / actTotalQuarters;
+            
+            // Update progress bar
+            ActProgressBar.Width = progressPercentage * 250; // 250 is approximate panel width minus padding
+            ActProgressText.Text = $"Q{actQuarter} of {actTotalQuarters}";
+            
+            // Update character relationships summary
+            UpdateCharacterRelationshipsSummary();
+        }
+        
+        private string GetActDisplayName(NarrativeAct act)
+        {
+            return act switch
+            {
+                NarrativeAct.Tutorial => "I: Tutorial",
+                NarrativeAct.RisingAction => "II: Rising Action",
+                NarrativeAct.Climax => "III: Climax",
+                NarrativeAct.Resolution => "IV: Resolution",
+                _ => "Unknown"
+            };
+        }
+        
+        private (int start, int end) GetActQuarterRange(NarrativeAct act)
+        {
+            return act switch
+            {
+                NarrativeAct.Tutorial => (1, 10),
+                NarrativeAct.RisingAction => (11, 60),
+                NarrativeAct.Climax => (61, 100),
+                NarrativeAct.Resolution => (101, 120),
+                _ => (1, 10)
+            };
+        }
+        
+        private void UpdateCharacterRelationshipsSummary()
+        {
+            var relationships = storyModeManager.StoryData.CharacterRelationships;
+            var summaryLines = new List<string>();
+            
+            // Always show Joan first
+            if (relationships.ContainsKey("joan"))
+            {
+                var joanRel = relationships["joan"];
+                var joanPhase = GetRelationshipPhaseDisplay(joanRel.CurrentPhase);
+                summaryLines.Add($"Joan: {joanPhase}");
+            }
+            else
+            {
+                summaryLines.Add("Joan: Professional");
+            }
+            
+            // Show up to 2 other introduced characters with highest relationship scores
+            var otherCharacters = relationships
+                .Where(kvp => kvp.Key != "joan" && storyModeManager.IsCharacterIntroduced(kvp.Key))
+                .OrderByDescending(kvp => (kvp.Value.TrustLevel + kvp.Value.ProfessionalRespect + kvp.Value.PersonalConnection) / 3)
+                .Take(2)
+                .ToList();
+            
+            foreach (var character in otherCharacters)
+            {
+                var characterName = GetCharacterDisplayName(character.Key);
+                var phase = GetRelationshipPhaseDisplay(character.Value.CurrentPhase);
+                summaryLines.Add($"{characterName}: {phase}");
+            }
+            
+            // Show count of other characters if there are more
+            int totalIntroduced = StoryScript.Characters.Values
+                .Count(c => storyModeManager.IsCharacterIntroduced(c.CharacterId));
+            
+            if (totalIntroduced > 3)
+            {
+                summaryLines.Add($"+{totalIntroduced - 3} more");
+            }
+            
+            // Relationship summary removed - now accessible via Relationships button
+        }
+        
+        private string GetRelationshipPhaseDisplay(RelationshipPhase phase)
+        {
+            return phase switch
+            {
+                RelationshipPhase.FirstMeeting => "New",
+                RelationshipPhase.ProfessionalAcquaintance => "Professional",
+                RelationshipPhase.TrustedColleague => "Trusted",
+                RelationshipPhase.PersonalFriend => "Friend",
+                RelationshipPhase.LifelongBond => "Close Friend",
+                RelationshipPhase.Strained => "Strained",
+                RelationshipPhase.Hostile => "Hostile",
+                _ => "Unknown"
+            };
+        }
+        
+        private string GetCharacterDisplayName(string characterId)
+        {
+            if (StoryScript.Characters.ContainsKey(characterId))
+            {
+                return StoryScript.Characters[characterId].Name.Split(' ')[0]; // First name only for compact display
+            }
+            return characterId;
         }
 
         private void UpdateDepartmentButtonTooltips()
@@ -414,6 +586,19 @@ namespace CorporateChaos
                 ExecutiveDecisionsBtn.Content = "📈 Executive Decisions";
                 HireEmployeesBtn.ToolTip = "Hire new employees for your departments";
                 ExecutiveDecisionsBtn.ToolTip = "Make strategic executive decisions";
+                
+                // Hide Characters button in sandbox mode
+                if (CharactersBtn != null)
+                {
+                    CharactersBtn.Visibility = Visibility.Collapsed;
+                }
+                
+                // Hide Relationships button in sandbox mode
+                if (RelationshipsBtn != null)
+                {
+                    RelationshipsBtn.Visibility = Visibility.Collapsed;
+                }
+                
                 System.Diagnostics.Debug.WriteLine("Sandbox mode - all buttons enabled");
                 return;
             }
@@ -453,6 +638,28 @@ namespace CorporateChaos
             {
                 ExecutiveDecisionsBtn.Content = "📈 Executive Decisions";
                 ExecutiveDecisionsBtn.ToolTip = "Make strategic executive decisions";
+            }
+            
+            // Show Characters button if any character besides Joan has been introduced
+            if (CharactersBtn != null)
+            {
+                bool hasIntroducedCharacters = StoryScript.Characters.Values
+                    .Any(c => c.CharacterId != "joan" && storyModeManager.IsCharacterIntroduced(c.CharacterId));
+                
+                CharactersBtn.Visibility = hasIntroducedCharacters ? Visibility.Visible : Visibility.Collapsed;
+                
+                if (hasIntroducedCharacters)
+                {
+                    int characterCount = StoryScript.Characters.Values
+                        .Count(c => c.CharacterId != "joan" && storyModeManager.IsCharacterIntroduced(c.CharacterId));
+                    CharactersBtn.ToolTip = $"Talk to characters you've met ({characterCount} available)";
+                }
+            }
+            
+            // Show Relationships button in story mode
+            if (RelationshipsBtn != null)
+            {
+                RelationshipsBtn.Visibility = Visibility.Visible;
             }
         }
 
@@ -667,13 +874,17 @@ namespace CorporateChaos
             
             if (saveLoadManager.SaveGame(gameSave))
             {
-                MessageBox.Show($"Game saved as: {gameSave.GetFileName()}", "Save Successful", 
-                    MessageBoxButton.OK, MessageBoxImage.Information);
+                Views.ModernMessageBox.ShowSuccess(
+                    $"Your game has been saved successfully!\n\nFile: {gameSave.GetFileName()}", 
+                    "Save Successful",
+                    this);
             }
             else
             {
-                MessageBox.Show("Failed to save game!", "Save Error", 
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                Views.ModernMessageBox.ShowError(
+                    "Failed to save game! Please check disk space and permissions.", 
+                    "Save Error",
+                    this);
             }
         }
 
@@ -683,6 +894,21 @@ namespace CorporateChaos
             company = gameSave.Company;
             departments = gameSave.Departments;
             hiredEmployees = gameSave.AvailableEmployees; // Load as hired employees
+            
+            // Fix legacy employees that don't have gender/profile images
+            foreach (var employee in hiredEmployees)
+            {
+                employee.EnsureProfileData();
+            }
+            
+            // Also fix employees in departments
+            foreach (var dept in departments.Values)
+            {
+                foreach (var employee in dept.Employees)
+                {
+                    employee.EnsureProfileData();
+                }
+            }
             
             gameLog = new StringBuilder();
             foreach (var eventText in gameSave.GameEvents)
@@ -730,6 +956,43 @@ namespace CorporateChaos
                 // New branching dialogue demo
                 JoanDialogue.ShowBranchingDialogueExample(company, departments, quarterNumber, this);
             }
+        }
+
+        // Character Interactions
+        private void CharactersBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (storyModeManager == null || !storyModeManager.IsStoryMode)
+            {
+                MessageBox.Show("Character interactions are only available in Story Mode.", 
+                              "Story Mode Only", 
+                              MessageBoxButton.OK, 
+                              MessageBoxImage.Information);
+                return;
+            }
+
+            var characterWindow = new Views.CharacterInteractionWindow(company, storyModeManager, quarterNumber);
+            characterWindow.Owner = this;
+            characterWindow.ShowDialog();
+        }
+
+        // Relationships Window
+        private void RelationshipsBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (storyModeManager == null || !storyModeManager.IsStoryMode)
+            {
+                MessageBox.Show("Relationships are only available in Story Mode.", 
+                              "Story Mode Only", 
+                              MessageBoxButton.OK, 
+                              MessageBoxImage.Information);
+                return;
+            }
+
+            var relationshipsWindow = new Views.RelationshipsWindow(
+                storyModeManager.StoryData.CharacterRelationships,
+                StoryScript.Characters
+            );
+            relationshipsWindow.Owner = this;
+            relationshipsWindow.ShowDialog();
         }
 
         // Music Toggle
@@ -798,6 +1061,15 @@ namespace CorporateChaos
                 {
                     LogEvent($"📖 {eventText}");
                 }
+                
+                // Trigger choice consequences for this quarter
+                storyModeManager.TriggerChoiceConsequences(quarterNumber);
+                
+                // Generate and display narrative events (post-tutorial)
+                if (!storyModeManager.IsInTutorial && storyModeManager.NarrativeEngine != null)
+                {
+                    ProcessNarrativeEvents(quarterNumber);
+                }
             }
             
             // Apply the chaotic events system
@@ -848,6 +1120,9 @@ namespace CorporateChaos
             if (storyModeManager.IsStoryMode)
             {
                 storyModeManager.CompleteQuarter(quarterNumber);
+                
+                // Check for act transitions and show narrative events
+                ProcessActTransitionEvents(quarterNumber);
             }
             
             UpdateUI();
@@ -898,6 +1173,171 @@ namespace CorporateChaos
             }
             
             LogEvent($"📅 Quarter {quarterNumber} begins! Use the hiring panel to recruit new talent.");
+        }
+
+        private void ProcessNarrativeEvents(int quarter)
+        {
+            // Get distributed narrative events for this quarter
+            var narrativeEvents = storyModeManager.NarrativeEngine!.GenerateDistributedEventsForQuarter(quarter);
+            
+            // Display each narrative event to the player
+            foreach (var narrativeEvent in narrativeEvents)
+            {
+                ShowNarrativeEvent(narrativeEvent);
+            }
+        }
+
+        private void ShowNarrativeEvent(NarrativeEvent narrativeEvent)
+        {
+            // Skip if this event has already been completed
+            if (storyModeManager.StoryData.CompletedStoryEvents.Contains(narrativeEvent.EventId))
+                return;
+
+            // Create a dialogue conversation for the narrative event
+            var conversation = new DialogueConversation
+            {
+                ConversationId = narrativeEvent.EventId,
+                Title = narrativeEvent.Title,
+                Participants = new List<string> { "player" },
+                StartNodeId = "event_intro",
+                CurrentNodeId = "event_intro"
+            };
+
+            // Add all involved characters to participants
+            foreach (var characterId in narrativeEvent.InvolvedCharacters)
+            {
+                if (!conversation.Participants.Contains(characterId))
+                {
+                    conversation.Participants.Add(characterId);
+                }
+            }
+
+            // Create the initial dialogue node
+            var initialNode = new DialogueNode
+            {
+                NodeId = "event_intro",
+                CharacterId = narrativeEvent.InvolvedCharacters.FirstOrDefault() ?? "joan",
+                DialogueText = string.Join("\n\n", narrativeEvent.Dialogue),
+                EmotionalTone = EmotionalTone.Neutral, // Default tone for narrative events
+                Choices = narrativeEvent.Choices
+            };
+
+            conversation.Nodes.Add("event_intro", initialNode);
+
+            // Show the dialogue using JoanDialogue
+            var dialogue = new JoanDialogue(
+                company,
+                departments,
+                conversation,
+                storyModeManager.StoryData.CharacterRelationships,
+                storyModeManager.StoryData.StoryFlags,
+                true,
+                quarterNumber,
+                storyModeManager
+            );
+
+            dialogue.Owner = this;
+            dialogue.Title = narrativeEvent.Title;
+            dialogue.ShowDialog();
+
+            // Log the narrative event
+            string eventTypeIcon = narrativeEvent.EventType switch
+            {
+                NarrativeEventType.CharacterIntroduction => "👋",
+                NarrativeEventType.RelationshipMilestone => "💫",
+                NarrativeEventType.PersonalChallenge => "💭",
+                NarrativeEventType.BusinessConflict => "⚔️",
+                NarrativeEventType.EmotionalBeat => "❤️",
+                NarrativeEventType.ChoiceConsequence => "🔄",
+                NarrativeEventType.ActTransition => "🎭",
+                NarrativeEventType.EndingSetup => "🎬",
+                _ => "📖"
+            };
+
+            LogEvent($"{eventTypeIcon} STORY EVENT: {narrativeEvent.Title}");
+            if (!string.IsNullOrEmpty(narrativeEvent.Description))
+            {
+                LogEvent($"   {narrativeEvent.Description}");
+            }
+
+            // Mark the event as completed
+            storyModeManager.StoryData.CompletedStoryEvents.Add(narrativeEvent.EventId);
+        }
+
+        private void ProcessActTransitionEvents(int quarter)
+        {
+            // Check if this is an act transition quarter (Q11, Q61, Q101)
+            if (quarter != 11 && quarter != 61 && quarter != 101)
+                return;
+
+            // Get the narrative engine from story mode manager
+            if (storyModeManager?.CharacterManager == null)
+                return;
+
+            var narrativeEngine = new NarrativeEngine(
+                storyModeManager.StoryData,
+                company,
+                storyModeManager.CharacterManager
+            );
+
+            // Generate act transition events
+            var actTransitionEvents = narrativeEngine.GenerateEventsForQuarter(quarter)
+                .Where(e => e.EventType == NarrativeEventType.ActTransition)
+                .ToList();
+
+            // Display each act transition event to the player
+            foreach (var transitionEvent in actTransitionEvents)
+            {
+                ShowActTransitionEvent(transitionEvent);
+            }
+        }
+
+        private void ShowActTransitionEvent(NarrativeEvent transitionEvent)
+        {
+            // Create a dialogue conversation for the act transition
+            var conversation = new DialogueConversation
+            {
+                ConversationId = transitionEvent.EventId,
+                Title = transitionEvent.Title,
+                Participants = new List<string> { "player", "joan" },
+                StartNodeId = "transition_intro",
+                CurrentNodeId = "transition_intro"
+            };
+
+            // Create the initial dialogue node
+            var initialNode = new DialogueNode
+            {
+                NodeId = "transition_intro",
+                CharacterId = "joan",
+                DialogueText = string.Join("\n\n", transitionEvent.Dialogue),
+                EmotionalTone = EmotionalTone.Serious,
+                Choices = transitionEvent.Choices
+            };
+
+            conversation.Nodes.Add("transition_intro", initialNode);
+
+            // Show the dialogue using JoanDialogue
+            var dialogue = new JoanDialogue(
+                company,
+                departments,
+                conversation,
+                storyModeManager.StoryData.CharacterRelationships,
+                storyModeManager.StoryData.StoryFlags,
+                true,
+                quarterNumber,
+                storyModeManager
+            );
+
+            dialogue.Owner = this;
+            dialogue.Title = transitionEvent.Title;
+            dialogue.ShowDialog();
+
+            // Log the act transition
+            LogEvent($"🎭 ACT TRANSITION: {transitionEvent.Title}");
+            LogEvent($"   {transitionEvent.Description}");
+
+            // Mark the event as completed
+            storyModeManager.StoryData.CompletedStoryEvents.Add(transitionEvent.EventId);
         }
 
         private void UpdateCrisisStatus()

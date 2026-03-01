@@ -1,0 +1,78 @@
+<Window x:Class="CorporateChaos.Views.CharacterInteractionWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:converters="clr-namespace:CorporateChaos.Converters"
+        Title="Character Interactions" Height="650" Width="850" 
+        WindowStartupLocation="CenterOwner"
+        Background="Transparent" AllowsTransparency="True" WindowStyle="None">
+    
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/styles/ScrollBarStyles.xaml"/>
+                <ResourceDictionary Source="/styles/ButtonStyles.xaml"/>
+                <ResourceDictionary Source="/styles/Typography.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            
+            <converters:PathToImageSourceConverter x:Key="PathToImageConverter"/>
+        </ResourceDictionary>
+    </Window.Resources>
+    
+    <Border Background="#1a1a2e" BorderBrush="#4a4a6e" BorderThickness="2" CornerRadius="12">
+        <Border.Effect>
+            <DropShadowEffect Color="Black" Opacity="0.5" BlurRadius="20" ShadowDepth="0"/>
+        </Border.Effect>
+        
+        <Grid Margin="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            
+            <!-- Header -->
+            <Border Grid.Row="0" Background="#2a4a6e" CornerRadius="10,10,0,0" Padding="25,20">
+                <Grid>
+                    <StackPanel HorizontalAlignment="Center">
+                        <TextBlock Text="👥 Character Interactions" Style="{StaticResource HeaderLarge}" 
+                                  HorizontalAlignment="Center"/>
+                        <TextBlock Text="Build relationships and get valuable advice" 
+                                  Style="{StaticResource BodyMedium}" Foreground="#B0D4F1"
+                                  HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                    </StackPanel>
+                    
+                    <!-- Close Button -->
+                    <Button Content="✕" HorizontalAlignment="Right" VerticalAlignment="Top"
+                            Click="CloseBtn_Click" Style="{StaticResource CloseButton}"/>
+                </Grid>
+            </Border>
+            
+            <!-- Description -->
+            <Border Grid.Row="1" Background="#16213e" Padding="20,15">
+                <TextBlock Text="Select a character to start a conversation. Your choices and interactions will affect your relationships and unlock new opportunities."
+                          Style="{StaticResource BodyMedium}" Foreground="#D0D0D0"
+                          HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center"/>
+            </Border>
+            
+            <!-- Character List -->
+            <Border Grid.Row="2" Background="#16213e" Padding="20">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <ScrollViewer.Resources>
+                        <Style TargetType="ScrollBar" BasedOn="{StaticResource CorporateChaosScrollBar}"/>
+                    </ScrollViewer.Resources>
+                    <StackPanel x:Name="CharacterListPanel">
+                        <!-- Characters will be added dynamically -->
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+            
+            <!-- Close Button -->
+            <Border Grid.Row="3" Background="#1a1a2e" CornerRadius="0,0,10,10" Padding="20,15">
+                <Button Content="Close" MinWidth="120" Height="40" 
+                        HorizontalAlignment="Center"
+                        Click="CloseBtn_Click" Style="{StaticResource GhostButton}"/>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

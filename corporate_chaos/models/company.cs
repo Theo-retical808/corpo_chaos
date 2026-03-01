@@ -395,32 +395,32 @@ namespace CorporateChaos.Models
             // Calculate quarterly expenses (salaries + operations)
             QuarterlyExpenses = departments.Values.Sum(d => d.GetQuarterlyCost());
             
-            // INCREASED BASE OPERATIONAL COSTS - scales with company size and market share
-            double baseOperationalCosts = 50000; // Base cost
-            double marketShareMultiplier = 1.0 + (MarketShare / 100.0); // 1.0 to 2.0 multiplier
-            double employeeScalingCosts = EmployeeCount * 2500; // $2,500 per employee in overhead
-            double capitalScalingCosts = Math.Max(0, Capital / 1000000) * 5000; // $5K per million in capital (infrastructure costs)
+            // BALANCED OPERATIONAL COSTS - scales more gently with company size
+            double baseOperationalCosts = 30000; // Reduced from 50000
+            double marketShareMultiplier = 1.0 + (MarketShare / 200.0); // 1.0 to 1.5 multiplier (was /100)
+            double employeeScalingCosts = EmployeeCount * 1500; // Reduced from $2,500 to $1,500 per employee
+            double capitalScalingCosts = Math.Max(0, Capital / 2000000) * 3000; // Reduced scaling (was /1000000 * 5000)
             
-            // Additional late-game scaling costs
+            // Additional late-game scaling costs (reduced)
             if (MarketShare > 30)
             {
-                baseOperationalCosts += 25000; // Additional $25K for market leaders
+                baseOperationalCosts += 15000; // Reduced from $25K
             }
             if (MarketShare > 50)
             {
-                baseOperationalCosts += 50000; // Additional $50K for dominant players
+                baseOperationalCosts += 25000; // Reduced from $50K
             }
             if (Capital > 1000000000) // $1B+
             {
-                baseOperationalCosts += 75000; // Additional $75K for mega-corporations
+                baseOperationalCosts += 40000; // Reduced from $75K
             }
             
             double totalOperationalCosts = (baseOperationalCosts + employeeScalingCosts + capitalScalingCosts) * marketShareMultiplier;
             QuarterlyExpenses += totalOperationalCosts;
 
             // Calculate quarterly revenue based on market share and department performance
-            double baseRevenue = MarketShare * 10000; // Base revenue per market share point
-            double departmentBonus = departments.Values.Sum(d => d.GetTotalProductivity()) / 100.0;
+            double baseRevenue = MarketShare * 15000; // Increased from 10000 to 15000
+            double departmentBonus = departments.Values.Sum(d => d.GetTotalProductivity()) / 80.0; // More generous (was /100)
             
             // Apply reputation modifier to revenue
             double reputationModifier = GetReputationRevenueModifier();

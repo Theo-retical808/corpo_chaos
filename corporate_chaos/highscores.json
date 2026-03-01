@@ -1,6 +1,23 @@
 {
   "scores": [
     {
+      "nickname": "Graham",
+      "score": 9553615,
+      "peakCapital": 735984722.0883949,
+      "peakRevenue": 70152481.29293892,
+      "peakProfit": 68455494.21774577,
+      "peakMarketShare": 53.729850284360666,
+      "peakEmployees": 34,
+      "peakReputation": 130,
+      "finalCapital": 458220735.53770864,
+      "finalMarketShare": 46.896140810091794,
+      "finalEmployees": 33,
+      "quartersPlayed": 120,
+      "endReason": "Retirement - You\u0027ve reached the end of your 30-year career!",
+      "dateAchieved": "2026-03-02T01:40:19.4962543+08:00",
+      "peakQuarter": 101
+    },
+    {
       "nickname": "ishi",
       "score": 4673801,
       "peakCapital": 360182477.2877986,
@@ -103,6 +120,23 @@
       "peakQuarter": 39
     },
     {
+      "nickname": "Theo",
+      "score": 360466,
+      "peakCapital": 39290719.81775199,
+      "peakRevenue": 9462537.76342822,
+      "peakProfit": 8213200.8864804,
+      "peakMarketShare": 10.20568799946015,
+      "peakEmployees": 70,
+      "peakReputation": 100,
+      "finalCapital": 0,
+      "finalMarketShare": 1.0926178745062316,
+      "finalEmployees": 70,
+      "quartersPlayed": 31,
+      "endReason": "Bankruptcy - Company declared bankruptcy after 2 consecutive quarters of negative capital",
+      "dateAchieved": "2026-03-02T00:28:37.0969319+08:00",
+      "peakQuarter": 15
+    },
+    {
       "nickname": "Denmarc",
       "score": 226988,
       "peakCapital": 32920921.423733898,
@@ -135,41 +169,7 @@
       "endReason": "Bankruptcy - Ran out of capital",
       "dateAchieved": "2026-01-28T10:50:52.7443273+08:00",
       "peakQuarter": 4
-    },
-    {
-      "nickname": "Quinn",
-      "score": 7372,
-      "peakCapital": 775818.0235378783,
-      "peakRevenue": 212414,
-      "peakProfit": 101234.01999999996,
-      "peakMarketShare": 8,
-      "peakEmployees": 6,
-      "peakReputation": 0,
-      "finalCapital": 12558.814111372083,
-      "finalMarketShare": 1,
-      "finalEmployees": 0,
-      "quartersPlayed": 17,
-      "endReason": "Business Failure - No employees left",
-      "dateAchieved": "2026-01-28T14:54:22.105058+08:00",
-      "peakQuarter": 5
-    },
-    {
-      "nickname": "Breh",
-      "score": 4032,
-      "peakCapital": 775299.6407445722,
-      "peakRevenue": 170394.84000000003,
-      "peakProfit": 58168.840000000026,
-      "peakMarketShare": 8,
-      "peakEmployees": 4,
-      "peakReputation": 0,
-      "finalCapital": 342800.2167836034,
-      "finalMarketShare": 5,
-      "finalEmployees": 0,
-      "quartersPlayed": 12,
-      "endReason": "Business Failure - No employees left",
-      "dateAchieved": "2026-01-28T20:39:26.2595547+08:00",
-      "peakQuarter": 5
     }
   ],
-  "lastUpdated": "2026-02-03T23:50:13.1796905+08:00"
+  "lastUpdated": "2026-03-02T01:40:19.497344+08:00"
 }

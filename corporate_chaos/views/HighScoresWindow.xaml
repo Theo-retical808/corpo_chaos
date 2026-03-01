@@ -5,6 +5,14 @@
         WindowStartupLocation="CenterOwner" ResizeMode="CanResize"
         Background="#1a1a2e">
     
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/styles/ScrollBarStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -21,6 +29,9 @@
         
         <Border Grid.Row="1" Background="#16213e" CornerRadius="10" Padding="15">
             <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                <ScrollViewer.Resources>
+                    <Style TargetType="ScrollBar" BasedOn="{StaticResource CorporateChaosScrollBar}"/>
+                </ScrollViewer.Resources>
                 <DataGrid x:Name="HighScoresDataGrid" AutoGenerateColumns="False" 
                           Background="Transparent" Foreground="White" 
                           GridLinesVisibility="Horizontal" HeadersVisibility="Column"

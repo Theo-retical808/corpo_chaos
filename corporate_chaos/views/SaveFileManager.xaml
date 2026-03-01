@@ -5,6 +5,14 @@
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
         Background="#1a1a2e">
     
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/styles/ScrollBarStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -32,6 +40,9 @@
                           Foreground="White" Margin="0,0,0,15"/>
                 
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <ScrollViewer.Resources>
+                        <Style TargetType="ScrollBar" BasedOn="{StaticResource CorporateChaosScrollBar}"/>
+                    </ScrollViewer.Resources>
                     <ItemsControl x:Name="SaveFilesItemsControl">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>

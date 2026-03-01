@@ -1,0 +1,74 @@
+<Window x:Class="CorporateChaos.Views.RelationshipsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Character Relationships" Height="600" Width="500"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ResizeMode="NoResize">
+    
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/styles/ScrollBarStyles.xaml"/>
+                <ResourceDictionary Source="/styles/ButtonStyles.xaml"/>
+                <ResourceDictionary Source="/styles/Typography.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    
+    <Border Background="#1a1a2e" CornerRadius="12" BorderBrush="#4d2a4d" BorderThickness="2">
+        <Border.Effect>
+            <DropShadowEffect Color="Black" BlurRadius="20" ShadowDepth="0" Opacity="0.7"/>
+        </Border.Effect>
+        
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="60"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="60"/>
+            </Grid.RowDefinitions>
+            
+            <!-- Header -->
+            <Border Grid.Row="0" Background="#2a4a6e" CornerRadius="12,12,0,0">
+                <Grid>
+                    <TextBlock Text="💕 CHARACTER RELATIONSHIPS" FontSize="18" FontWeight="Bold" 
+                              Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    
+                    <Button x:Name="CloseBtn" Content="✕" Width="30" Height="30" 
+                           HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"
+                           Background="Transparent" Foreground="White" BorderThickness="0"
+                           FontSize="18" FontWeight="Bold" Click="CloseBtn_Click" Cursor="Hand">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#4d2a2a"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </Grid>
+            </Border>
+            
+            <!-- Content -->
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="15">
+                <ScrollViewer.Resources>
+                    <Style TargetType="ScrollBar" BasedOn="{StaticResource CorporateChaosScrollBar}"/>
+                </ScrollViewer.Resources>
+                
+                <StackPanel x:Name="RelationshipsPanel">
+                    <!-- Relationships will be added dynamically -->
+                </StackPanel>
+            </ScrollViewer>
+            
+            <!-- Footer -->
+            <Border Grid.Row="2" Background="#16213e" CornerRadius="0,0,12,12" Padding="15">
+                <TextBlock Text="Build relationships through dialogue choices and business decisions" 
+                          FontSize="11" Foreground="Gray" TextWrapping="Wrap" 
+                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+        </Grid>
+    </Border>
+</Window>
