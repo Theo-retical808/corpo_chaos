@@ -1,8 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "RP2d5N1yBDY=",
+  "dgSpecHash": "XQOMPQs0lrk=",
   "success": true,
   "projectFilePath": "C:\\Users\\user\\OneDrive\\Desktop\\Test_Projects\\Corp_chaos_proto\\corporate_chaos\\corporate_chaos\\corporate_chaos.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\user\\.nuget\\packages\\microsoft.netcore.app.runtime.win-x64\\8.0.24\\microsoft.netcore.app.runtime.win-x64.8.0.24.nupkg.sha512",
+    "C:\\Users\\user\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-x64\\8.0.24\\microsoft.windowsdesktop.app.runtime.win-x64.8.0.24.nupkg.sha512",
+    "C:\\Users\\user\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-x64\\8.0.24\\microsoft.aspnetcore.app.runtime.win-x64.8.0.24.nupkg.sha512"
+  ],
   "logs": []
 }

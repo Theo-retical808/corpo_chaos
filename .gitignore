@@ -50,3 +50,9 @@ corporate_chaos/settings.json
 *.tmp
 *.temp
 *_wpftmp.csproj
+
+# Publish output
+corporate_chaos/publish/
+
+# Installer output
+installer/output/
