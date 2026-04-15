@@ -1,0 +1,51 @@
+CORPORATE CHAOS — A Turn-Based Business Management Simulation
+Version 0.1.2 Beta
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ABOUT THE GAME
+
+Corporate Chaos is an offline, single-player business simulation where you take the helm of a company and steer it through 30 years of corporate life — one quarter at a time.
+
+Hire employees, manage six departments, make executive decisions, survive random crises, and try to build a billion-dollar empire or capture 65% market share before your 120 quarters run out.
+
+Features:
+  • Story Mode — Learn the ropes with Secretary Joan guiding you through a narrative-driven tutorial with branching dialogue and character relationships
+  • Sandbox Mode — Jump straight in with all features unlocked, in a 120-quarter challenge or endless free play
+  • Dynamic Chaos Engine — Random events driven by your company stats keep every playthrough unpredictable
+  • Employee Management — Hire, assign, transfer, and fire employees across Marketing, Operations, Finance, HR, IT, and Research
+  • Executive Decisions — Marketing campaigns, R&D investments, company retreats, crisis consultants, business loans, and cost cutting
+  • Detailed Financials — Quarterly revenue/expense breakdowns, financial reports, and performance tracking
+  • Fully Customizable — Edit JSON data files to change employee names, events, game balance, and job descriptions without any coding
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AI-GENERATED CONTENT DISCLOSURE
+
+Portions of this software were developed with the assistance of generative AI tools. This includes but is not limited to:
+
+  • Source code and game logic
+  • UI layouts and visual styling
+  • Story dialogue, event descriptions, and narrative text
+  • Employee names and job descriptions
+  • Documentation and installer text
+  • Character portrait images
+
+All AI-generated content has been reviewed and curated by the developer. However, AI-generated material may contain inaccuracies, unintended patterns, or artifacts. The game is provided as-is for entertainment purposes.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+BETA NOTICE
+
+This is a beta release. You may encounter:
+  • Bugs and unexpected behavior
+  • Incomplete story mode content
+  • Balance issues (too easy or too hard)
+  • UI quirks on certain screen resolutions
+
+Bug reports and feedback are welcome at:
+https://github.com/Theo-retical808/corpo_chaos/issues
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+This game runs completely offline. No internet connection, account, or login is required. No data is collected or transmitted.

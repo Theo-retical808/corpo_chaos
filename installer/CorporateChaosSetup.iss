@@ -2,7 +2,7 @@
 ; Version: 0.1.2 Beta
 ;
 ; Prerequisites:
-;   1. Install Inno Setup from https://jrsoftware.org/isdl.php
+;   1. Install Inno Setup 6 from https://jrsoftware.org/isdl.php
 ;   2. Run: dotnet publish -c Release -r win-x64 --self-contained -o publish
 ;      from the corporate_chaos/ directory
 ;   3. Open this file in Inno Setup Compiler and click Build > Compile
@@ -15,7 +15,6 @@
 #define MyAppPublisher "Theo-retical808"
 #define MyAppURL "https://github.com/Theo-retical808/corpo_chaos"
 #define MyAppExeName "corporate_chaos.exe"
-#define MyAppDescription "A turn-based business management simulation game"
 
 ; Path to the publish output (relative to this .iss file)
 #define PublishDir "..\corporate_chaos\publish"
@@ -33,7 +32,6 @@ DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
 OutputDir=output
 OutputBaseFilename=CorporateChaos_v{#MyAppVersion}_Setup
-SetupIconFile={#PublishDir}\corporate_chaos.exe
 Compression=lzma2/ultra64
 SolidCompression=yes
 WizardStyle=modern
@@ -41,12 +39,7 @@ PrivilegesRequired=lowest
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 UninstallDisplayIcon={app}\{#MyAppExeName}
-LicenseFile=
-InfoBeforeFile=
-
-; Visual settings
-WizardImageFile=compiler:WizModernImage-IS.bmp
-WizardSmallImageFile=compiler:WizModernSmallImage-IS.bmp
+InfoBeforeFile=InfoBefore.txt
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"

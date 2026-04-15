@@ -1,70 +1,68 @@
 # Corporate Chaos
 
-> **Beta Testing Notice:** This project is currently in beta testing. Features and mechanics may change, and there is no official instruction manual yet. Early testers have been briefed on the gameplay mechanics. Please expect updates and improvements in future releases.
+A turn-based business management simulation game built with WPF and .NET 8.0.
 
-Corporate Chaos is a turn-based business management simulation designed to gamify the experience of running a company. Its initial goal is to allow users to **simulate business management and supervision** in a fun yet analytical way, while also providing insight into different approaches people take when managing a business.  
+Take the helm of a company and steer it through 30 years of corporate life — one quarter at a time. Hire employees, manage departments, make executive decisions, survive random crises, and try to build a billion-dollar empire.
 
 ## Features
 
-- **Turn-Based System:** Each decision and action is processed in turns, allowing strategic planning and thoughtful management.  
-- **Comprehensive Management:** Users can manage nearly all aspects of a business, from operations to finance, marketing, and human resources.  
-- **Chaotic Event Tree:** Random events occur throughout the game, influenced by three core stats. This introduces unpredictability and challenges players to adapt.  
-- **Story Mode:** Interactive tutorial system with Secretary Joan guiding players through game mechanics over the first 10 quarters. Now expanded into a comprehensive 120-quarter narrative experience (see Story Mode Expansion below).
-- **Game Statistics:** At the end of each run, detailed statistics summarize the performance, decisions, and outcomes.
-- **Options System:** Comprehensive settings management accessible from the main menu:
-  - **Audio Settings:** Volume control slider (0-100%) with real-time preview and mute toggle
-  - **Display Settings:** Windowed or fullscreen mode with instant application
-  - **Settings Persistence:** All preferences saved to `settings.json` and restored on startup
-  - **Real-time Updates:** Changes apply immediately without requiring restart
-  - See `OPTIONS_SYSTEM.md` for complete documentation
+- **Story Mode** — Learn the ropes with Secretary Joan guiding you through a narrative-driven tutorial with branching dialogue and character relationships
+- **Sandbox Mode** — Jump straight in with all features unlocked, in a 120-quarter challenge or endless free play
+- **Dynamic Chaos Engine** — Random events driven by your company stats keep every playthrough unpredictable
+- **Employee Management** — Hire, assign, transfer, and fire employees across Marketing, Operations, Finance, HR, IT, and Research
+- **Executive Decisions** — Marketing campaigns, R&D investments, company retreats, crisis consultants, business loans, and cost cutting
+- **Detailed Financials** — Quarterly revenue/expense breakdowns, financial reports, and performance tracking
+- **Fully Customizable** — Edit JSON data files to change employee names, events, game balance, and job descriptions without any coding
+- **Completely Offline** — No internet, no accounts, no telemetry. A single desktop application that reads and writes local files
 
-## Planned Features
+## Download
 
-### Story Mode Expansion (Completed - Beta Testing)
-The story mode has been expanded from a basic 10-quarter tutorial into a comprehensive narrative experience spanning all 120 quarters of gameplay. 
+Check the [Releases](https://github.com/Theo-retical808/corpo_chaos/releases) page for the latest installer.
 
-**✅ IMPLEMENTATION COMPLETE - All Core Systems Operational:**
+## Build from Source
 
-**Completed Systems:**
-- ✅ **Core Data Models:** Extended story data structures with character relationships, choice tracking, and narrative state management
-- ✅ **Character System Foundation:** Character relationship tracking, arc progression, and personality management systems
-- ✅ **All 8 Story Characters:** Complete character profiles with distinct personalities, dialogue patterns, and strategic roles
-  - Marcus Vey (CFO) - Risk-loving financial strategist
-  - Evelyn Cross (HR Head) - Employee-focused culture guardian
-  - Vincent Duro (Rival CEO) - Competitive nemesis/respected opponent
-  - Lucinda Vale (PR/Marketing) - Creative brand strategist
-  - Gregory Shaw (Operations) - Methodical efficiency expert
-  - Selena Park (Venture Capitalist) - Strategic investment advisor
-  - Harold Finch (Legal Counsel) - Risk-averse compliance guardian
-  - Sophie Kim (Junior Analyst) - Enthusiastic data specialist
-- ✅ **Enhanced Dialogue System:** Branching conversations with relationship-based adaptations and choice consequences
-- ✅ **Narrative Event System:** Story-mechanic integration, emotional beat management, and content distribution
-- ✅ **Four-Act Narrative Structure:** Tutorial (Q1-10), Rising Action (Q11-60), Climax (Q61-100), Resolution (Q101-120)
-- ✅ **Joan's Character Progression:** Evolves from professional assistant to lifelong friend across four relationship phases
-- ✅ **Choice Tracking & Consequences:** Player decisions affect story direction, character relationships, and game endings
-- ✅ **Story Branching System:** 8 distinct narrative paths based on player choices and company performance
-- ✅ **Emotional Beat Manager:** Balanced pacing of triumph, challenge, bittersweet, and surprise moments
-- ✅ **Timeline Content Coverage:** Story content distributed across all 120 quarters with proper pacing
-- ✅ **Character Ending Impact:** Character advice and relationships influence ending probabilities
-- ✅ **Main Game Integration:** Narrative events integrated with quarterly progression and UI
-- ✅ **Character Interaction UI:** Dedicated window for player-initiated character conversations
+**Prerequisites:** [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
 
-**Key Features:**
-- **Multi-Act Narrative Structure:** Four-act story with distinct emotional arcs and escalating stakes
-- **Rich Character Development:** Joan and 8 additional characters with evolving relationships and personal arcs
-- **Meaningful Player Choices:** Decisions affect story direction, character relationships, and game endings
-- **Story-Mechanic Integration:** Business decisions become story catalysts with narrative context and character reactions
-- **Multiple Endings:** Character relationships and choices influence paths toward market dominance, buyout opportunities, or other outcomes
-- **Emotional Investment:** Designed emotional beats and character arcs create genuine investment in the narrative
-- **Story Branching:** 8 distinct narrative paths (Aggressive Growth, Conservative Management, Employee-Focused, Profit-Focused, Ethical Leadership, Ruthless Efficiency, Innovation-Driven, Market Domination)
+```bash
+cd corporate_chaos
+dotnet build        # Build
+dotnet run          # Run
+```
 
-*See `.kiro/specs/story-mode-expansion/` for detailed requirements, design, and implementation documentation.*  
+To create a self-contained release (no .NET required on target machine):
 
-## Intention
+```bash
+dotnet publish -c Release -r win-x64 --self-contained -o publish
+```
 
-The original intention of Corporate Chaos was to serve as a simulation for collecting data on **business practices and decision-making approaches** from different users. Over time, it has also become a small-scale game, enjoyed by testers and myself, blending both **analytics and entertainment**.
+See [installer/README.md](installer/README.md) for creating the installer with Inno Setup.
+
+## Customization
+
+Corporate Chaos is designed to be modifiable without writing code. Edit the JSON files in the `data/` folder:
+
+| File | What It Controls |
+|------|-----------------|
+| `names.json` | Employee first names (male/female) and last names |
+| `events.json` | All random event descriptions, crises, scandals, positive PR |
+| `gamebalance.json` | Starting values, costs, revenue formulas, event probabilities |
+| `positions.json` | Department job descriptions and skill keywords |
+
+See [docs/CUSTOMIZATION_GUIDE.md](docs/CUSTOMIZATION_GUIDE.md) for the full guide.
+
+## Documentation
+
+- [Technical Decisions & Architecture](docs/TECHNICAL_DECISIONS.md) — Why C#, why WPF, why this architecture, pros and cons
+- [Customization Guide](docs/CUSTOMIZATION_GUIDE.md) — How to modify the game without code
+
+## AI-Generated Content Disclosure
+
+Portions of this software were developed with the assistance of generative AI tools. This includes source code, game logic, UI layouts, story dialogue, event descriptions, employee names, character portrait images, and documentation. All AI-generated content has been reviewed and curated by the developer.
 
 ## License
 
-See the [LICENSE](LICENSE) file for details.
+This project is provided as-is for entertainment and educational purposes.
 
+## Status
+
+**v0.1.2 Beta** — Playable but under active development. Story mode is being expanded. Bug reports welcome at [Issues](https://github.com/Theo-retical808/corpo_chaos/issues).
