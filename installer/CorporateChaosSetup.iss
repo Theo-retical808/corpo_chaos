@@ -39,6 +39,7 @@ PrivilegesRequired=lowest
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 UninstallDisplayIcon={app}\{#MyAppExeName}
+SetupIconFile=logo.ico
 InfoBeforeFile=InfoBefore.txt
 
 [Languages]
