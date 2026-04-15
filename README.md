@@ -57,7 +57,9 @@ See [docs/CUSTOMIZATION_GUIDE.md](docs/CUSTOMIZATION_GUIDE.md) for the full guid
 
 ## AI-Generated Content Disclosure
 
-Portions of this software were developed with the assistance of generative AI tools. This includes source code, game logic, UI layouts, story dialogue, event descriptions, employee names, character portrait images, and documentation. All AI-generated content has been reviewed and curated by the developer.
+All game mechanics, features, systems, and design decisions were conceived and defined by the developer. Generative AI was used as a development tool to bring these ideas to life — writing the code, producing assets, and drafting text based on the developer's specifications and direction.
+
+AI-assisted content includes source code, game logic, UI layouts, story dialogue, event descriptions, employee names, character portrait images, and documentation. The creative vision, game design, feature set, balancing decisions, and architectural choices are the developer's own work. All AI-generated output has been reviewed and curated.
 
 ## License
 

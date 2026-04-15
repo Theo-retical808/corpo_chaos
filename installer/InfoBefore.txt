@@ -22,16 +22,20 @@ Features:
 
 AI-GENERATED CONTENT DISCLOSURE
 
-Portions of this software were developed with the assistance of generative AI tools. This includes but is not limited to:
+All game mechanics, features, systems, and design decisions were conceived and defined by the developer. Generative AI was used as a development tool to bring these ideas to life — writing the code, producing assets, and drafting text based on the developer's specifications and direction.
 
-  • Source code and game logic
-  • UI layouts and visual styling
+AI-assisted content includes but is not limited to:
+
+  • Source code and game logic (implemented from developer-defined designs)
+  • UI layouts and visual styling (built to developer specifications)
   • Story dialogue, event descriptions, and narrative text
   • Employee names and job descriptions
   • Documentation and installer text
   • Character portrait images
 
-All AI-generated content has been reviewed and curated by the developer. However, AI-generated material may contain inaccuracies, unintended patterns, or artifacts. The game is provided as-is for entertainment purposes.
+The creative vision, game design, feature set, balancing decisions, and architectural choices are the developer's own work. Generative AI served as the implementation tool, not the designer.
+
+All AI-generated output has been reviewed and curated by the developer. However, AI-generated material may contain inaccuracies, unintended patterns, or artifacts. The game is provided as-is for entertainment purposes.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
