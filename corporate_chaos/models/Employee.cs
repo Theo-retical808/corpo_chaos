@@ -115,65 +115,18 @@ namespace CorporateChaos.Models
             // Determine gender randomly
             var gender = random.Next(2) == 0 ? Gender.Male : Gender.Female;
             
-            // Male names
-            var maleFirstNames = new[]
-            {
-                "Alexander", "Andrew", "Anthony", "Benjamin", "Brandon", "Brian", "Carlos", "Charles", "Christopher", "Daniel",
-                "David", "Edward", "Eric", "Frank", "George", "Henry", "James", "Jason", "Jeffrey", "John",
-                "Jonathan", "Joseph", "Joshua", "Justin", "Kevin", "Mark", "Matthew", "Michael", "Nicholas", "Patrick",
-                "Paul", "Peter", "Richard", "Robert", "Ryan", "Samuel", "Scott", "Stephen", "Steven", "Thomas",
-                "Timothy", "William", "Aaron", "Adam", "Adrian", "Alan", "Albert", "Antonio", "Arthur", "Austin",
-                "Blake", "Bruce", "Carl", "Christian", "Craig", "Derek", "Douglas", "Eugene", "Gabriel", "Gary",
-                "Gregory", "Harold", "Ian", "Isaac", "Jacob", "Jeremy", "Jesse", "Joel", "Jordan", "Kenneth",
-                "Kyle", "Lawrence", "Louis", "Lucas", "Marcus", "Martin", "Nathan", "Noah", "Oliver", "Oscar",
-                "Philip", "Ralph", "Raymond", "Roger", "Sean", "Simon", "Victor", "Walter", "Wayne", "Zachary"
-            };
-            
-            // Female names
-            var femaleFirstNames = new[]
-            {
-                "Amanda", "Amy", "Andrea", "Angela", "Anna", "Ashley", "Barbara", "Betty", "Brenda", "Carol",
-                "Catherine", "Christine", "Deborah", "Diana", "Donna", "Dorothy", "Elizabeth", "Emily", "Emma", "Frances",
-                "Helen", "Jennifer", "Jessica", "Karen", "Kimberly", "Laura", "Linda", "Lisa", "Margaret", "Maria",
-                "Marie", "Mary", "Michelle", "Nancy", "Patricia", "Rebecca", "Ruth", "Sandra", "Sarah", "Sharon",
-                "Stephanie", "Susan", "Teresa", "Virginia", "Abigail", "Alice", "Allison", "Amber", "Andrea", "Angela",
-                "Ann", "Anne", "Annie", "April", "Beverly", "Bonnie", "Carolyn", "Cheryl", "Christina", "Cynthia",
-                "Debra", "Denise", "Diane", "Doris", "Evelyn", "Gloria", "Grace", "Hannah", "Heather", "Irene",
-                "Jacqueline", "Jane", "Janet", "Janice", "Jean", "Joan", "Joyce", "Judith", "Julie", "Kathleen",
-                "Kathryn", "Kelly", "Lori", "Louise", "Megan", "Melissa", "Nicole", "Pamela", "Rachel", "Rose",
-                "Samantha", "Sara", "Shannon", "Shirley", "Tiffany", "Victoria", "Wanda", "Wendy", "Yvonne"
-            };
-
-            var lastNames = new[]
-            {
-                "Adams", "Alexander", "Allen", "Anderson", "Baker", "Barnes", "Bell", "Bennett", "Brooks", "Brown",
-                "Butler", "Campbell", "Carter", "Clark", "Collins", "Cook", "Cooper", "Davis", "Edwards", "Evans",
-                "Fisher", "Foster", "Garcia", "Gonzalez", "Gray", "Green", "Hall", "Harris", "Henderson", "Hill",
-                "Howard", "Hughes", "Jackson", "James", "Johnson", "Jones", "Kelly", "King", "Lee", "Lewis",
-                "Lopez", "Martin", "Martinez", "Miller", "Mitchell", "Moore", "Morgan", "Murphy", "Nelson", "Parker",
-                "Patterson", "Perez", "Peterson", "Phillips", "Powell", "Price", "Reed", "Richardson", "Rivera", "Roberts",
-                "Robinson", "Rodriguez", "Rogers", "Ross", "Russell", "Sanchez", "Scott", "Smith", "Stewart", "Taylor",
-                "Thomas", "Thompson", "Torres", "Turner", "Walker", "Ward", "Washington", "Watson", "White", "Williams",
-                "Wilson", "Wood", "Wright", "Young", "Bailey", "Bryant", "Coleman", "Cox", "Diaz", "Ellis",
-                "Flores", "Ford", "Freeman", "Gibson", "Graham", "Griffin", "Hayes", "Henry", "Hernandez", "Hunt",
-                "Jenkins", "Jordan", "Knight", "Lawrence", "Long", "Mason", "McDonald", "Murray", "Owens", "Palmer",
-                "Perry", "Porter", "Reynolds", "Rice", "Rose", "Sanders", "Simmons", "Stone", "Sullivan", "Webb",
-                "Wells", "West", "Woods", "Adams", "Armstrong", "Austin", "Bishop", "Black", "Boyd", "Bradley",
-                "Burns", "Burton", "Carpenter", "Chapman", "Cole", "Crawford", "Cross", "Curtis", "Duncan", "Elliott",
-                "Ferguson", "Fields", "Fleming", "Fletcher", "Fox", "Francis", "Franklin", "Gardner", "George", "Gilbert",
-                "Gordon", "Grant", "Greene", "Hamilton", "Hansen", "Harper", "Harrison", "Hart", "Harvey", "Hawkins"
-            };
-
-            // Select first names based on gender
-            var firstNames = gender == Gender.Male ? maleFirstNames : femaleFirstNames;
+            // Load names from JSON data
+            var nameData = CorporateChaos.Systems.GameDataLoader.LoadNames();
+            var firstNames = gender == Gender.Male ? nameData.MaleFirstNames : nameData.FemaleFirstNames;
+            var lastNames = nameData.LastNames;
             
             // Generate unique name
             string fullName;
             int attempts = 0;
             do
             {
-                string firstName = firstNames[random.Next(firstNames.Length)];
-                string lastName = lastNames[random.Next(lastNames.Length)];
+                string firstName = firstNames[random.Next(firstNames.Count)];
+                string lastName = lastNames[random.Next(lastNames.Count)];
                 fullName = $"{firstName} {lastName}";
                 attempts++;
                 
@@ -320,82 +273,25 @@ namespace CorporateChaos.Models
 
         private static void GeneratePositionDetails(Employee employee, Random random)
         {
-            var positionTemplates = new Dictionary<Department, (string[] descriptions, string[] keywords)>
-            {
-                [Department.Marketing] = (
-                    new[] {
-                        "Brand strategist with creative campaign experience",
-                        "Digital marketing specialist focused on social media growth",
-                        "Market research analyst with consumer behavior expertise",
-                        "Content creator with strong storytelling abilities",
-                        "SEO/SEM specialist with data-driven approach",
-                        "Public relations coordinator with media connections"
-                    },
-                    new[] { "campaigns", "branding", "social media", "analytics", "content", "SEO", "PR", "creative" }
-                ),
-                [Department.Operations] = (
-                    new[] {
-                        "Process optimization expert with lean methodology background",
-                        "Supply chain coordinator with vendor management skills",
-                        "Quality assurance specialist focused on continuous improvement",
-                        "Project manager with cross-functional team experience",
-                        "Operations analyst with efficiency optimization focus",
-                        "Logistics coordinator with distribution expertise"
-                    },
-                    new[] { "processes", "supply chain", "quality", "logistics", "efficiency", "lean", "coordination" }
-                ),
-                [Department.Finance] = (
-                    new[] {
-                        "Financial analyst with budgeting and forecasting expertise",
-                        "Accounting specialist with regulatory compliance knowledge",
-                        "Investment advisor with portfolio management experience",
-                        "Cost analyst focused on expense optimization",
-                        "Tax specialist with corporate finance background",
-                        "Risk management analyst with audit experience"
-                    },
-                    new[] { "budgeting", "forecasting", "compliance", "investments", "analysis", "auditing", "taxation" }
-                ),
-                [Department.HR] = (
-                    new[] {
-                        "Talent acquisition specialist with recruitment expertise",
-                        "Employee relations coordinator focused on workplace culture",
-                        "Training and development specialist with learning programs",
-                        "Compensation analyst with benefits administration skills",
-                        "HR generalist with policy development experience",
-                        "Organizational development consultant with change management"
-                    },
-                    new[] { "recruitment", "culture", "training", "benefits", "policies", "development", "relations" }
-                ),
-                [Department.IT] = (
-                    new[] {
-                        "Software developer with full-stack development skills",
-                        "Systems administrator with network infrastructure expertise",
-                        "Cybersecurity specialist focused on threat prevention",
-                        "Database administrator with data management experience",
-                        "IT support technician with troubleshooting abilities",
-                        "DevOps engineer with automation and deployment skills"
-                    },
-                    new[] { "programming", "systems", "security", "databases", "support", "automation", "networks" }
-                ),
-                [Department.Research] = (
-                    new[] {
-                        "Research scientist with experimental design expertise",
-                        "Data scientist with machine learning and analytics skills",
-                        "Product development specialist with innovation focus",
-                        "Market research analyst with statistical analysis background",
-                        "R&D engineer with prototype development experience",
-                        "Innovation consultant with emerging technology knowledge"
-                    },
-                    new[] { "research", "data science", "innovation", "analysis", "development", "experimentation", "technology" }
-                )
-            };
-
-            var (descriptions, keywords) = positionTemplates[employee.Specialization];
-            employee.PositionDescription = descriptions[random.Next(descriptions.Length)];
+            // Load position data from JSON
+            var positionData = CorporateChaos.Systems.GameDataLoader.LoadPositions();
+            var deptName = employee.Specialization.ToString();
             
-            // Add 2-4 relevant keywords
-            var shuffledKeywords = keywords.OrderBy(x => random.Next()).Take(random.Next(2, 5)).ToList();
-            employee.SkillKeywords = shuffledKeywords;
+            if (positionData.Departments.ContainsKey(deptName))
+            {
+                var dept = positionData.Departments[deptName];
+                employee.PositionDescription = dept.Descriptions[random.Next(dept.Descriptions.Count)];
+                
+                // Add 2-4 relevant keywords
+                var shuffledKeywords = dept.Keywords.OrderBy(x => random.Next()).Take(random.Next(2, 5)).ToList();
+                employee.SkillKeywords = shuffledKeywords;
+            }
+            else
+            {
+                // Fallback for unknown departments
+                employee.PositionDescription = "General business professional";
+                employee.SkillKeywords = new List<string> { "business", "management" };
+            }
         }
 
         // Method to fix legacy employees loaded from old saves that don't have gender/profile image
@@ -409,14 +305,10 @@ namespace CorporateChaos.Models
                 // Determine gender based on name if not set
                 if (Gender == default(Gender))
                 {
-                    // Simple heuristic: check if name is in common male/female names
-                    var maleNames = new[] { "Alexander", "Andrew", "Anthony", "Benjamin", "Brandon", "Brian", "Carlos", "Charles", "Christopher", "Daniel",
-                        "David", "Edward", "Eric", "Frank", "George", "Henry", "James", "Jason", "Jeffrey", "John",
-                        "Jonathan", "Joseph", "Joshua", "Justin", "Kevin", "Mark", "Matthew", "Michael", "Nicholas", "Patrick",
-                        "Paul", "Peter", "Richard", "Robert", "Ryan", "Samuel", "Scott", "Stephen", "Steven", "Thomas" };
-                    
+                    // Use JSON-loaded names to determine gender
+                    var nameData = CorporateChaos.Systems.GameDataLoader.LoadNames();
                     var firstName = Name.Split(' ')[0];
-                    Gender = maleNames.Contains(firstName) ? Gender.Male : Gender.Female;
+                    Gender = nameData.MaleFirstNames.Contains(firstName) ? Gender.Male : Gender.Female;
                 }
                 
                 // Assign profile image based on gender

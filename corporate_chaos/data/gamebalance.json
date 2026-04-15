@@ -1,0 +1,107 @@
+{
+  "startingValues": {
+    "capital": 500000,
+    "reputation": 10,
+    "morale": 50,
+    "marketShare": 5.0,
+    "risk": 10,
+    "employeeCount": 0
+  },
+  "departmentBudgetDefaults": {
+    "marketing": 15.0,
+    "operations": 20.0,
+    "finance": 15.0,
+    "hr": 10.0,
+    "it": 20.0,
+    "research": 20.0
+  },
+  "riskMultipliers": {
+    "conservative": 0.7,
+    "balanced": 1.0,
+    "aggressive": 1.5
+  },
+  "investmentMultipliers": {
+    "low": 0.5,
+    "medium": 1.0,
+    "high": 2.0
+  },
+  "employeeManagementMultipliers": {
+    "low": 0.8,
+    "standard": 1.0,
+    "high": 1.3
+  },
+  "quarterlyFinancials": {
+    "baseOperationalCosts": 30000,
+    "employeeOverheadPerEmployee": 1500,
+    "baseRevenuePerMarketSharePoint": 15000,
+    "capitalScalingDivisor": 2000000,
+    "capitalScalingMultiplier": 3000,
+    "lateGameCosts": {
+      "quarter30": 15000,
+      "quarter50": 25000,
+      "billionDollar": 40000
+    },
+    "marketShareMultiplierDivisor": 200
+  },
+  "decisions": {
+    "marketing": {
+      "baseCost": 50000,
+      "baseMarketGain": 2.0,
+      "baseRiskIncrease": 3
+    },
+    "operations": {
+      "baseCost": 30000,
+      "baseMoraleGain": 10,
+      "baseRiskReduction": 5
+    },
+    "finance": {
+      "baseGain": 25000,
+      "baseMoraleLoss": 8,
+      "baseReputationLoss": 5
+    },
+    "hr": {
+      "baseCost": 20000,
+      "baseMoraleGain": 15,
+      "baseProductivityGain": 5
+    },
+    "it": {
+      "baseCost": 40000,
+      "baseEfficiencyGain": 10,
+      "baseRiskReduction": 3
+    },
+    "research": {
+      "baseCost": 60000,
+      "baseMarketGain": 1.5,
+      "baseReputationGain": 5
+    }
+  },
+  "chaosEngine": {
+    "baseChaosChance": 0.20,
+    "scandalChance": 0.15,
+    "mismanagementChance": 0.12,
+    "positivePRChance": 0.08,
+    "marketEventChance": 0.25,
+    "competitorChance": 0.20,
+    "financialCrisisChance": 0.15,
+    "catastrophicBaseChance": 0.02,
+    "catastrophicMaxRiskBonus": 0.28
+  },
+  "employeeTurnover": {
+    "baseTurnoverChance": 0.10,
+    "maxTurnoverChance": 0.30,
+    "highMoraleThreshold": 80,
+    "lowMoraleMultiplier": 1.5,
+    "veryLowMoraleMultiplier": 2.0
+  },
+  "marketDynamics": {
+    "naturalDecayBase": 0.05,
+    "decayAt30Percent": 0.08,
+    "decayAt50Percent": 0.12,
+    "decayAt60Percent": 0.15,
+    "marketShareCap": 60.0,
+    "competitivePressure30": 0.8,
+    "competitivePressure40": 0.6,
+    "competitivePressure50": 0.4,
+    "competitivePressure55": 0.2
+  }
+}

@@ -423,6 +423,12 @@ namespace CorporateChaos.Views
             }
         }
 
+        private void TitleBar_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == System.Windows.Input.MouseButton.Left)
+                DragMove();
+        }
+
         private void CloseBtn_Click(object sender, RoutedEventArgs e)
         {
             IsCompleted = true;

@@ -4,28 +4,55 @@
         xmlns:converters="clr-namespace:CorporateChaos.Converters"
         Title="Department Management" Height="700" Width="900" 
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
-        Background="#1a1a2e">
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent">
     
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/styles/ScrollBarStyles.xaml"/>
+                <ResourceDictionary Source="/styles/ButtonStyles.xaml"/>
+                <ResourceDictionary Source="/styles/GameTheme.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             <converters:PathToImageSourceConverter x:Key="PathToImageConverter"/>
         </ResourceDictionary>
     </Window.Resources>
     
-    <Grid Margin="20">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+    <Border Background="#1a1a2e" CornerRadius="12" BorderBrush="#2a3a5e" BorderThickness="1">
+        <Border.Effect>
+            <DropShadowEffect Color="Black" BlurRadius="20" ShadowDepth="0" Opacity="0.6"/>
+        </Border.Effect>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="44"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <!-- Custom Title Bar -->
+            <Border Grid.Row="0" CornerRadius="12,12,0,0" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#1e2e4e" Offset="0"/>
+                        <GradientStop Color="#162040" Offset="1"/>
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Grid>
+                    <TextBlock x:Name="DepartmentTitleText" Text="🏢 DEPARTMENT MANAGEMENT" FontSize="14" FontWeight="Bold" 
+                              Foreground="White" VerticalAlignment="Center" Margin="15,0,0,0"/>
+                    <Button Content="✕" Width="36" Height="28" HorizontalAlignment="Right" Margin="0,0,8,0"
+                            Click="CloseBtn_Click" Style="{StaticResource CloseButton}"/>
+                </Grid>
+            </Border>
+            
+            <!-- Content -->
+            <Grid Grid.Row="1" Margin="20,10,20,20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
         
         <!-- Header -->
-        <StackPanel Grid.Row="0" Margin="0,0,0,20">
-            <TextBlock x:Name="DepartmentTitleText" Text="🏢 DEPARTMENT MANAGEMENT" FontSize="20" FontWeight="Bold" 
-                      Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+        <StackPanel Grid.Row="0" Margin="0,0,0,15">
             <TextBlock x:Name="DepartmentStatsText" Text="Department Statistics" 
                       FontSize="12" Foreground="LightGray" HorizontalAlignment="Center"/>
             <TextBlock Text="💡 Strategic Tip: Look at employee skill keywords and stats to determine the best department assignment for optimal performance" 
@@ -106,10 +133,10 @@
                                             
                                             <!-- Action Buttons -->
                                             <StackPanel Grid.Column="2" Orientation="Vertical" VerticalAlignment="Top">
-                                                <Button Content="🔄 Transfer" Width="70" Height="25"
+                                                <Button Content="🔄 Transfer" MinWidth="80" Height="28" Padding="8,0"
                                                        Background="#4d2a4d" Foreground="White" BorderBrush="#7a4d7a"
                                                        Click="TransferBtn_Click" Tag="{Binding}" Margin="0,0,0,5"/>
-                                                <Button Content="🔥 Fire" Width="70" Height="25"
+                                                <Button Content="🔥 Fire" MinWidth="80" Height="28" Padding="8,0"
                                                        Background="#8b2635" Foreground="White" BorderBrush="#b83545"
                                                        Click="FireBtn_Click" Tag="{Binding}"/>
                                             </StackPanel>
@@ -205,10 +232,10 @@
                                             
                                             <!-- Action Buttons -->
                                             <StackPanel Grid.Column="2" Orientation="Vertical" VerticalAlignment="Top">
-                                                <Button Content="➕ Assign" Width="70" Height="25"
+                                                <Button Content="➕ Assign" MinWidth="80" Height="28" Padding="8,0"
                                                        Background="#2a4d3a" Foreground="White" BorderBrush="#4d7a5d"
                                                        Click="AssignBtn_Click" Tag="{Binding}" Margin="0,0,0,5"/>
-                                                <Button Content="🔥 Fire" Width="70" Height="25"
+                                                <Button Content="🔥 Fire" MinWidth="80" Height="28" Padding="8,0"
                                                        Background="#8b2635" Foreground="White" BorderBrush="#b83545"
                                                        Click="FireBtn_Click" Tag="{Binding}"/>
                                             </StackPanel>
@@ -228,4 +255,6 @@
                     Click="CloseBtn_Click"/>
         </StackPanel>
     </Grid>
+    </Grid>
+    </Border>
 </Window>

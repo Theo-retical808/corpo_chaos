@@ -3,45 +3,57 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Executive Strategic Decisions" Height="800" Width="1200" 
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
-        Background="#1a1a2e">
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent">
     
-    <Grid Margin="20">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/styles/ButtonStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    
+    <Border Background="#1a1a2e" CornerRadius="12" BorderBrush="#2a3a5e" BorderThickness="1">
+        <Border.Effect>
+            <DropShadowEffect Color="Black" BlurRadius="20" ShadowDepth="0" Opacity="0.6"/>
+        </Border.Effect>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="44"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <!-- Custom Title Bar -->
+            <Border Grid.Row="0" CornerRadius="12,12,0,0" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#1e2e4e" Offset="0"/>
+                        <GradientStop Color="#162040" Offset="1"/>
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Grid>
+                    <TextBlock Text="🎯 EXECUTIVE STRATEGIC DECISIONS" FontSize="14" FontWeight="Bold" 
+                              Foreground="White" VerticalAlignment="Center" Margin="15,0,0,0"/>
+                    <Button Content="✕" Width="36" Height="28" HorizontalAlignment="Right" Margin="0,0,8,0"
+                            Click="CloseBtn_Click" Style="{StaticResource CloseButton}"/>
+                </Grid>
+            </Border>
+            
+            <!-- Content -->
+            <Grid Grid.Row="1" Margin="20,10,20,20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
         
         <!-- Header -->
-        <StackPanel Grid.Row="0" Margin="0,0,0,20">
-            <Grid>
-                <Button x:Name="CloseBtn" Content="✕" Width="35" Height="35" 
-                        HorizontalAlignment="Left" VerticalAlignment="Top"
-                        Click="CloseBtn_Click" Background="#4d2a2a" Foreground="White"
-                        FontWeight="Bold" FontSize="16"
-                        BorderThickness="0">
-                    <Button.Style>
-                        <Style TargetType="Button">
-                            <Setter Property="Background" Value="#4d2a2a"/>
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#6d3a3a"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
-                
-                <StackPanel HorizontalAlignment="Center">
-                    <TextBlock Text="🎯 EXECUTIVE STRATEGIC DECISIONS" FontSize="22" FontWeight="Bold" 
-                              Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,10"/>
-                    <TextBlock x:Name="CompanyStatusText" Text="Make strategic decisions to improve company performance" 
-                              FontSize="13" Foreground="LightGray" HorizontalAlignment="Center"/>
-                </StackPanel>
-            </Grid>
+        <StackPanel Grid.Row="0" Margin="0,0,0,15">
+            <TextBlock x:Name="CompanyStatusText" Text="Make strategic decisions to improve company performance" 
+                      FontSize="12" Foreground="LightGray" HorizontalAlignment="Center"/>
         </StackPanel>
         
-        <!-- Main Content - No ScrollViewer -->
+        <!-- Main Content -->
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -64,10 +76,10 @@
                                       Foreground="LightGray" Margin="0,0,0,8"/>
                             
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <Button x:Name="CostCuttingLightBtn" Content="Light 5%" Width="70" Height="32" 
+                                <Button x:Name="CostCuttingLightBtn" Content="Light 5%" MinWidth="75" Height="32" 
                                        Margin="2" Click="CostCuttingLight_Click" 
                                        Background="#4d2a2a" Foreground="White"
-                                       BorderThickness="0" FontSize="11" FontWeight="SemiBold">
+                                       BorderThickness="0" FontSize="11" FontWeight="SemiBold" Padding="6,0">
                                     <Button.Style>
                                         <Style TargetType="Button">
                                             <Setter Property="Background" Value="#4d2a2a"/>
@@ -79,10 +91,10 @@
                                         </Style>
                                     </Button.Style>
                                 </Button>
-                                <Button x:Name="CostCuttingMediumBtn" Content="Med 15%" Width="70" Height="32" 
+                                <Button x:Name="CostCuttingMediumBtn" Content="Med 15%" MinWidth="75" Height="32" 
                                        Margin="2" Click="CostCuttingMedium_Click" 
                                        Background="#4d2a2a" Foreground="White"
-                                       BorderThickness="0" FontSize="11" FontWeight="SemiBold">
+                                       BorderThickness="0" FontSize="11" FontWeight="SemiBold" Padding="6,0">
                                     <Button.Style>
                                         <Style TargetType="Button">
                                             <Setter Property="Background" Value="#4d2a2a"/>
@@ -94,10 +106,10 @@
                                         </Style>
                                     </Button.Style>
                                 </Button>
-                                <Button x:Name="CostCuttingHeavyBtn" Content="Heavy 25%" Width="70" Height="32" 
+                                <Button x:Name="CostCuttingHeavyBtn" Content="Heavy 25%" MinWidth="80" Height="32" 
                                        Margin="2" Click="CostCuttingHeavy_Click" 
                                        Background="#4d2a2a" Foreground="White"
-                                       BorderThickness="0" FontSize="11" FontWeight="SemiBold">
+                                       BorderThickness="0" FontSize="11" FontWeight="SemiBold" Padding="6,0">
                                     <Button.Style>
                                         <Style TargetType="Button">
                                             <Setter Property="Background" Value="#4d2a2a"/>
@@ -122,10 +134,10 @@
                                       Foreground="LightGray" Margin="0,0,0,8"/>
                             
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <Button x:Name="BonusSmallBtn" Content="Small $50K" Width="90" Height="32" 
+                                <Button x:Name="BonusSmallBtn" Content="Small $50K" MinWidth="95" Height="32" 
                                        Margin="5,0" Click="BonusSmall_Click" 
                                        Background="#2a4d3a" Foreground="White"
-                                       BorderThickness="0" FontSize="11" FontWeight="SemiBold">
+                                       BorderThickness="0" FontSize="11" FontWeight="SemiBold" Padding="6,0">
                                     <Button.Style>
                                         <Style TargetType="Button">
                                             <Setter Property="Background" Value="#2a4d3a"/>
@@ -137,10 +149,10 @@
                                         </Style>
                                     </Button.Style>
                                 </Button>
-                                <Button x:Name="BonusLargeBtn" Content="Large $150K" Width="90" Height="32" 
+                                <Button x:Name="BonusLargeBtn" Content="Large $150K" MinWidth="100" Height="32" 
                                        Margin="5,0" Click="BonusLarge_Click" 
                                        Background="#2a4d3a" Foreground="White"
-                                       BorderThickness="0" FontSize="11" FontWeight="SemiBold">
+                                       BorderThickness="0" FontSize="11" FontWeight="SemiBold" Padding="6,0">
                                     <Button.Style>
                                         <Style TargetType="Button">
                                             <Setter Property="Background" Value="#2a4d3a"/>
@@ -165,10 +177,10 @@
                                       Foreground="LightGray" Margin="0,0,0,8"/>
                             
                             <!-- Small Loan -->
-                            <Button x:Name="SmallLoanBtn" Content="Small Loan $100K" Width="140" Height="28" 
+                            <Button x:Name="SmallLoanBtn" Content="Small Loan $100K" MinWidth="150" Height="28" 
                                    Click="SmallLoan_Click" HorizontalAlignment="Center" Margin="0,2"
                                    Background="#4d4d2a" Foreground="White"
-                                   BorderThickness="0" FontSize="10" FontWeight="SemiBold">
+                                   BorderThickness="0" FontSize="10" FontWeight="SemiBold" Padding="8,0">
                                 <Button.Style>
                                     <Style TargetType="Button">
                                         <Setter Property="Background" Value="#4d4d2a"/>
@@ -182,10 +194,10 @@
                             </Button>
                             
                             <!-- Medium Loan -->
-                            <Button x:Name="MediumLoanBtn" Content="Medium Loan $500K" Width="140" Height="28" 
+                            <Button x:Name="MediumLoanBtn" Content="Medium Loan $500K" MinWidth="155" Height="28" 
                                    Click="MediumLoan_Click" HorizontalAlignment="Center" Margin="0,2"
                                    Background="#4d4d2a" Foreground="White"
-                                   BorderThickness="0" FontSize="10" FontWeight="SemiBold">
+                                   BorderThickness="0" FontSize="10" FontWeight="SemiBold" Padding="8,0">
                                 <Button.Style>
                                     <Style TargetType="Button">
                                         <Setter Property="Background" Value="#4d4d2a"/>
@@ -199,10 +211,10 @@
                             </Button>
                             
                             <!-- Large Loan -->
-                            <Button x:Name="LargeLoanBtn" Content="Large Loan $1M" Width="140" Height="28" 
+                            <Button x:Name="LargeLoanBtn" Content="Large Loan $1M" MinWidth="140" Height="28" 
                                    Click="LargeLoan_Click" HorizontalAlignment="Center" Margin="0,2"
                                    Background="#4d4d2a" Foreground="White"
-                                   BorderThickness="0" FontSize="10" FontWeight="SemiBold">
+                                   BorderThickness="0" FontSize="10" FontWeight="SemiBold" Padding="8,0">
                                 <Button.Style>
                                     <Style TargetType="Button">
                                         <Setter Property="Background" Value="#4d4d2a"/>
@@ -234,10 +246,10 @@
                                       Foreground="LightGray" Margin="0,0,0,8"/>
                             
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <Button x:Name="MarketingLocalBtn" Content="Local $100K" Width="90" Height="32" 
+                                <Button x:Name="MarketingLocalBtn" Content="Local $100K" MinWidth="95" Height="32" 
                                        Margin="5,0" Click="MarketingLocal_Click" 
                                        Background="#2a4d4d" Foreground="White"
-                                       BorderThickness="0" FontSize="11" FontWeight="SemiBold">
+                                       BorderThickness="0" FontSize="11" FontWeight="SemiBold" Padding="6,0">
                                     <Button.Style>
                                         <Style TargetType="Button">
                                             <Setter Property="Background" Value="#2a4d4d"/>
@@ -249,10 +261,10 @@
                                         </Style>
                                     </Button.Style>
                                 </Button>
-                                <Button x:Name="MarketingNationalBtn" Content="National $275K" Width="100" Height="32" 
+                                <Button x:Name="MarketingNationalBtn" Content="National $275K" MinWidth="110" Height="32" 
                                        Margin="5,0" Click="MarketingNational_Click" 
                                        Background="#2a4d4d" Foreground="White"
-                                       BorderThickness="0" FontSize="11" FontWeight="SemiBold">
+                                       BorderThickness="0" FontSize="11" FontWeight="SemiBold" Padding="6,0">
                                     <Button.Style>
                                         <Style TargetType="Button">
                                             <Setter Property="Background" Value="#2a4d4d"/>
@@ -277,10 +289,10 @@
                                       Foreground="LightGray" Margin="0,0,0,8"/>
                             
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <Button x:Name="RetreatWeekendBtn" Content="Weekend" Width="85" Height="32" 
+                                <Button x:Name="RetreatWeekendBtn" Content="Weekend" MinWidth="85" Height="32" 
                                        Margin="5,0" Click="RetreatWeekend_Click" 
                                        Background="#2a4d3a" Foreground="White"
-                                       BorderThickness="0" FontSize="11" FontWeight="SemiBold">
+                                       BorderThickness="0" FontSize="11" FontWeight="SemiBold" Padding="8,0">
                                     <Button.Style>
                                         <Style TargetType="Button">
                                             <Setter Property="Background" Value="#2a4d3a"/>
@@ -292,10 +304,10 @@
                                         </Style>
                                     </Button.Style>
                                 </Button>
-                                <Button x:Name="RetreatWeekBtn" Content="Week" Width="85" Height="32" 
+                                <Button x:Name="RetreatWeekBtn" Content="Week" MinWidth="85" Height="32" 
                                        Margin="5,0" Click="RetreatWeek_Click" 
                                        Background="#2a4d3a" Foreground="White"
-                                       BorderThickness="0" FontSize="11" FontWeight="SemiBold">
+                                       BorderThickness="0" FontSize="11" FontWeight="SemiBold" Padding="8,0">
                                     <Button.Style>
                                         <Style TargetType="Button">
                                             <Setter Property="Background" Value="#2a4d3a"/>
@@ -319,10 +331,10 @@
                             <TextBlock Text="Innovation &amp; future growth" FontSize="11" 
                                       Foreground="LightGray" Margin="0,0,0,8"/>
                             
-                            <Button x:Name="RDInvestmentBtn" Content="Major Investment $120K" Width="160" Height="32" 
+                            <Button x:Name="RDInvestmentBtn" Content="Major Investment $120K" MinWidth="170" Height="32" 
                                    Click="RDInvestment_Click" HorizontalAlignment="Center"
                                    Background="#4d2a4d" Foreground="White"
-                                   BorderThickness="0" FontSize="11" FontWeight="SemiBold">
+                                   BorderThickness="0" FontSize="11" FontWeight="SemiBold" Padding="8,0">
                                 <Button.Style>
                                     <Style TargetType="Button">
                                         <Setter Property="Background" Value="#4d2a4d"/>
@@ -353,10 +365,10 @@
                             <TextBlock Text="Hire consultants for crises" FontSize="11" 
                                       Foreground="LightGray" Margin="0,0,0,8"/>
                             
-                            <Button x:Name="CrisisManagementBtn" Content="Hire Consultants $100K" Width="170" Height="32" 
+                            <Button x:Name="CrisisManagementBtn" Content="Hire Consultants $100K" MinWidth="175" Height="32" 
                                    Click="CrisisManagement_Click" HorizontalAlignment="Center"
                                    Background="#4d3a2a" Foreground="White"
-                                   BorderThickness="0" FontSize="11" FontWeight="SemiBold">
+                                   BorderThickness="0" FontSize="11" FontWeight="SemiBold" Padding="8,0">
                                 <Button.Style>
                                     <Style TargetType="Button">
                                         <Setter Property="Background" Value="#4d3a2a"/>
@@ -379,9 +391,9 @@
                             <TextBlock Text="Fast strategic moves" FontSize="11" 
                                       Foreground="LightGray" Margin="0,0,0,8"/>
                             
-                            <Button Content="🎯 Executive Meeting" Width="150" Height="32" 
+                            <Button Content="🎯 Executive Meeting" MinWidth="160" Height="32" 
                                    HorizontalAlignment="Center" Margin="0,0,0,8"
-                                   Background="#3a3a5d" Foreground="White"
+                                   Background="#3a3a5d" Foreground="White" Padding="8,0"
                                    BorderThickness="0" FontSize="11" FontWeight="SemiBold">
                                 <Button.Style>
                                     <Style TargetType="Button">
@@ -395,8 +407,8 @@
                                 </Button.Style>
                             </Button>
                             
-                            <Button Content="📊 Market Analysis" Width="150" Height="32" 
-                                   HorizontalAlignment="Center"
+                            <Button Content="📊 Market Analysis" MinWidth="160" Height="32" 
+                                   HorizontalAlignment="Center" Padding="8,0"
                                    Background="#3a3a5d" Foreground="White"
                                    BorderThickness="0" FontSize="11" FontWeight="SemiBold">
                                 <Button.Style>
@@ -491,9 +503,9 @@
                     <StackPanel Grid.Column="6" VerticalAlignment="Center">
                         <TextBlock x:Name="TotalBudgetText" Text="Total: 100%" FontSize="12" FontWeight="Bold" 
                                   Foreground="White" Margin="10,0,0,8"/>
-                        <Button x:Name="ApplyBudgetBtn" Content="Apply Budget" Width="100" Height="35" 
+                        <Button x:Name="ApplyBudgetBtn" Content="Apply Budget" MinWidth="110" Height="35" 
                                Click="ApplyBudget_Click" Background="#2a4d3a" Foreground="White" 
-                               BorderThickness="0" FontWeight="SemiBold">
+                               BorderThickness="0" FontWeight="SemiBold" Padding="10,0">
                             <Button.Style>
                                 <Style TargetType="Button">
                                     <Setter Property="Background" Value="#2a4d3a"/>
@@ -510,4 +522,6 @@
             </StackPanel>
         </Border>
     </Grid>
+    </Grid>
+    </Border>
 </Window>

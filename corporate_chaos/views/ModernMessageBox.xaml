@@ -1,7 +1,7 @@
 <Window x:Class="CorporateChaos.Views.ModernMessageBox"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Message" Height="Auto" Width="500" 
+        Title="Message" SizeToContent="Height" Width="500" 
         WindowStyle="None" AllowsTransparency="True" 
         Background="Transparent" ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner">

@@ -61,7 +61,10 @@ namespace CorporateChaos.Models
         public int Risk { get; set; }
 
         [JsonPropertyName("netLoss")]
-        public double NetLoss { get; set; } // New field to track crisis/event losses
+        public double NetLoss { get; set; } // Tracks crisis/event losses
+
+        [JsonPropertyName("decisionExpenses")]
+        public double DecisionExpenses { get; set; } // Tracks executive decision spending
 
         [JsonPropertyName("employeeCount")]
         public int EmployeeCount { get; set; }
@@ -383,8 +386,9 @@ namespace CorporateChaos.Models
 
         public void ProcessQuarterlyFinancials(Dictionary<Department, DepartmentStats> departments)
         {
-            // Reset net loss for the new quarter
+            // Reset net loss and decision expenses for the new quarter
             NetLoss = 0;
+            DecisionExpenses = 0;
             
             // Apply budget allocations first
             ApplyBudgetAllocations(departments);
@@ -426,9 +430,11 @@ namespace CorporateChaos.Models
             double reputationModifier = GetReputationRevenueModifier();
             QuarterlyRevenue = baseRevenue * (1 + departmentBonus) * reputationModifier;
 
-            // Apply to capital: Revenue - (Operations Cost + Net Loss) = Net Profit
-            double netProfit = QuarterlyRevenue - (QuarterlyExpenses + NetLoss);
-            Capital += netProfit;
+            // Apply to capital: Revenue - Total Expenses = Net Result
+            // Total expenses include operational costs + crisis losses + decision spending
+            double totalExpenses = QuarterlyExpenses + NetLoss + DecisionExpenses;
+            double netResult = QuarterlyRevenue - totalExpenses;
+            Capital += netResult;
 
             // Ensure values stay within bounds
             ClampValues();

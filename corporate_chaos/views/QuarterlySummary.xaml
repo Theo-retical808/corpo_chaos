@@ -3,29 +3,55 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Quarterly Summary" Height="500" Width="700" 
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
-        Background="#1a1a2e">
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent">
     
-    <Grid Margin="20">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/styles/ButtonStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    
+    <Border Background="#1a1a2e" CornerRadius="12" BorderBrush="#2a3a5e" BorderThickness="1">
+        <Border.Effect>
+            <DropShadowEffect Color="Black" BlurRadius="20" ShadowDepth="0" Opacity="0.6"/>
+        </Border.Effect>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="44"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <!-- Custom Title Bar -->
+            <Border Grid.Row="0" CornerRadius="12,12,0,0" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#1e2e4e" Offset="0"/>
+                        <GradientStop Color="#162040" Offset="1"/>
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Grid>
+                    <TextBlock x:Name="QuarterTitleText" Text="📊 QUARTERLY SUMMARY - Q1" FontSize="14" FontWeight="Bold" 
+                              Foreground="White" VerticalAlignment="Center" Margin="15,0,0,0"/>
+                    <Button Content="✕" Width="36" Height="28" HorizontalAlignment="Right" Margin="0,0,8,0"
+                            Click="CloseBtn_Click" Style="{StaticResource CloseButton}"/>
+                </Grid>
+            </Border>
+            
+            <!-- Content -->
+            <Grid Grid.Row="1" Margin="20,10,20,20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
         
         <!-- Header -->
-        <Grid Grid.Row="0" Margin="0,0,0,20">
-            <Button x:Name="CloseBtn" Content="✕" Width="30" Height="30" 
-                    HorizontalAlignment="Left" VerticalAlignment="Top"
-                    Click="CloseBtn_Click" Background="#4d2a2a" Foreground="White"
-                    FontWeight="Bold" FontSize="14"/>
-            
-            <StackPanel HorizontalAlignment="Center">
-                <TextBlock x:Name="QuarterTitleText" Text="📊 QUARTERLY SUMMARY - Q1" FontSize="20" FontWeight="Bold" 
-                          Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+        <StackPanel Grid.Row="0" Margin="0,0,0,15" HorizontalAlignment="Center">
                 <TextBlock Text="Review your company's performance and recent events" 
                           FontSize="12" Foreground="LightGray" HorizontalAlignment="Center"/>
-            </StackPanel>
-        </Grid>
+        </StackPanel>
         
         <!-- Main Content -->
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" 
@@ -84,7 +110,6 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             
                             <StackPanel Grid.Column="0">
@@ -98,13 +123,8 @@
                             </StackPanel>
                             
                             <StackPanel Grid.Column="2">
-                                <TextBlock Text="Net Loss" FontSize="11" Foreground="Gray"/>
-                                <TextBlock x:Name="NetLossText" Text="$0" FontSize="14" FontWeight="Bold" Foreground="Orange"/>
-                            </StackPanel>
-                            
-                            <StackPanel Grid.Column="3">
-                                <TextBlock Text="Net Profit" FontSize="11" Foreground="Gray"/>
-                                <TextBlock x:Name="NetProfitText" Text="$0" FontSize="14" FontWeight="Bold" Foreground="White"/>
+                                <TextBlock x:Name="NetResultLabel" Text="Net Profit" FontSize="11" Foreground="Gray"/>
+                                <TextBlock x:Name="NetResultText" Text="$0" FontSize="14" FontWeight="Bold" Foreground="White"/>
                             </StackPanel>
                         </Grid>
                     </StackPanel>
@@ -208,4 +228,6 @@
         <TextBlock Grid.Row="2" Text="💡 Tip: Click 'Current Events' button to review this summary anytime" 
                   FontSize="11" Foreground="Gray" HorizontalAlignment="Center" Margin="0,15,0,0"/>
     </Grid>
+    </Grid>
+    </Border>
 </Window>

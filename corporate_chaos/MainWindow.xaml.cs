@@ -22,6 +22,7 @@ namespace CorporateChaos
         private DecisionSystem decisions = null!;
         private StringBuilder gameLog = null!;
         private int quarterNumber;
+        private double previousQuarterStartCapital;
         private DataManager dataManager = null!;
         private SaveLoadManager saveLoadManager = null!;
         private StoryModeManager storyModeManager = null!;
@@ -101,10 +102,19 @@ namespace CorporateChaos
 
         private void StartStoryMode()
         {
-            InitializeGame(true);
-            MainMenuGrid.Visibility = Visibility.Collapsed;
-            CorporateGameGrid.Visibility = Visibility.Visible;
-            StartCorporateGame();
+            try
+            {
+                InitializeGame(true);
+                MainMenuGrid.Visibility = Visibility.Collapsed;
+                CorporateGameGrid.Visibility = Visibility.Visible;
+                StartCorporateGame();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error starting story mode: {ex}");
+                MessageBox.Show($"Error starting Story Mode:\n\n{ex.Message}\n\n{ex.StackTrace}", 
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void InitializeGame(bool isStoryMode = false)
@@ -393,6 +403,9 @@ namespace CorporateChaos
             MoraleText.Text = $"{company.Morale} ({GetMoraleDescription(company.Morale)})";
             RiskText.Text = $"{company.Risk} ({GetRiskDescription(company.Risk)})";
             
+            // Update stat progress bars
+            UpdateStatBars();
+            
             // Update employee count
             int totalEmployees = departments.Values.Sum(d => d.GetEmployeeCount());
             company.EmployeeCount = totalEmployees;
@@ -401,13 +414,23 @@ namespace CorporateChaos
             // Update hired employees count
             HiredEmployeesCountText.Text = $"Total Hired: {hiredEmployees.Count} employees";
             
-            // Update quarterly financials
+            // Update quarterly financials - expenses include operational + crisis + decisions
+            double totalExpenses = company.QuarterlyExpenses + company.NetLoss + company.DecisionExpenses;
             QuarterlyRevenueText.Text = $"${company.QuarterlyRevenue:N0}";
-            QuarterlyExpensesText.Text = $"${company.QuarterlyExpenses:N0}";
-            NetLossText.Text = $"${company.NetLoss:N0}";
-            double netProfit = company.QuarterlyRevenue - (company.QuarterlyExpenses + company.NetLoss);
-            NetProfitText.Text = $"${netProfit:N0}";
-            NetProfitText.Foreground = netProfit >= 0 ? System.Windows.Media.Brushes.LightGreen : System.Windows.Media.Brushes.LightCoral;
+            QuarterlyExpensesText.Text = $"${totalExpenses:N0}";
+            double netResult = company.QuarterlyRevenue - totalExpenses;
+            if (netResult >= 0)
+            {
+                NetResultLabel.Text = "Net Profit";
+                NetResultText.Text = $"${netResult:N0}";
+                NetResultText.Foreground = System.Windows.Media.Brushes.LightGreen;
+            }
+            else
+            {
+                NetResultLabel.Text = "Net Loss";
+                NetResultText.Text = $"-${Math.Abs(netResult):N0}";
+                NetResultText.Foreground = System.Windows.Media.Brushes.LightCoral;
+            }
             
             // Update crisis status
             CrisisStatusText.Text = chaos.GetCrisisStatusSummary();
@@ -549,6 +572,25 @@ namespace CorporateChaos
                 return StoryScript.Characters[characterId].Name.Split(' ')[0]; // First name only for compact display
             }
             return characterId;
+        }
+
+        private void UpdateStatBars()
+        {
+            // Market share bar (0-100%)
+            if (MarketShareBar.Parent is System.Windows.Controls.Grid msGrid && msGrid.ActualWidth > 0)
+                MarketShareBar.Width = Math.Max(0, (company.MarketShare / 100.0) * msGrid.ActualWidth);
+            
+            // Reputation bar (-100 to 100, normalize to 0-1)
+            if (ReputationBar.Parent is System.Windows.Controls.Grid repGrid && repGrid.ActualWidth > 0)
+                ReputationBar.Width = Math.Max(0, ((company.Reputation + 100) / 200.0) * repGrid.ActualWidth);
+            
+            // Morale bar (-100 to 100, normalize to 0-1)
+            if (MoraleBar.Parent is System.Windows.Controls.Grid morGrid && morGrid.ActualWidth > 0)
+                MoraleBar.Width = Math.Max(0, ((company.Morale + 100) / 200.0) * morGrid.ActualWidth);
+            
+            // Risk bar (0 to 100)
+            if (RiskBar.Parent is System.Windows.Controls.Grid riskGrid && riskGrid.ActualWidth > 0)
+                RiskBar.Width = Math.Max(0, (company.Risk / 100.0) * riskGrid.ActualWidth);
         }
 
         private void UpdateDepartmentButtonTooltips()
@@ -826,6 +868,21 @@ namespace CorporateChaos
             quarterlySummary.ShowDialog();
         }
 
+        private void FinancialReportBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (quarterNumber <= 1)
+            {
+                Views.ModernMessageBox.ShowInformation(
+                    "No financial data available yet.\n\nComplete your first quarter to see the financial report.",
+                    "No Data", this);
+                return;
+            }
+
+            var report = new Views.FinancialReport(quarterNumber - 1, company, departments, previousQuarterStartCapital);
+            report.Owner = this;
+            report.ShowDialog();
+        }
+
         // Department Management - New Panel System
         private void DepartmentBtn_Click(object sender, RoutedEventArgs e)
         {
@@ -1047,6 +1104,9 @@ namespace CorporateChaos
 
         private void ProcessQuarterEnd()
         {
+            // Capture starting capital before processing
+            previousQuarterStartCapital = company.Capital;
+            
             // Process quarterly financials
             company.ProcessQuarterlyFinancials(departments);
             
@@ -1359,7 +1419,8 @@ namespace CorporateChaos
                 foreach (var employee in dept.Employees)
                 {
                     // Adjust morale based on company performance
-                    if (company.QuarterlyRevenue > company.QuarterlyExpenses)
+                    double totalExp = company.QuarterlyExpenses + company.NetLoss + company.DecisionExpenses;
+                    if (company.QuarterlyRevenue > totalExp)
                     {
                         employee.Morale = Math.Min(100, employee.Morale + 5);
                     }

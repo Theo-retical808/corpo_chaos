@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG;NET;NET8_0;NETCOREAPP;WINDOWS;WINDOWS7_0;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER;WINDOWS7_0_OR_GREATER
 C:\Users\user\OneDrive\Desktop\Test_Projects\Corp_chaos_proto\corporate_chaos\corporate_chaos\App.xaml
-181104825890
+20-49629129
 
-43365026490
+45468080572
 198717675157
-MainWindow.xaml;styles\ButtonStyles.xaml;styles\ModernDialog.xaml;styles\ScrollBarStyles.xaml;styles\Typography.xaml;views\CharacterInteractionWindow.xaml;views\DepartmentPanel.xaml;views\ExecutiveDecisions.xaml;views\HighScoresWindow.xaml;views\HiringPanel.xaml;views\JoanDialogue.xaml;views\ModernMessageBox.xaml;views\NicknameDialog.xaml;views\OptionsWindow.xaml;views\QuarterlySummary.xaml;views\RelationshipsWindow.xaml;views\SaveFileManager.xaml;views\StoryModeGuide.xaml;
+MainWindow.xaml;styles\ButtonStyles.xaml;styles\GameTheme.xaml;styles\ModernDialog.xaml;styles\ScrollBarStyles.xaml;styles\Typography.xaml;views\CharacterInteractionWindow.xaml;views\DepartmentPanel.xaml;views\ExecutiveDecisions.xaml;views\FinancialReport.xaml;views\HighScoresWindow.xaml;views\HiringPanel.xaml;views\JoanDialogue.xaml;views\ModernMessageBox.xaml;views\NicknameDialog.xaml;views\OptionsWindow.xaml;views\QuarterlySummary.xaml;views\RelationshipsWindow.xaml;views\SaveFileManager.xaml;views\StoryModeGuide.xaml;
 
 False
 

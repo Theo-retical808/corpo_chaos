@@ -15,6 +15,7 @@
                 <ResourceDictionary Source="/styles/ScrollBarStyles.xaml"/>
                 <ResourceDictionary Source="/styles/ButtonStyles.xaml"/>
                 <ResourceDictionary Source="/styles/Typography.xaml"/>
+                <ResourceDictionary Source="/styles/GameTheme.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>
@@ -29,27 +30,44 @@
                 </LinearGradientBrush>
             </Grid.Background>
             
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="350">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="380">
                 <!-- Logo -->
-                <Image Source="images/logo.png" Width="200" Height="200" Margin="0,0,0,40" 
+                <Image Source="images/logo.png" Width="220" Height="220" Margin="0,0,0,20" 
                        HorizontalAlignment="Center"/>
                 
-                <Button x:Name="StoryModeBtn" Content="📖 Story Mode" Height="50" FontSize="18" 
-                        Margin="0,10" Click="StoryModeBtn_Click"
+                <!-- Game Title -->
+                <TextBlock Text="CORPORATE CHAOS" FontSize="28" FontWeight="Bold" 
+                          Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,5"
+                          FontFamily="Segoe UI" Effect="{StaticResource TextGlow}"/>
+                <TextBlock Text="Build Your Empire" FontSize="13" 
+                          Foreground="#7a8aae" HorizontalAlignment="Center" Margin="0,0,0,30"
+                          FontFamily="Segoe UI" FontStyle="Italic"/>
+                
+                <Button x:Name="StoryModeBtn" Content="📖  Story Mode" 
+                        Style="{StaticResource GameMenuButton}" Margin="0,5"
+                        Click="StoryModeBtn_Click"
                         ToolTip="Learn corporate management through guided tutorials with Secretary Joan"/>
-                <Button x:Name="SandboxModeBtn" Content="🎮 Sandbox Mode" Height="50" FontSize="18" 
-                        Margin="0,10" Click="SandboxModeBtn_Click"/>
-                <Button x:Name="LoadGameBtn" Content="📁 Load Run" Height="50" FontSize="18" 
-                        Margin="0,10" Click="LoadGameBtn_Click"/>
-                <Button x:Name="ScoreBoardBtn" Content="🏆 Score Board" Height="50" FontSize="18" 
-                        Margin="0,10" Click="ScoreBoardBtn_Click"/>
-                <Button x:Name="OptionsBtn" Content="⚙️ Options" Height="50" FontSize="18" 
-                        Margin="0,10" Click="OptionsBtn_Click"
+                <Button x:Name="SandboxModeBtn" Content="🎮  Sandbox Mode" 
+                        Style="{StaticResource GameMenuButton}" Margin="0,5"
+                        Click="SandboxModeBtn_Click"/>
+                <Button x:Name="LoadGameBtn" Content="📁  Load Run" 
+                        Style="{StaticResource GameMenuButton}" Margin="0,5"
+                        Click="LoadGameBtn_Click"/>
+                <Button x:Name="ScoreBoardBtn" Content="🏆  Score Board" 
+                        Style="{StaticResource GameMenuButton}" Margin="0,5"
+                        Click="ScoreBoardBtn_Click"/>
+                <Button x:Name="OptionsBtn" Content="⚙️  Options" 
+                        Style="{StaticResource GameMenuButton}" Margin="0,5"
+                        Click="OptionsBtn_Click"
                         ToolTip="Adjust audio, display, and game settings"/>
-                <Button x:Name="QuitGameBtn" Content="🚪 Quit Game" Height="50" FontSize="18" 
-                        Margin="0,10" Click="QuitGameBtn_Click"
-                        Background="#4d2a2a" Foreground="White"
+                <Button x:Name="QuitGameBtn" Content="🚪  Quit Game" 
+                        Style="{StaticResource GameMenuDangerButton}" Margin="0,15,0,0"
+                        Click="QuitGameBtn_Click"
                         ToolTip="Exit Corporate Chaos"/>
+                
+                <!-- Version -->
+                <TextBlock Text="v0.1.1 Beta" FontSize="10" Foreground="#4a5a7e" 
+                          HorizontalAlignment="Center" Margin="0,20,0,0"/>
             </StackPanel>
         </Grid>
 
@@ -62,21 +80,25 @@
                 </LinearGradientBrush>
             </Grid.Background>
             
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="400">
-                <TextBlock Text="🎮 SANDBOX MODE" FontSize="24" FontWeight="Bold" 
-                          Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="420">
+                <TextBlock Text="🎮 SANDBOX MODE" FontSize="26" FontWeight="Bold" 
+                          Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,5"
+                          Effect="{StaticResource TextGlow}"/>
                 <TextBlock Text="Choose your corporate challenge" FontSize="14" 
-                          Foreground="LightGray" HorizontalAlignment="Center" Margin="0,0,0,30"/>
+                          Foreground="#7a8aae" HorizontalAlignment="Center" Margin="0,0,0,30"/>
                 
-                <Button x:Name="CorporateBtn" Content="🏢 Corporate Challenge" Height="60" FontSize="20" 
-                        Margin="0,15" Click="CorporateBtn_Click"
+                <Button x:Name="CorporateBtn" Content="🏢  Corporate Challenge" 
+                        Style="{StaticResource GameMenuButton}" Height="60" FontSize="20"
+                        Margin="0,8" Click="CorporateBtn_Click"
                         ToolTip="30-year career challenge with 120 quarters to reach 70% market share"/>
-                <Button x:Name="EndlessModeBtn" Content="🏭 Endless Mode" Height="60" FontSize="20" 
-                        Margin="0,15" Click="EndlessModeBtn_Click"
+                <Button x:Name="EndlessModeBtn" Content="🏭  Endless Mode" 
+                        Style="{StaticResource GameMenuButton}" Height="60" FontSize="20"
+                        Margin="0,8" Click="EndlessModeBtn_Click"
                         ToolTip="Play without quarter limits - build your empire indefinitely"/>
                 
-                <Button x:Name="BackToMenuBtn" Content="← Back to Main Menu" Height="40" FontSize="16" 
-                        Margin="0,30,0,0" Click="BackToMenuBtn_Click"/>
+                <Button x:Name="BackToMenuBtn" Content="← Back to Main Menu" 
+                        Style="{StaticResource GameMenuButton}" Height="40" FontSize="14"
+                        Margin="0,25,0,0" Click="BackToMenuBtn_Click"/>
             </StackPanel>
         </Grid>
 
@@ -96,23 +118,30 @@
             </Grid.RowDefinitions>
             
             <!-- Header -->
-            <Border Grid.Row="0" Background="#1a1a2e" BorderBrush="#333" BorderThickness="0,0,0,2">
+            <Border Grid.Row="0" Style="{StaticResource HeaderBar}">
                 <Grid>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="20,0,0,0">
-                        <TextBlock Text="Career: " FontSize="16" Foreground="Gray" VerticalAlignment="Center"/>
-                        <TextBlock x:Name="QuarterCounterText" Text="Y1 Q1 (1/120)" FontSize="18" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" Margin="0,0,20,0"/>
-                        <TextBlock Text="💰 " FontSize="16" VerticalAlignment="Center"/>
-                        <TextBlock x:Name="HeaderCapitalText" Text="$500,000" FontSize="16" FontWeight="Bold" Foreground="LightGreen" VerticalAlignment="Center"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0">
+                        <TextBlock Text="Career: " FontSize="14" Foreground="#7a8aae" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="QuarterCounterText" Text="Y1 Q1 (1/120)" FontSize="16" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" Margin="0,0,25,0"/>
+                        <Border Background="#1a2a3e" CornerRadius="12" Padding="10,4" Margin="0,0,10,0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="💰 " FontSize="14" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="HeaderCapitalText" Text="$500,000" FontSize="14" FontWeight="Bold" Foreground="#7dcea0" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
                     
-                    <TextBlock Text="CORPORATE EXECUTIVE DASHBOARD" FontSize="20" FontWeight="Bold" 
-                              Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <TextBlock Text="CORPORATE EXECUTIVE DASHBOARD" FontSize="18" FontWeight="Bold" 
+                              Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"
+                              FontFamily="Segoe UI"/>
                     
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="20,0">
-                        <Button x:Name="SaveGameBtn" Content="💾 Save" Width="80" Height="30" 
-                                Margin="0,0,10,0" Click="SaveGameBtn_Click"/>
-                        <Button x:Name="MainMenuBackBtn" Content="Main Menu" Width="100" Height="30" 
-                                Click="MainMenuBackBtn_Click"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0">
+                        <Button x:Name="SaveGameBtn" Content="💾 Save" 
+                                Style="{StaticResource SecondaryButton}" MinWidth="80" Height="32" FontSize="12"
+                                Padding="10,4" Margin="0,0,8,0" Click="SaveGameBtn_Click"/>
+                        <Button x:Name="MainMenuBackBtn" Content="Main Menu" 
+                                Style="{StaticResource GhostButton}" MinWidth="100" Height="32" FontSize="12"
+                                Padding="10,4" Click="MainMenuBackBtn_Click"/>
                     </StackPanel>
                 </Grid>
             </Border>
@@ -311,13 +340,15 @@
                             <TextBlock Text="👥 EMPLOYEE MANAGEMENT" FontSize="14" FontWeight="Bold" 
                                       Foreground="White" Margin="0,10,0,10"/>
                             
-                            <Button x:Name="HireEmployeesBtn" Content="🎯 Hire New Employees" Height="45" 
-                                    Margin="0,0,0,10" Click="HireEmployeesBtn_Click" 
-                                    Background="#2a4d3a" Foreground="White" FontWeight="Bold"/>
+                            <Button x:Name="HireEmployeesBtn" Content="🎯 Hire New Employees" 
+                                    Style="{StaticResource GameActionButton}"
+                                    Background="#2a4d3a"
+                                    Margin="0,0,0,8" Click="HireEmployeesBtn_Click"/>
                             
-                            <Button x:Name="ExecutiveDecisionsBtn" Content="📈 Executive Decisions" Height="45" 
-                                    Margin="0,0,0,10" Click="ExecutiveDecisionsBtn_Click" 
-                                    Background="#4d2a4d" Foreground="White" FontWeight="Bold"/>
+                            <Button x:Name="ExecutiveDecisionsBtn" Content="📈 Executive Decisions" 
+                                    Style="{StaticResource GameActionButton}"
+                                    Background="#4d2a4d"
+                                    Margin="0,0,0,8" Click="ExecutiveDecisionsBtn_Click"/>
                             
                             <TextBlock x:Name="HiredEmployeesCountText" Text="Total Hired: 0 employees" 
                                       FontSize="11" Foreground="LightGray" HorizontalAlignment="Center" Margin="0,0,0,10"/>
@@ -573,62 +604,97 @@
                         </Border>
                         
                         <!-- Company Statistics -->
-                        <Border Grid.Row="1" Background="#16213e" CornerRadius="5" Margin="10,5,10,5">
+                        <Border Grid.Row="1" Background="#16213e" CornerRadius="5" Margin="10,5,10,5"
+                                BorderBrush="#2a3a5e" BorderThickness="1">
                             <ScrollViewer VerticalScrollBarVisibility="Auto">
                                 <ScrollViewer.Resources>
                                     <Style TargetType="ScrollBar" BasedOn="{StaticResource CorporateChaosScrollBar}"/>
                                 </ScrollViewer.Resources>
                                 <StackPanel Margin="10">
-                                    <TextBlock Text="📊 COMPANY STATS" FontSize="14" FontWeight="Bold" 
+                                    <TextBlock Text="📊 COMPANY STATS" FontSize="13" FontWeight="Bold" 
                                               Foreground="White" Margin="0,0,0,10"/>
                                     
-                                    <StackPanel Orientation="Horizontal" Margin="0,3">
-                                        <TextBlock Text="💰 Capital:" FontSize="11" Foreground="Gray" Width="90"/>
-                                        <TextBlock x:Name="CapitalText" Text="$500,000" FontSize="11" FontWeight="Bold" Foreground="LightGreen"/>
+                                    <!-- Capital -->
+                                    <StackPanel Margin="0,0,0,8">
+                                        <Grid>
+                                            <TextBlock Text="💰 Capital" FontSize="10" Foreground="#7a8aae"/>
+                                            <TextBlock x:Name="CapitalText" Text="$500,000" FontSize="11" FontWeight="Bold" 
+                                                      Foreground="#7dcea0" HorizontalAlignment="Right"/>
+                                        </Grid>
                                     </StackPanel>
                                     
-                                    <StackPanel Orientation="Horizontal" Margin="0,3">
-                                        <TextBlock Text="📈 Market:" FontSize="11" Foreground="Gray" Width="90"/>
-                                        <TextBlock x:Name="MarketShareText" Text="5%" FontSize="11" FontWeight="Bold" Foreground="LightBlue"/>
+                                    <!-- Market Share with bar -->
+                                    <StackPanel Margin="0,0,0,8">
+                                        <Grid>
+                                            <TextBlock Text="📈 Market Share" FontSize="10" Foreground="#7a8aae"/>
+                                            <TextBlock x:Name="MarketShareText" Text="5%" FontSize="11" FontWeight="Bold" 
+                                                      Foreground="#85c1e9" HorizontalAlignment="Right"/>
+                                        </Grid>
+                                        <Grid Margin="0,3,0,0">
+                                            <Border Background="#1a1a2e" CornerRadius="3" Height="6"/>
+                                            <Border x:Name="MarketShareBar" Background="#3498db" CornerRadius="3" 
+                                                    Height="6" HorizontalAlignment="Left" Width="0"/>
+                                        </Grid>
                                     </StackPanel>
                                     
-                                    <StackPanel Orientation="Horizontal" Margin="0,3">
-                                        <TextBlock Text="⭐ Reputation:" FontSize="11" Foreground="Gray" Width="90"/>
-                                        <TextBlock x:Name="ReputationText" Text="50" FontSize="11" FontWeight="Bold" Foreground="Yellow"/>
+                                    <!-- Reputation with bar -->
+                                    <StackPanel Margin="0,0,0,8">
+                                        <Grid>
+                                            <TextBlock Text="⭐ Reputation" FontSize="10" Foreground="#7a8aae"/>
+                                            <TextBlock x:Name="ReputationText" Text="50" FontSize="11" FontWeight="Bold" 
+                                                      Foreground="#f9e79f" HorizontalAlignment="Right"/>
+                                        </Grid>
+                                        <Grid Margin="0,3,0,0">
+                                            <Border Background="#1a1a2e" CornerRadius="3" Height="6"/>
+                                            <Border x:Name="ReputationBar" Background="#f1c40f" CornerRadius="3" 
+                                                    Height="6" HorizontalAlignment="Left" Width="0"/>
+                                        </Grid>
                                     </StackPanel>
                                     
-                                    <StackPanel Orientation="Horizontal" Margin="0,3">
-                                        <TextBlock Text="😊 Morale:" FontSize="11" Foreground="Gray" Width="90"/>
-                                        <TextBlock x:Name="MoraleText" Text="50" FontSize="11" FontWeight="Bold" Foreground="Pink"/>
+                                    <!-- Morale with bar -->
+                                    <StackPanel Margin="0,0,0,8">
+                                        <Grid>
+                                            <TextBlock Text="😊 Morale" FontSize="10" Foreground="#7a8aae"/>
+                                            <TextBlock x:Name="MoraleText" Text="50" FontSize="11" FontWeight="Bold" 
+                                                      Foreground="#f5b7b1" HorizontalAlignment="Right"/>
+                                        </Grid>
+                                        <Grid Margin="0,3,0,0">
+                                            <Border Background="#1a1a2e" CornerRadius="3" Height="6"/>
+                                            <Border x:Name="MoraleBar" Background="#e74c8b" CornerRadius="3" 
+                                                    Height="6" HorizontalAlignment="Left" Width="0"/>
+                                        </Grid>
                                     </StackPanel>
                                     
-                                    <StackPanel Orientation="Horizontal" Margin="0,3">
-                                        <TextBlock Text="⚠️ Risk:" FontSize="11" Foreground="Gray" Width="90"/>
-                                        <TextBlock x:Name="RiskText" Text="10" FontSize="11" FontWeight="Bold" Foreground="Orange"/>
+                                    <!-- Risk with bar -->
+                                    <StackPanel Margin="0,0,0,8">
+                                        <Grid>
+                                            <TextBlock Text="⚠️ Risk" FontSize="10" Foreground="#7a8aae"/>
+                                            <TextBlock x:Name="RiskText" Text="10" FontSize="11" FontWeight="Bold" 
+                                                      Foreground="#f0b27a" HorizontalAlignment="Right"/>
+                                        </Grid>
+                                        <Grid Margin="0,3,0,0">
+                                            <Border Background="#1a1a2e" CornerRadius="3" Height="6"/>
+                                            <Border x:Name="RiskBar" Background="#e67e22" CornerRadius="3" 
+                                                    Height="6" HorizontalAlignment="Left" Width="0"/>
+                                        </Grid>
                                     </StackPanel>
                                     
-                                    <StackPanel Orientation="Horizontal" Margin="0,3">
-                                        <TextBlock Text="👥 Employees:" FontSize="11" Foreground="Gray" Width="90"/>
-                                        <TextBlock x:Name="EmployeeCountText" Text="0" FontSize="11" FontWeight="Bold" Foreground="Cyan"/>
+                                    <!-- Employees -->
+                                    <StackPanel Margin="0,0,0,4">
+                                        <Grid>
+                                            <TextBlock Text="👥 Employees" FontSize="10" Foreground="#7a8aae"/>
+                                            <TextBlock x:Name="EmployeeCountText" Text="0" FontSize="11" FontWeight="Bold" 
+                                                      Foreground="#85e0e0" HorizontalAlignment="Right"/>
+                                        </Grid>
                                     </StackPanel>
                                     
                                     <!-- Story Mode: Relationships Button -->
-                                    <Button x:Name="RelationshipsBtn" Content="💕 Relationships" Height="35" 
+                                    <Button x:Name="RelationshipsBtn" Content="💕 Relationships" 
+                                           Style="{StaticResource GameActionButton}"
+                                           Background="#4d2a4d" Height="35"
                                            Margin="0,10,0,0" Click="RelationshipsBtn_Click"
-                                           Background="#4d2a4d" Foreground="White" FontWeight="Bold"
                                            Visibility="Collapsed"
-                                           ToolTip="View your relationships with story characters">
-                                        <Button.Style>
-                                            <Style TargetType="Button">
-                                                <Setter Property="Background" Value="#4d2a4d"/>
-                                                <Style.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Background" Value="#6d3a6d"/>
-                                                    </Trigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Button.Style>
-                                    </Button>
+                                           ToolTip="View your relationships with story characters"/>
                                 </StackPanel>
                             </ScrollViewer>
                         </Border>
@@ -685,7 +751,13 @@
             </Grid>
             
             <!-- Bottom Control Panel -->
-            <Border Grid.Row="2" Background="#1a1a2e" BorderBrush="#333" BorderThickness="0,2,0,0" Margin="0">
+            <Border Grid.Row="2" BorderBrush="#2a3a5e" BorderThickness="0,2,0,0" Margin="0">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#1a1a2e" Offset="0"/>
+                        <GradientStop Color="#141428" Offset="1"/>
+                    </LinearGradientBrush>
+                </Border.Background>
                 <Grid Margin="20">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -695,11 +767,18 @@
                     
                     <!-- Quarterly Summary -->
                     <StackPanel Grid.Column="0">
-                        <TextBlock Text="📋 QUARTERLY SUMMARY" FontSize="16" FontWeight="Bold" 
-                                  Foreground="White" Margin="0,0,0,10"/>
+                        <Grid Margin="0,0,0,10">
+                            <TextBlock Text="📋 QUARTERLY SUMMARY" FontSize="16" FontWeight="Bold" 
+                                      Foreground="White"/>
+                            <Button x:Name="FinancialReportBtn" Content="📑 Financial Report" 
+                                    HorizontalAlignment="Right" VerticalAlignment="Center"
+                                    Style="{StaticResource SecondaryButton}" 
+                                    Height="28" FontSize="11" Padding="10,3"
+                                    Click="FinancialReportBtn_Click"
+                                    ToolTip="View detailed financial breakdown of the previous quarter"/>
+                        </Grid>
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
@@ -716,13 +795,8 @@
                             </StackPanel>
                             
                             <StackPanel Grid.Column="2">
-                                <TextBlock Text="Net Loss" FontSize="12" Foreground="Gray"/>
-                                <TextBlock x:Name="NetLossText" Text="$0" FontSize="14" FontWeight="Bold" Foreground="Orange"/>
-                            </StackPanel>
-                            
-                            <StackPanel Grid.Column="3">
-                                <TextBlock Text="Net Profit" FontSize="12" Foreground="Gray"/>
-                                <TextBlock x:Name="NetProfitText" Text="$0" FontSize="14" FontWeight="Bold" Foreground="White"/>
+                                <TextBlock x:Name="NetResultLabel" Text="Net Profit" FontSize="12" Foreground="Gray"/>
+                                <TextBlock x:Name="NetResultText" Text="$0" FontSize="14" FontWeight="Bold" Foreground="White"/>
                             </StackPanel>
                         </Grid>
                     </StackPanel>
@@ -802,22 +876,11 @@
                     
                     <!-- End Quarter Button -->
                     <StackPanel Grid.Column="2" VerticalAlignment="Center">
-                        <Button x:Name="EndQuarterBtn" Content="⏭️ End Quarter" Height="50" FontSize="16" 
-                                FontWeight="Bold" Click="EndQuarterBtn_Click" Background="#4d2a4d" 
-                                Foreground="White" BorderThickness="0">
-                            <Button.Style>
-                                <Style TargetType="Button">
-                                    <Setter Property="Background" Value="#4d2a4d"/>
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#6d3a6d"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
-                        </Button>
+                        <Button x:Name="EndQuarterBtn" Content="⏭️ End Quarter" 
+                                Style="{StaticResource EndQuarterButton}"
+                                Click="EndQuarterBtn_Click"/>
                         <TextBlock Text="Make strategic decisions before ending the quarter" 
-                                  FontSize="10" Foreground="Gray" TextWrapping="Wrap" 
+                                  FontSize="10" Foreground="#5a6a8e" TextWrapping="Wrap" 
                                   HorizontalAlignment="Center" Margin="0,5,0,0"/>
                     </StackPanel>
                 </Grid>

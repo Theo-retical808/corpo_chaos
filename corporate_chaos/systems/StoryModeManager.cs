@@ -188,7 +188,14 @@ namespace CorporateChaos.Systems
                 }
                 
                 var guideWindow = new StoryModeGuide(storyEvent, quarter, storyData);
-                guideWindow.Owner = owner;
+                try
+                {
+                    guideWindow.Owner = owner;
+                }
+                catch
+                {
+                    guideWindow.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                }
                 
                 if (guideWindow.ShowDialog() == true)
                 {

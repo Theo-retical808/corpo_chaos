@@ -1,0 +1,70 @@
+{
+  "departments": {
+    "Marketing": {
+      "descriptions": [
+        "Brand strategist with creative campaign experience",
+        "Digital marketing specialist focused on social media growth",
+        "Market research analyst with consumer behavior expertise",
+        "Content creator with strong storytelling abilities",
+        "SEO/SEM specialist with data-driven approach",
+        "Public relations coordinator with media connections"
+      ],
+      "keywords": ["campaigns", "branding", "social media", "analytics", "content", "SEO", "PR", "creative"]
+    },
+    "Operations": {
+      "descriptions": [
+        "Process optimization expert with lean methodology background",
+        "Supply chain coordinator with vendor management skills",
+        "Quality assurance specialist focused on continuous improvement",
+        "Project manager with cross-functional team experience",
+        "Operations analyst with efficiency optimization focus",
+        "Logistics coordinator with distribution expertise"
+      ],
+      "keywords": ["processes", "supply chain", "quality", "logistics", "efficiency", "lean", "coordination"]
+    },
+    "Finance": {
+      "descriptions": [
+        "Financial analyst with budgeting and forecasting expertise",
+        "Accounting specialist with regulatory compliance knowledge",
+        "Investment strategist with portfolio management experience",
+        "Risk assessment analyst with quantitative modeling skills",
+        "Tax specialist with corporate tax optimization background",
+        "Financial controller with audit and reporting expertise"
+      ],
+      "keywords": ["budgeting", "forecasting", "compliance", "investment", "risk analysis", "tax", "audit"]
+    },
+    "HR": {
+      "descriptions": [
+        "Talent acquisition specialist with recruitment expertise",
+        "Employee relations coordinator with conflict resolution skills",
+        "Training and development manager with program design experience",
+        "Compensation and benefits analyst with market benchmarking",
+        "HR generalist with policy development background",
+        "Organizational development consultant with change management skills"
+      ],
+      "keywords": ["recruitment", "training", "benefits", "policy", "culture", "development", "retention"]
+    },
+    "IT": {
+      "descriptions": [
+        "Software developer with full-stack development experience",
+        "Systems administrator with cloud infrastructure expertise",
+        "Cybersecurity analyst with threat detection background",
+        "Database administrator with performance optimization skills",
+        "IT project manager with agile methodology experience",
+        "Network engineer with enterprise architecture knowledge"
+      ],
+      "keywords": ["development", "cloud", "security", "databases", "agile", "networking", "automation"]
+    },
+    "Research": {
+      "descriptions": [
+        "Research scientist with experimental design expertise",
+        "Product development engineer with innovation track record",
+        "Data scientist with machine learning and AI experience",
+        "R&D project lead with patent development background",
+        "Market intelligence analyst with competitive analysis skills",
+        "Innovation strategist with technology scouting experience"
+      ],
+      "keywords": ["research", "innovation", "data science", "patents", "prototyping", "analysis", "R&D"]
+    }
+  }
+}

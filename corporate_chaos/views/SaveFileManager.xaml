@@ -3,27 +3,54 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Save File Manager" Height="500" Width="700" 
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
-        Background="#1a1a2e">
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent">
     
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/styles/ScrollBarStyles.xaml"/>
+                <ResourceDictionary Source="/styles/ButtonStyles.xaml"/>
+                <ResourceDictionary Source="/styles/GameTheme.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>
     
-    <Grid Margin="20">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+    <Border Background="#1a1a2e" CornerRadius="12" BorderBrush="#2a3a5e" BorderThickness="1">
+        <Border.Effect>
+            <DropShadowEffect Color="Black" BlurRadius="20" ShadowDepth="0" Opacity="0.6"/>
+        </Border.Effect>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="44"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <!-- Custom Title Bar -->
+            <Border Grid.Row="0" CornerRadius="12,12,0,0" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#1e2e4e" Offset="0"/>
+                        <GradientStop Color="#162040" Offset="1"/>
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Grid>
+                    <TextBlock Text="💾 SAVE FILE MANAGER" FontSize="14" FontWeight="Bold" 
+                              Foreground="White" VerticalAlignment="Center" Margin="15,0,0,0"/>
+                    <Button Content="✕" Width="36" Height="28" HorizontalAlignment="Right" Margin="0,0,8,0"
+                            Click="CloseBtn_Click" Style="{StaticResource CloseButton}"/>
+                </Grid>
+            </Border>
+            
+            <!-- Content -->
+            <Grid Grid.Row="1" Margin="20,10,20,20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
         
         <!-- Header -->
-        <StackPanel Grid.Row="0" Margin="0,0,0,20">
-            <TextBlock Text="💾 SAVE FILE MANAGER" FontSize="20" FontWeight="Bold" 
-                      Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+        <StackPanel Grid.Row="0" Margin="0,0,0,15">
             <TextBlock Text="Select a save file to continue or delete unwanted saves" 
                       FontSize="12" Foreground="LightGray" HorizontalAlignment="Center"/>
         </StackPanel>
@@ -82,10 +109,10 @@
                                         
                                         <!-- Action Buttons -->
                                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                            <Button Content="▶️ Continue" Width="80" Height="35" Margin="0,0,10,0"
+                                            <Button Content="▶️ Continue" MinWidth="90" Height="35" Padding="8,0" Margin="0,0,10,0"
                                                    Background="#2a4d3a" Foreground="White" BorderBrush="#4d7a5d"
                                                    Click="ContinueBtn_Click" Tag="{Binding}"/>
-                                            <Button Content="🗑️ Delete" Width="70" Height="35"
+                                            <Button Content="🗑️ Delete" MinWidth="80" Height="35" Padding="8,0"
                                                    Background="#4d2a2a" Foreground="White" BorderBrush="#7a4d4d"
                                                    Click="DeleteBtn_Click" Tag="{Binding}"/>
                                         </StackPanel>
@@ -108,4 +135,6 @@
                     Click="CloseBtn_Click"/>
         </StackPanel>
     </Grid>
+    </Grid>
+    </Border>
 </Window>

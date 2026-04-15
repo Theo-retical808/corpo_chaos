@@ -12,13 +12,23 @@ namespace CorporateChaos.Views
             // Set quarter title
             QuarterTitleText.Text = $"📊 QUARTERLY SUMMARY - Q{quarter}";
             
-            // Update financial data
+            // Update financial data - expenses include operational + crisis + decisions
+            double totalExpenses = company.QuarterlyExpenses + company.NetLoss + company.DecisionExpenses;
             RevenueText.Text = $"${company.QuarterlyRevenue:N0}";
-            ExpensesText.Text = $"${company.QuarterlyExpenses:N0}";
-            NetLossText.Text = $"${company.NetLoss:N0}";
-            double netProfit = company.QuarterlyRevenue - (company.QuarterlyExpenses + company.NetLoss);
-            NetProfitText.Text = $"${netProfit:N0}";
-            NetProfitText.Foreground = netProfit >= 0 ? System.Windows.Media.Brushes.LightGreen : System.Windows.Media.Brushes.LightCoral;
+            ExpensesText.Text = $"${totalExpenses:N0}";
+            double netResult = company.QuarterlyRevenue - totalExpenses;
+            if (netResult >= 0)
+            {
+                NetResultLabel.Text = "Net Profit";
+                NetResultText.Text = $"${netResult:N0}";
+                NetResultText.Foreground = System.Windows.Media.Brushes.LightGreen;
+            }
+            else
+            {
+                NetResultLabel.Text = "Net Loss";
+                NetResultText.Text = $"-${Math.Abs(netResult):N0}";
+                NetResultText.Foreground = System.Windows.Media.Brushes.LightCoral;
+            }
             
             // Update company metrics
             CapitalText.Text = $"${company.Capital:N0}";
@@ -64,6 +74,12 @@ namespace CorporateChaos.Views
                 >= -20 => System.Windows.Media.Brushes.LightGreen,
                 _ => System.Windows.Media.Brushes.Cyan
             };
+        }
+
+        private void TitleBar_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == System.Windows.Input.MouseButton.Left)
+                DragMove();
         }
 
         private void CloseBtn_Click(object sender, RoutedEventArgs e)

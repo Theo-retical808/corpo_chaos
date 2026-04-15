@@ -52,3 +52,10 @@ C:\Users\user\OneDrive\Desktop\Test_Projects\Corp_chaos_proto\corporate_chaos\co
 C:\Users\user\OneDrive\Desktop\Test_Projects\Corp_chaos_proto\corporate_chaos\corporate_chaos\obj\Debug\net8.0-windows\views\ModernMessageBox.g.cs
 C:\Users\user\OneDrive\Desktop\Test_Projects\Corp_chaos_proto\corporate_chaos\corporate_chaos\obj\Debug\net8.0-windows\views\RelationshipsWindow.baml
 C:\Users\user\OneDrive\Desktop\Test_Projects\Corp_chaos_proto\corporate_chaos\corporate_chaos\obj\Debug\net8.0-windows\views\RelationshipsWindow.g.cs
+C:\Users\user\OneDrive\Desktop\Test_Projects\Corp_chaos_proto\corporate_chaos\corporate_chaos\bin\Debug\net8.0-windows\data\events.json
+C:\Users\user\OneDrive\Desktop\Test_Projects\Corp_chaos_proto\corporate_chaos\corporate_chaos\bin\Debug\net8.0-windows\data\gamebalance.json
+C:\Users\user\OneDrive\Desktop\Test_Projects\Corp_chaos_proto\corporate_chaos\corporate_chaos\bin\Debug\net8.0-windows\data\names.json
+C:\Users\user\OneDrive\Desktop\Test_Projects\Corp_chaos_proto\corporate_chaos\corporate_chaos\bin\Debug\net8.0-windows\data\positions.json
+C:\Users\user\OneDrive\Desktop\Test_Projects\Corp_chaos_proto\corporate_chaos\corporate_chaos\obj\Debug\net8.0-windows\styles\GameTheme.baml
+C:\Users\user\OneDrive\Desktop\Test_Projects\Corp_chaos_proto\corporate_chaos\corporate_chaos\obj\Debug\net8.0-windows\views\FinancialReport.baml
+C:\Users\user\OneDrive\Desktop\Test_Projects\Corp_chaos_proto\corporate_chaos\corporate_chaos\obj\Debug\net8.0-windows\views\FinancialReport.g.cs

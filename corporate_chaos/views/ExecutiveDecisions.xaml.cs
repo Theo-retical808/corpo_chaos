@@ -313,6 +313,7 @@ namespace CorporateChaos.Views
             }
 
             company.Capital -= cost;
+            company.DecisionExpenses += cost;
             company.Morale += 15;
             
             // Boost employee productivity
@@ -343,6 +344,7 @@ namespace CorporateChaos.Views
             }
 
             company.Capital -= cost;
+            company.DecisionExpenses += cost;
             company.Morale += 25;
             
             // Significant boost to employee productivity
@@ -407,6 +409,7 @@ namespace CorporateChaos.Views
             }
 
             company.Capital -= cost;
+            company.DecisionExpenses += cost;
             company.Reputation += random.Next(8, 15);
             
             // Reduced market share gain with diminishing returns
@@ -433,6 +436,7 @@ namespace CorporateChaos.Views
             }
 
             company.Capital -= cost;
+            company.DecisionExpenses += cost;
             company.Reputation += random.Next(15, 25);
             
             // Reduced market share gain with diminishing returns
@@ -462,6 +466,7 @@ namespace CorporateChaos.Views
             }
 
             company.Capital -= cost;
+            company.DecisionExpenses += cost;
             company.Morale += 12;
             company.Risk -= 5;
             
@@ -495,6 +500,7 @@ namespace CorporateChaos.Views
             }
 
             company.Capital -= cost;
+            company.DecisionExpenses += cost;
             company.Morale += 20;
             company.Risk -= 10;
             
@@ -523,6 +529,7 @@ namespace CorporateChaos.Views
             }
 
             company.Capital -= cost;
+            company.DecisionExpenses += cost;
             
             // Reduced market share gain with diminishing returns
             double baseGain = random.NextDouble() * 1.5 + 1.0; // 1-2.5% instead of 2-5%
@@ -547,6 +554,7 @@ namespace CorporateChaos.Views
             }
 
             company.Capital -= cost;
+            company.DecisionExpenses += cost;
             company.Risk -= 15;
             company.Reputation += random.Next(5, 12);
             
@@ -666,6 +674,12 @@ namespace CorporateChaos.Views
                 company.MarketShare += 1;
                 company.Reputation += 2;
             }
+        }
+
+        private void TitleBar_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == System.Windows.Input.MouseButton.Left)
+                DragMove();
         }
 
         private void CloseBtn_Click(object sender, RoutedEventArgs e)

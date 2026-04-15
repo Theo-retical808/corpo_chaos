@@ -1,35 +1,55 @@
 <Window x:Class="CorporateChaos.Views.OptionsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="⚙️ Options" Height="450" Width="600" 
-        WindowStartupLocation="CenterOwner"
-        ResizeMode="NoResize"
-        Background="#1a1a2e">
+        Title="Options" Height="450" Width="600" 
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent">
     
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/styles/ScrollBarStyles.xaml"/>
+                <ResourceDictionary Source="/styles/ButtonStyles.xaml"/>
+                <ResourceDictionary Source="/styles/GameTheme.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>
     
-    <Grid Margin="20">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-
-        <!-- Header -->
-        <TextBlock Grid.Row="0" Text="⚙️ GAME OPTIONS" 
-                   FontSize="24" FontWeight="Bold" 
-                   Foreground="White" 
-                   HorizontalAlignment="Center" 
-                   Margin="0,0,0,30"/>
+    <Border Background="#1a1a2e" CornerRadius="12" BorderBrush="#2a3a5e" BorderThickness="1">
+        <Border.Effect>
+            <DropShadowEffect Color="Black" BlurRadius="20" ShadowDepth="0" Opacity="0.6"/>
+        </Border.Effect>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="44"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <!-- Custom Title Bar -->
+            <Border Grid.Row="0" CornerRadius="12,12,0,0" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#1e2e4e" Offset="0"/>
+                        <GradientStop Color="#162040" Offset="1"/>
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Grid>
+                    <TextBlock Text="⚙️ GAME OPTIONS" FontSize="14" FontWeight="Bold" 
+                              Foreground="White" VerticalAlignment="Center" Margin="15,0,0,0"/>
+                    <Button Content="✕" Width="36" Height="28" HorizontalAlignment="Right" Margin="0,0,8,0"
+                            Click="CloseBtn_Click" Style="{StaticResource CloseButton}"/>
+                </Grid>
+            </Border>
+            
+            <!-- Content -->
+            <Grid Grid.Row="1" Margin="20,10,20,20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
         <!-- Options Content -->
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
             <ScrollViewer.Resources>
                 <Style TargetType="ScrollBar" BasedOn="{StaticResource CorporateChaosScrollBar}"/>
             </ScrollViewer.Resources>
@@ -163,4 +183,6 @@
                     Click="CloseBtn_Click"/>
         </StackPanel>
     </Grid>
+    </Grid>
+    </Border>
 </Window>

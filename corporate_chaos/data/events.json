@@ -1,0 +1,137 @@
+{
+  "marketDisruptions": [
+    "New technology disrupts your market segment",
+    "Consumer preferences shift dramatically",
+    "Government regulations change overnight",
+    "Currency fluctuations affect international business",
+    "E-commerce platform changes algorithms",
+    "Viral social media trend impacts brand perception",
+    "Scientific breakthrough makes products obsolete",
+    "Global supply chain disruption",
+    "Energy crisis affects operational costs",
+    "Health crisis changes consumer behavior"
+  ],
+  "competitorActions": [
+    "launches aggressive price war",
+    "poaches your key clients",
+    "copies your business model",
+    "spreads negative publicity",
+    "files patent lawsuit",
+    "undercuts your pricing by 30%",
+    "releases competing product early"
+  ],
+  "financialCrises": [
+    "Major client defaults on payment",
+    "Bank increases interest rates on business loans",
+    "Stock market crash affects investment portfolio",
+    "Tax audit results in additional penalties",
+    "Critical equipment failure requires emergency replacement",
+    "Lawsuit settlement requires immediate payment",
+    "Insurance premium spike due to industry claims",
+    "Credit line reduced by financial institution",
+    "Factory lease renewal at 40% higher rate",
+    "Accounting error reveals hidden liabilities",
+    "Supply chain disruption requires expensive alternatives",
+    "IT system failure requires costly emergency repairs"
+  ],
+  "scandals": [
+    "leaked internal emails reveal questionable practices",
+    "former employee whistleblower goes public",
+    "social media backlash over company policies",
+    "executive caught in personal scandal",
+    "data privacy violation discovered",
+    "discriminatory hiring practices exposed",
+    "environmental damage cover-up revealed",
+    "tax avoidance scheme becomes public",
+    "insider trading allegations surface"
+  ],
+  "mismanagements": [
+    "budget allocated to wrong department",
+    "critical project deadline missed due to poor planning",
+    "resources wasted on failed initiative",
+    "communication breakdown between departments",
+    "strategic decision backfires spectacularly",
+    "vendor contract negotiated poorly",
+    "talent acquisition strategy fails",
+    "operational efficiency drops due to poor processes"
+  ],
+  "positivePR": [
+    "Company wins industry innovation award",
+    "CEO featured in positive business magazine profile",
+    "Community outreach program receives national recognition",
+    "Product receives glowing reviews from major publications",
+    "Company ranked in 'Best Places to Work' list",
+    "Sustainability initiative praised by environmental groups",
+    "Charitable donation generates positive media coverage",
+    "Employee volunteer program highlighted in local news"
+  ],
+  "miscommunications": [
+    "Internal memo leaked to press causes confusion",
+    "Department heads disagree publicly at company meeting",
+    "Email chain reveals conflicting directives from management",
+    "Marketing campaign contradicts official company stance",
+    "HR policy update causes widespread employee confusion",
+    "IT system migration causes temporary communication blackout",
+    "Cross-department project fails due to unclear responsibilities",
+    "Customer service gives incorrect information to major client"
+  ],
+  "teamBuildingSuccesses": [
+    "Company retreat strengthens team bonds and collaboration",
+    "Cross-department hackathon produces innovative solutions",
+    "Employee mentorship program shows measurable results",
+    "Team building workshop improves interdepartmental communication",
+    "Company sports league boosts employee engagement",
+    "Innovation challenge sparks creative problem-solving culture",
+    "Peer recognition program increases workplace satisfaction"
+  ],
+  "productDefects": [
+    "manufacturing defect discovered in latest batch",
+    "software bug causes customer data loss",
+    "safety issue identified in product design",
+    "quality control failure leads to recalls",
+    "supplier provides substandard materials",
+    "packaging defect damages product reputation",
+    "performance issues reported by multiple customers",
+    "compatibility problems with existing systems"
+  ],
+  "qualitySuccesses": [
+    "Product passes rigorous quality certification",
+    "Customer satisfaction scores reach all-time high",
+    "Zero-defect manufacturing milestone achieved",
+    "Quality improvement initiative reduces returns by 40%",
+    "Industry quality award received for product excellence",
+    "Customer loyalty program shows record retention rates",
+    "Product reliability exceeds industry benchmarks"
+  ],
+  "catastrophicEvents": [
+    "major data breach exposes customer information",
+    "factory fire destroys primary production facility",
+    "class-action lawsuit filed against company",
+    "regulatory investigation launched",
+    "key patent invalidated by court ruling",
+    "major client cancels all contracts",
+    "cyber attack cripples company operations",
+    "environmental disaster linked to company operations"
+  ],
+  "randomChaos": [
+    "A viral TikTok about your company goes viral (randomly positive or negative)",
+    "Your office building gets featured in a reality TV show",
+    "A unicorn startup tries to acquire you with cryptocurrency",
+    "Your employees start a company-wide gaming tournament during work hours",
+    "Free pizza delivery mix-up leads to unexpected client meeting",
+    "CEO gets stuck in elevator with major investor",
+    "Company phone system gets hacked to only play elevator music",
+    "Intern accidentally redesigns company logo, everyone loves it",
+    "Office therapy dog becomes internet famous",
+    "Coffee machine breaks, productivity drops 50%"
+  ],
+  "crisisTypes": [
+    { "title": "Data Breach", "description": "Customer data has been compromised" },
+    { "title": "Product Recall", "description": "Major product defect discovered" },
+    { "title": "PR Nightmare", "description": "Viral negative publicity spreading" },
+    { "title": "Regulatory Investigation", "description": "Government agency investigating practices" },
+    { "title": "Supply Chain Collapse", "description": "Key supplier has gone bankrupt" },
+    { "title": "Employee Strike", "description": "Workers threatening collective action" },
+    { "title": "Cyber Attack", "description": "Systems compromised by hackers" }
+  ]
+}

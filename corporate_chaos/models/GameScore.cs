@@ -106,7 +106,7 @@ namespace CorporateChaos.Models
             if (company.QuarterlyRevenue > PeakRevenue)
                 PeakRevenue = company.QuarterlyRevenue;
 
-            double currentProfit = company.QuarterlyRevenue - company.QuarterlyExpenses;
+            double currentProfit = company.QuarterlyRevenue - (company.QuarterlyExpenses + company.NetLoss + company.DecisionExpenses);
             if (currentProfit > PeakProfit)
                 PeakProfit = currentProfit;
 
