@@ -208,9 +208,6 @@ namespace CorporateChaos.Views
                 
                 // Notify parent window
                 EmployeeHired?.Invoke(employee);
-                
-                MessageBox.Show($"✅ {employee.Name} has been hired!\nThey will be available for department assignment.", 
-                    "Employee Hired", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 

@@ -66,7 +66,7 @@
                         ToolTip="Exit Corporate Chaos"/>
                 
                 <!-- Version -->
-                <TextBlock Text="v0.1.1 Beta" FontSize="10" Foreground="#4a5a7e" 
+                <TextBlock Text="v1.4" FontSize="10" Foreground="#4a5a7e" 
                           HorizontalAlignment="Center" Margin="0,20,0,0"/>
             </StackPanel>
         </Grid>
@@ -885,6 +885,246 @@
                     </StackPanel>
                 </Grid>
             </Border>
+            
+            <!-- ═══════════════════════════════════════════════════════════ -->
+            <!-- TUTORIAL OVERLAY — spans all rows, sits above game content -->
+            <!-- ═══════════════════════════════════════════════════════════ -->
+            <Grid x:Name="TutorialOverlay" Grid.Row="0" Grid.RowSpan="3" Panel.ZIndex="9999"
+                  Visibility="Collapsed" IsHitTestVisible="False">
+                
+                <!-- Dim background (subtle, so game is still visible) -->
+                <Rectangle x:Name="TutorialDimmer" Fill="Black" Opacity="0.35" IsHitTestVisible="False"/>
+                
+                <!-- Joan chat bubble panel — bottom LEFT (default) -->
+                <Border x:Name="JoanChatPanel" 
+                        HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                        Margin="20,0,0,210" MaxWidth="480"
+                        Visibility="Collapsed" IsHitTestVisible="True">
+                    <Border.Effect>
+                        <DropShadowEffect Color="Black" BlurRadius="20" ShadowDepth="0" Opacity="0.7"/>
+                    </Border.Effect>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="70"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <!-- Joan avatar -->
+                        <StackPanel Grid.Column="0" VerticalAlignment="Bottom" Margin="0,0,10,0">
+                            <Border Width="60" Height="60" CornerRadius="30" Background="White">
+                                <Border.Effect>
+                                    <DropShadowEffect Color="#4a9eff" BlurRadius="12" ShadowDepth="0" Opacity="0.6"/>
+                                </Border.Effect>
+                                <Image x:Name="TutorialJoanAvatar" Width="56" Height="56"
+                                       Stretch="UniformToFill" ClipToBounds="True">
+                                    <Image.Clip>
+                                        <EllipseGeometry Center="28,28" RadiusX="28" RadiusY="28"/>
+                                    </Image.Clip>
+                                </Image>
+                            </Border>
+                            <TextBlock Text="Joan" FontSize="9" Foreground="#85c1e9" 
+                                      HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                        </StackPanel>
+                        
+                        <!-- Chat bubble (tail points LEFT toward Joan) -->
+                        <Grid Grid.Column="1">
+                            <!-- Bubble tail pointing left -->
+                            <Path Data="M 0,20 L -10,28 L 0,36" 
+                                  Fill="#1e3a5e" Stroke="#3a6a9e" StrokeThickness="1"
+                                  HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                                  Margin="-1,0,0,14"/>
+                            
+                            <Border Background="#1e3a5e" CornerRadius="12" Padding="16,12"
+                                    BorderBrush="#3a6a9e" BorderThickness="1">
+                                <StackPanel>
+                                    <!-- Step indicator -->
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                        <TextBlock x:Name="TutorialStepText" Text="Step 1 of 3" 
+                                                  FontSize="10" Foreground="#85c1e9" FontWeight="Bold"/>
+                                        <TextBlock x:Name="TutorialMechanicText" Text=" · Basic Operations" 
+                                                  FontSize="10" Foreground="#5a8aae"/>
+                                    </StackPanel>
+                                    
+                                    <!-- Title -->
+                                    <TextBlock x:Name="TutorialTitleText" Text="Welcome to Corporate Chaos!" 
+                                              FontSize="14" FontWeight="Bold" Foreground="White"
+                                              TextWrapping="Wrap" Margin="0,0,0,8"/>
+                                    
+                                    <!-- Message -->
+                                    <TextBlock x:Name="TutorialMessageText" 
+                                              Text="I'm Secretary Joan, your personal assistant. Let me guide you through running your company."
+                                              FontSize="12" Foreground="#c8d8e8" TextWrapping="Wrap"
+                                              LineHeight="18" Margin="0,0,0,12"/>
+                                    
+                                    <!-- Navigation buttons -->
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <Button x:Name="TutorialPrevBtn" Content="← Back" 
+                                                Height="28" Padding="12,4" FontSize="11"
+                                                Background="#2a3a5e" Foreground="#85c1e9"
+                                                BorderBrush="#3a5a8e" BorderThickness="1"
+                                                Margin="0,0,8,0" Click="TutorialPrevBtn_Click"
+                                                Visibility="Collapsed" IsHitTestVisible="True"
+                                                Cursor="Hand">
+                                            <Button.Style>
+                                                <Style TargetType="Button">
+                                                    <Setter Property="Background" Value="#2a3a5e"/>
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="#3a4a7e"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
+                                        <Button x:Name="TutorialNextBtn" Content="Got it! →" 
+                                                Height="28" Padding="14,4" FontSize="11" FontWeight="Bold"
+                                                Background="#2a5d3a" Foreground="White"
+                                                BorderBrush="#4d8a5d" BorderThickness="1"
+                                                Click="TutorialNextBtn_Click"
+                                                IsHitTestVisible="True" Cursor="Hand">
+                                            <Button.Style>
+                                                <Style TargetType="Button">
+                                                    <Setter Property="Background" Value="#2a5d3a"/>
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="#3a7d4a"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <!-- Joan chat bubble panel — bottom RIGHT (used when highlight is on left panel) -->
+                <Border x:Name="JoanChatPanelRight" 
+                        HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                        Margin="0,0,20,210" MaxWidth="480"
+                        Visibility="Collapsed" IsHitTestVisible="True">
+                    <Border.Effect>
+                        <DropShadowEffect Color="Black" BlurRadius="20" ShadowDepth="0" Opacity="0.7"/>
+                    </Border.Effect>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="70"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Chat bubble (tail points RIGHT toward Joan) -->
+                        <Grid Grid.Column="0">
+                            <!-- Bubble tail pointing right -->
+                            <Path Data="M 0,20 L 10,28 L 0,36" 
+                                  Fill="#1e3a5e" Stroke="#3a6a9e" StrokeThickness="1"
+                                  HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                                  Margin="0,0,-1,14"/>
+
+                            <Border Background="#1e3a5e" CornerRadius="12" Padding="16,12"
+                                    BorderBrush="#3a6a9e" BorderThickness="1">
+                                <StackPanel>
+                                    <!-- Step indicator -->
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                        <TextBlock x:Name="TutorialStepTextR" Text="Step 1 of 3" 
+                                                  FontSize="10" Foreground="#85c1e9" FontWeight="Bold"/>
+                                        <TextBlock x:Name="TutorialMechanicTextR" Text=" · Basic Operations" 
+                                                  FontSize="10" Foreground="#5a8aae"/>
+                                    </StackPanel>
+
+                                    <!-- Title -->
+                                    <TextBlock x:Name="TutorialTitleTextR" Text="Welcome to Corporate Chaos!" 
+                                              FontSize="14" FontWeight="Bold" Foreground="White"
+                                              TextWrapping="Wrap" Margin="0,0,0,8"/>
+
+                                    <!-- Message -->
+                                    <TextBlock x:Name="TutorialMessageTextR" 
+                                              Text="I'm Secretary Joan, your personal assistant."
+                                              FontSize="12" Foreground="#c8d8e8" TextWrapping="Wrap"
+                                              LineHeight="18" Margin="0,0,0,12"/>
+
+                                    <!-- Navigation buttons -->
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <Button x:Name="TutorialPrevBtnR" Content="← Back" 
+                                                Height="28" Padding="12,4" FontSize="11"
+                                                Background="#2a3a5e" Foreground="#85c1e9"
+                                                BorderBrush="#3a5a8e" BorderThickness="1"
+                                                Margin="0,0,8,0" Click="TutorialPrevBtn_Click"
+                                                Visibility="Collapsed" IsHitTestVisible="True"
+                                                Cursor="Hand">
+                                            <Button.Style>
+                                                <Style TargetType="Button">
+                                                    <Setter Property="Background" Value="#2a3a5e"/>
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="#3a4a7e"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
+                                        <Button x:Name="TutorialNextBtnR" Content="Got it! →" 
+                                                Height="28" Padding="14,4" FontSize="11" FontWeight="Bold"
+                                                Background="#2a5d3a" Foreground="White"
+                                                BorderBrush="#4d8a5d" BorderThickness="1"
+                                                Click="TutorialNextBtn_Click"
+                                                IsHitTestVisible="True" Cursor="Hand">
+                                            <Button.Style>
+                                                <Style TargetType="Button">
+                                                    <Setter Property="Background" Value="#2a5d3a"/>
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="#3a7d4a"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+
+                        <!-- Joan avatar (right side) -->
+                        <StackPanel Grid.Column="1" VerticalAlignment="Bottom" Margin="10,0,0,0">
+                            <Border Width="60" Height="60" CornerRadius="30" Background="White">
+                                <Border.Effect>
+                                    <DropShadowEffect Color="#4a9eff" BlurRadius="12" ShadowDepth="0" Opacity="0.6"/>
+                                </Border.Effect>
+                                <Image x:Name="TutorialJoanAvatarR" Width="56" Height="56"
+                                       Stretch="UniformToFill" ClipToBounds="True">
+                                    <Image.Clip>
+                                        <EllipseGeometry Center="28,28" RadiusX="28" RadiusY="28"/>
+                                    </Image.Clip>
+                                </Image>
+                            </Border>
+                            <TextBlock Text="Joan" FontSize="9" Foreground="#85c1e9" 
+                                      HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+                
+                <!-- Highlight ring — positioned programmatically from code-behind -->
+                <Border x:Name="TutorialHighlightRing" 
+                        BorderBrush="#f0c040" BorderThickness="3" CornerRadius="8"
+                        Background="Transparent" IsHitTestVisible="False"
+                        Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Top">
+                    <Border.Effect>
+                        <DropShadowEffect Color="#f0c040" BlurRadius="16" ShadowDepth="0" Opacity="0.8"/>
+                    </Border.Effect>
+                    <Border.Triggers>
+                        <EventTrigger RoutedEvent="Border.Loaded">
+                            <BeginStoryboard>
+                                <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                     From="1.0" To="0.4" Duration="0:0:0.7"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </Border.Triggers>
+                </Border>
+            </Grid>
         </Grid>
     </Grid>
 </Window>

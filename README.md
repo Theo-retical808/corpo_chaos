@@ -67,4 +67,4 @@ This project is provided as-is for entertainment and educational purposes.
 
 ## Status
 
-**v0.1.2 Beta** — Playable but under active development. Story mode is being expanded. Bug reports welcome at [Issues](https://github.com/Theo-retical808/corpo_chaos/issues).
+**v1.4** — Stable release with full interactive tutorial, expanded dialogue system, and polished UX. Story mode features branching character relationships across 120 quarters. Bug reports welcome at [Issues](https://github.com/Theo-retical808/corpo_chaos/issues).

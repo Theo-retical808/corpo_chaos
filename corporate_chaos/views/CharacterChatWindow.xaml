@@ -1,0 +1,112 @@
+<Window x:Class="CorporateChaos.Views.CharacterChatWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Conversation" Height="680" Width="560"
+        WindowStartupLocation="CenterOwner"
+        Background="Transparent" AllowsTransparency="True" WindowStyle="None"
+        MinWidth="420" MinHeight="500">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/styles/ScrollBarStyles.xaml"/>
+                <ResourceDictionary Source="/styles/ButtonStyles.xaml"/>
+                <ResourceDictionary Source="/styles/Typography.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Border Background="#1a1a2e" BorderBrush="#4a4a6e" BorderThickness="2" CornerRadius="14">
+        <Border.Effect>
+            <DropShadowEffect Color="Black" Opacity="0.55" BlurRadius="24" ShadowDepth="0"/>
+        </Border.Effect>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <!-- Header -->
+                <RowDefinition Height="Auto"/>
+                <!-- Chat area -->
+                <RowDefinition Height="*"/>
+                <!-- Choices / typing area -->
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- ── HEADER ─────────────────────────────────────────────────── -->
+            <Border Grid.Row="0" Background="#1e2d4a" CornerRadius="12,12,0,0" Padding="16,14">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Avatar -->
+                    <Border Grid.Column="0" Width="52" Height="52" CornerRadius="26"
+                            Background="#2a3a5e" Margin="0,0,14,0">
+                        <Border.Effect>
+                            <DropShadowEffect Color="#4a7cae" Opacity="0.5" BlurRadius="10" ShadowDepth="0"/>
+                        </Border.Effect>
+                        <Image x:Name="CharacterAvatar" Width="50" Height="50"
+                               Stretch="UniformToFill" ClipToBounds="True">
+                            <Image.Clip>
+                                <EllipseGeometry Center="25,25" RadiusX="25" RadiusY="25"/>
+                            </Image.Clip>
+                        </Image>
+                    </Border>
+
+                    <!-- Name + status -->
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock x:Name="CharacterNameText" Text="Character"
+                                   FontSize="17" FontWeight="Bold" Foreground="White"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                            <!-- Online dot -->
+                            <Ellipse Width="8" Height="8" Fill="#4caf50" Margin="0,0,6,0"
+                                     VerticalAlignment="Center"/>
+                            <TextBlock x:Name="CharacterRoleText" Text="Role"
+                                       FontSize="12" Foreground="#90b4d1"/>
+                        </StackPanel>
+                        <!-- Relationship bar -->
+                        <Grid Margin="0,5,0,0" Width="160" HorizontalAlignment="Left">
+                            <Border Background="#2a3a5e" CornerRadius="3" Height="5"/>
+                            <Border x:Name="RelationshipBar" Background="#4a9eff"
+                                    CornerRadius="3" Height="5" HorizontalAlignment="Left"
+                                    Width="80"/>
+                        </Grid>
+                        <TextBlock x:Name="RelationshipText" Text="Relationship: Neutral"
+                                   FontSize="10" Foreground="#6a8aaa" Margin="0,2,0,0"/>
+                    </StackPanel>
+
+                    <!-- Close -->
+                    <Button Grid.Column="2" Content="✕" VerticalAlignment="Top"
+                            Click="CloseBtn_Click" Style="{StaticResource CloseButton}"/>
+                </Grid>
+            </Border>
+
+            <!-- ── CHAT AREA ──────────────────────────────────────────────── -->
+            <Border Grid.Row="1" Background="#12192e">
+                <ScrollViewer x:Name="ChatScrollViewer"
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled"
+                              Padding="14,10">
+                    <ScrollViewer.Resources>
+                        <Style TargetType="ScrollBar" BasedOn="{StaticResource CorporateChaosScrollBar}"/>
+                    </ScrollViewer.Resources>
+                    <!-- Bubbles go here -->
+                    <StackPanel x:Name="BubbleContainer" Margin="0,4"/>
+                </ScrollViewer>
+            </Border>
+
+            <!-- ── CHOICES PANEL ──────────────────────────────────────────── -->
+            <Border Grid.Row="2" x:Name="ChoicesPanel"
+                    Background="#1a1a2e" CornerRadius="0,0,12,12" Padding="14,12">
+                <StackPanel>
+                    <TextBlock x:Name="ChoicesPromptText"
+                               Text="How do you respond?"
+                               FontSize="12" Foreground="#6a8aaa"
+                               Margin="0,0,0,8" HorizontalAlignment="Center"/>
+                    <StackPanel x:Name="ChoiceButtonsPanel"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

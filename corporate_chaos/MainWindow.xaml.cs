@@ -42,6 +42,12 @@ namespace CorporateChaos
         // Peak performance tracking
         private GameScore currentGameScore = null!;
 
+        // Tutorial overlay system
+        private List<TutorialStep> _tutorialSteps = new();
+        private int _tutorialStepIndex = 0;
+        private UIElement? _currentHighlightTarget = null;
+        private bool _waitingForButtonPress = false; // True when tutorial is waiting for user to click highlighted button
+
         public MainWindow()
         {
             InitializeComponent();
@@ -715,6 +721,7 @@ namespace CorporateChaos
         {
             if (sender is Button button && button.Tag != null && company != null)
             {
+                NotifyTutorialButtonPressed(button);
                 var riskType = button.Tag.ToString()!;
                 company.RiskAppetite = Enum.Parse<RiskAppetite>(riskType);
                 UpdateControlKnobVisuals("Risk", riskType);
@@ -725,6 +732,7 @@ namespace CorporateChaos
         {
             if (sender is Button button && button.Tag != null && company != null)
             {
+                NotifyTutorialButtonPressed(button);
                 var budgetLevel = button.Tag.ToString()!;
                 company.BudgetAllocation = Enum.Parse<InvestmentLevel>(budgetLevel);
                 UpdateControlKnobVisuals("Budget", budgetLevel);
@@ -735,6 +743,7 @@ namespace CorporateChaos
         {
             if (sender is Button button && button.Tag != null && company != null)
             {
+                NotifyTutorialButtonPressed(button);
                 var strategy = button.Tag.ToString()!;
                 company.MarketStrategy = Enum.Parse<MarketStrategy>(strategy);
                 UpdateControlKnobVisuals("Market", strategy);
@@ -745,6 +754,7 @@ namespace CorporateChaos
         {
             if (sender is Button button && button.Tag != null && company != null)
             {
+                NotifyTutorialButtonPressed(button);
                 var response = button.Tag.ToString()!;
                 company.CrisisResponse = Enum.Parse<CrisisResponse>(response);
                 UpdateControlKnobVisuals("Crisis", response);
@@ -808,6 +818,20 @@ namespace CorporateChaos
         // Employee Management - New Hiring System
         private void HireEmployeesBtn_Click(object sender, RoutedEventArgs e)
         {
+            // If tutorial is waiting for this button, advance tutorial first (don't open panel yet)
+            if (_waitingForButtonPress && _tutorialStepIndex >= 0 && _tutorialStepIndex < _tutorialSteps.Count
+                && _tutorialSteps[_tutorialStepIndex].HighlightTarget == HireEmployeesBtn)
+            {
+                NotifyTutorialButtonPressed(HireEmployeesBtn);
+                return; // Tutorial advanced — don't open the panel during tutorial guidance
+            }
+
+            NotifyTutorialButtonPressed(HireEmployeesBtn);
+            OpenHiringPanel();
+        }
+
+        private void OpenHiringPanel()
+        {
             var hiringPanel = new HiringPanel(company, departments, quarterNumber);
             hiringPanel.Owner = this;
             
@@ -836,6 +860,20 @@ namespace CorporateChaos
         // Executive Decisions Panel
         private void ExecutiveDecisionsBtn_Click(object sender, RoutedEventArgs e)
         {
+            // If tutorial is waiting for this button, advance tutorial first (don't open panel yet)
+            if (_waitingForButtonPress && _tutorialStepIndex >= 0 && _tutorialStepIndex < _tutorialSteps.Count
+                && _tutorialSteps[_tutorialStepIndex].HighlightTarget == ExecutiveDecisionsBtn)
+            {
+                NotifyTutorialButtonPressed(ExecutiveDecisionsBtn);
+                return;
+            }
+
+            NotifyTutorialButtonPressed(ExecutiveDecisionsBtn);
+            OpenExecutiveDecisions();
+        }
+
+        private void OpenExecutiveDecisions()
+        {
             var executiveDecisions = new ExecutiveDecisions(company, departments);
             executiveDecisions.Owner = this;
             
@@ -854,6 +892,16 @@ namespace CorporateChaos
         // Current Events Button
         private void CurrentEventsBtn_Click(object sender, RoutedEventArgs e)
         {
+            // If tutorial is waiting for this button, advance tutorial only
+            if (_waitingForButtonPress && _tutorialStepIndex >= 0 && _tutorialStepIndex < _tutorialSteps.Count
+                && _tutorialSteps[_tutorialStepIndex].HighlightTarget == CurrentEventsBtn)
+            {
+                NotifyTutorialButtonPressed(CurrentEventsBtn);
+                return;
+            }
+
+            NotifyTutorialButtonPressed(CurrentEventsBtn);
+
             ShowQuarterlySummary();
             
             // Hide the new events indicator
@@ -888,6 +936,16 @@ namespace CorporateChaos
         {
             if (sender is Button button && button.Tag != null)
             {
+                // If tutorial is waiting for this specific department button, advance tutorial only
+                if (_waitingForButtonPress && _tutorialStepIndex >= 0 && _tutorialStepIndex < _tutorialSteps.Count
+                    && _tutorialSteps[_tutorialStepIndex].HighlightTarget == button)
+                {
+                    NotifyTutorialButtonPressed(button);
+                    return;
+                }
+
+                NotifyTutorialButtonPressed(button);
+
                 var deptName = button.Tag.ToString()!;
                 if (Enum.TryParse<Department>(deptName, out Department department))
                 {
@@ -1010,8 +1068,22 @@ namespace CorporateChaos
             }
             else if (result == MessageBoxResult.No)
             {
-                // New branching dialogue demo
-                JoanDialogue.ShowBranchingDialogueExample(company, departments, quarterNumber, this);
+                // New branching dialogue demo — open via CharacterChatWindow
+                var conversation = JoanDialogue.CreateSampleBranchingDialogue(company, quarterNumber);
+                var relationships = new Dictionary<string, CharacterRelationship>
+                {
+                    ["joan"] = new CharacterRelationship
+                    {
+                        TrustLevel = 50,
+                        ProfessionalRespect = 60,
+                        PersonalConnection = 30,
+                        CurrentPhase = StoryScript.GetJoanPhaseForQuarter(quarterNumber)
+                    }
+                };
+                var flags = new List<string> { $"quarter_{quarterNumber}", "example_dialogue" };
+                var chatWindow = new Views.CharacterChatWindow(company, storyModeManager!, quarterNumber, "joan", conversation, relationships, flags);
+                chatWindow.Owner = this;
+                chatWindow.ShowDialog();
             }
         }
 
@@ -1079,6 +1151,18 @@ namespace CorporateChaos
         // Quarter End Processing
         private void EndQuarterBtn_Click(object sender, RoutedEventArgs e)
         {
+            // If tutorial is waiting for this button, advance tutorial and then process quarter end
+            if (_waitingForButtonPress && _tutorialStepIndex >= 0 && _tutorialStepIndex < _tutorialSteps.Count
+                && _tutorialSteps[_tutorialStepIndex].HighlightTarget == EndQuarterBtn)
+            {
+                NotifyTutorialButtonPressed(EndQuarterBtn);
+                // If tutorial just completed (no more steps), fall through to process the quarter
+                if (_tutorialSteps.Count > 0 && _tutorialStepIndex < _tutorialSteps.Count)
+                    return; // Tutorial still has more steps — don't end quarter yet
+            }
+
+            NotifyTutorialButtonPressed(EndQuarterBtn);
+
             // Clear previous quarter events (from 2 quarters ago) when starting a new quarter
             previousQuarterEvents.Clear();
             
@@ -1089,6 +1173,12 @@ namespace CorporateChaos
 
         private void ShowJoanEndQuarterDialogue()
         {
+            // During the tutorial phase, Joan speaks through the in-game chat bubble overlay
+            // (shown after ProcessQuarterEnd via ShowStoryGuide → ShowTutorialForQuarter).
+            // Skip the separate dialog popup so we don't interrupt the overlay flow.
+            if (storyModeManager?.IsStoryMode == true && storyModeManager.IsInTutorial)
+                return;
+
             // Use adaptive dialogue if available, otherwise traditional
             if (storyModeManager?.ShouldUseAdaptiveDialogue() == true)
             {
@@ -1179,7 +1269,14 @@ namespace CorporateChaos
             // Complete quarter in story mode
             if (storyModeManager.IsStoryMode)
             {
+                bool wasInTutorial = storyModeManager.IsInTutorial;
                 storyModeManager.CompleteQuarter(quarterNumber);
+
+                // If the tutorial just ended, show the graduation overlay
+                if (wasInTutorial && !storyModeManager.IsInTutorial)
+                {
+                    ShowTutorialGraduation();
+                }
                 
                 // Check for act transitions and show narrative events
                 ProcessActTransitionEvents(quarterNumber);
@@ -1284,16 +1381,16 @@ namespace CorporateChaos
 
             conversation.Nodes.Add("event_intro", initialNode);
 
-            // Show the dialogue using JoanDialogue
-            var dialogue = new JoanDialogue(
+            // Show the dialogue using CharacterChatWindow
+            string speakingCharId = narrativeEvent.InvolvedCharacters.FirstOrDefault() ?? "joan";
+            var dialogue = new Views.CharacterChatWindow(
                 company,
-                departments,
+                storyModeManager,
+                quarterNumber,
+                speakingCharId,
                 conversation,
                 storyModeManager.StoryData.CharacterRelationships,
-                storyModeManager.StoryData.StoryFlags,
-                true,
-                quarterNumber,
-                storyModeManager
+                storyModeManager.StoryData.StoryFlags
             );
 
             dialogue.Owner = this;
@@ -1376,16 +1473,15 @@ namespace CorporateChaos
 
             conversation.Nodes.Add("transition_intro", initialNode);
 
-            // Show the dialogue using JoanDialogue
-            var dialogue = new JoanDialogue(
+            // Show the dialogue using CharacterChatWindow
+            var dialogue = new Views.CharacterChatWindow(
                 company,
-                departments,
+                storyModeManager,
+                quarterNumber,
+                "joan",
                 conversation,
                 storyModeManager.StoryData.CharacterRelationships,
-                storyModeManager.StoryData.StoryFlags,
-                true,
-                quarterNumber,
-                storyModeManager
+                storyModeManager.StoryData.StoryFlags
             );
 
             dialogue.Owner = this;
@@ -1600,6 +1696,349 @@ namespace CorporateChaos
                 >= 1 => "Very Low",
                 _ => "Minimal"
             };
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // TUTORIAL OVERLAY SYSTEM
+        // ═══════════════════════════════════════════════════════════════
+
+        private record TutorialStep(
+            string Title,
+            string Message,
+            string Mechanic,
+            UIElement? HighlightTarget = null
+        );
+
+        public void ShowTutorialForQuarter(int quarter)
+        {
+            if (storyModeManager == null || !storyModeManager.IsStoryMode) return;
+
+            var storyEvent = storyModeManager.GetStoryEventForQuarter(quarter);
+            if (storyEvent == null) return;
+
+            _tutorialSteps = BuildTutorialSteps(quarter, storyEvent);
+            if (_tutorialSteps.Count == 0) return;
+
+            _tutorialStepIndex = 0;
+            _waitingForButtonPress = false;
+            LoadTutorialJoanAvatar();
+            ShowTutorialStep(_tutorialStepIndex);
+        }
+
+        private List<TutorialStep> BuildTutorialSteps(int quarter, CorporateChaos.Models.StoryEvent storyEvent)
+        {
+            var steps = new List<TutorialStep>();
+            var mechanic = storyEvent.IntroducedMechanic.ToString();
+
+            var dialogues = storyEvent.JoanDialogue;
+            if (dialogues == null || dialogues.Count == 0)
+            {
+                steps.Add(new TutorialStep(storyEvent.Title, storyEvent.Description, mechanic));
+                return steps;
+            }
+
+            // First step: context/description (no highlight — user clicks "Got it")
+            steps.Add(new TutorialStep(storyEvent.Title, storyEvent.Description, mechanic));
+
+            // Each dialogue line gets a specific highlight target matching what it describes
+            var targets = GetHighlightTargetsForDialogue(storyEvent.IntroducedMechanic, dialogues.Count);
+            for (int i = 0; i < dialogues.Count; i++)
+            {
+                steps.Add(new TutorialStep(storyEvent.Title, dialogues[i], mechanic, targets[i]));
+            }
+
+            // Final step: objective with the primary action button highlighted
+            if (!string.IsNullOrEmpty(storyEvent.ObjectiveText))
+            {
+                UIElement? finalTarget = GetPrimaryTargetForMechanic(storyEvent.IntroducedMechanic);
+                steps.Add(new TutorialStep("🎯 Your Objective", storyEvent.ObjectiveText, mechanic, finalTarget));
+            }
+
+            return steps;
+        }
+
+        /// <summary>
+        /// Returns a highlight target for each dialogue line, matching what the dialogue describes.
+        /// </summary>
+        private List<UIElement?> GetHighlightTargetsForDialogue(CorporateChaos.Models.MechanicType mechanic, int dialogueCount)
+        {
+            var targets = new List<UIElement?>();
+            switch (mechanic)
+            {
+                case CorporateChaos.Models.MechanicType.BasicOperations:
+                    // Q1 dialogues: intro→null, guide→null, dashboard→null, stats→null, staff→dept, zero employees→dept, End Quarter→EndQuarterBtn
+                    AssignTargets(targets, dialogueCount, null, null, null, null, MarketingDeptBtn, MarketingDeptBtn, EndQuarterBtn);
+                    break;
+                case CorporateChaos.Models.MechanicType.EmployeeHiring:
+                    // Q2: great job→null, Hire button→HireBtn, candidates→HireBtn, HR dept→null, hire 2-3→HireBtn
+                    AssignTargets(targets, dialogueCount, null, HireEmployeesBtn, HireEmployeesBtn, null, HireEmployeesBtn);
+                    break;
+                case CorporateChaos.Models.MechanicType.DepartmentManagement:
+                    // Q3: excellent→null, click dept→MarketingDept, skills→MarketingDept, position→MarketingDept, workforce→null, organized→MarketingDept
+                    AssignTargets(targets, dialogueCount, null, MarketingDeptBtn, MarketingDeptBtn, MarketingDeptBtn, null, MarketingDeptBtn);
+                    break;
+                case CorporateChaos.Models.MechanicType.ExecutiveDecisions:
+                    // Q4: organized→null, Executive Decisions→ExecBtn, cut costs→ExecBtn, trade-offs→ExecBtn, marketing campaign→ExecBtn
+                    AssignTargets(targets, dialogueCount, null, ExecutiveDecisionsBtn, ExecutiveDecisionsBtn, ExecutiveDecisionsBtn, ExecutiveDecisionsBtn);
+                    break;
+                case CorporateChaos.Models.MechanicType.FinancialManagement:
+                    // Q5: financial→null, budget sliders→ExecBtn, departments→ExecBtn, Marketing drives→ExecBtn, adjust budget→ExecBtn
+                    AssignTargets(targets, dialogueCount, null, ExecutiveDecisionsBtn, ExecutiveDecisionsBtn, ExecutiveDecisionsBtn, ExecutiveDecisionsBtn);
+                    break;
+                case CorporateChaos.Models.MechanicType.CrisisManagement:
+                    // Q6: crisis→null, crisis management→null, Quarterly Summary→CurrentEventsBtn, crisis response→CrisisControlBtn, careful→null, don't panic→CurrentEventsBtn
+                    AssignTargets(targets, dialogueCount, null, null, CurrentEventsBtn, CrisisControlBtn, null, CurrentEventsBtn);
+                    break;
+                case CorporateChaos.Models.MechanicType.AdvancedHR:
+                    // Q7: mastered→null, don't meet expectations→null, fire through dept→MarketingDeptBtn, careful→MarketingDeptBtn, wisely→null, well-managed→MarketingDeptBtn
+                    AssignTargets(targets, dialogueCount, null, null, MarketingDeptBtn, MarketingDeptBtn, null, MarketingDeptBtn);
+                    break;
+                case CorporateChaos.Models.MechanicType.MarketAnalysis:
+                    // Q8: alert→null, market analysis→null, control knobs→RiskBalancedBtn, Market Strategy→MarketQualityBtn, Executive Decisions→ExecBtn, positioning→ExecBtn
+                    AssignTargets(targets, dialogueCount, null, null, RiskBalancedBtn, MarketQualityBtn, ExecutiveDecisionsBtn, ExecutiveDecisionsBtn);
+                    break;
+                case CorporateChaos.Models.MechanicType.RiskManagement:
+                    // Q9: challenges→null, Risk Appetite→RiskBalancedBtn, Conservative→RiskConservativeBtn, Aggressive→RiskAggressiveBtn, Crisis Response→CrisisControlBtn, balance→EndQuarterBtn
+                    AssignTargets(targets, dialogueCount, null, RiskBalancedBtn, RiskConservativeBtn, RiskAggressiveBtn, CrisisControlBtn, EndQuarterBtn);
+                    break;
+                case CorporateChaos.Models.MechanicType.AdvancedStrategy:
+                    // Q10: final→null, graduation→null, everything learned→ExecBtn, sustainable growth→HireBtn, ChaosEngine→null, leader→EndQuarterBtn
+                    AssignTargets(targets, dialogueCount, null, null, ExecutiveDecisionsBtn, HireEmployeesBtn, null, EndQuarterBtn);
+                    break;
+                default:
+                    for (int i = 0; i < dialogueCount; i++) targets.Add(null);
+                    break;
+            }
+            return targets;
+        }
+
+        private void AssignTargets(List<UIElement?> targets, int dialogueCount, params UIElement?[] planned)
+        {
+            for (int i = 0; i < dialogueCount; i++)
+                targets.Add(i < planned.Length ? planned[i] : null);
+        }
+
+        private UIElement? GetPrimaryTargetForMechanic(CorporateChaos.Models.MechanicType mechanic)
+        {
+            return mechanic switch
+            {
+                CorporateChaos.Models.MechanicType.BasicOperations => EndQuarterBtn,
+                CorporateChaos.Models.MechanicType.EmployeeHiring => HireEmployeesBtn,
+                CorporateChaos.Models.MechanicType.DepartmentManagement => MarketingDeptBtn,
+                CorporateChaos.Models.MechanicType.ExecutiveDecisions => ExecutiveDecisionsBtn,
+                CorporateChaos.Models.MechanicType.FinancialManagement => ExecutiveDecisionsBtn,
+                CorporateChaos.Models.MechanicType.CrisisManagement => CurrentEventsBtn,
+                CorporateChaos.Models.MechanicType.AdvancedHR => MarketingDeptBtn,
+                CorporateChaos.Models.MechanicType.MarketAnalysis => ExecutiveDecisionsBtn,
+                CorporateChaos.Models.MechanicType.RiskManagement => EndQuarterBtn,
+                CorporateChaos.Models.MechanicType.AdvancedStrategy => EndQuarterBtn,
+                _ => null
+            };
+        }
+
+        private void ShowTutorialStep(int index)
+        {
+            if (index < 0 || index >= _tutorialSteps.Count) return;
+
+            var step = _tutorialSteps[index];
+            int total = _tutorialSteps.Count;
+
+            // Determine which side to show the bubble on based on the highlight target.
+            bool useRightBubble = step.HighlightTarget != null && IsElementOnLeftSide(step.HighlightTarget);
+
+            string stepLabel = $"Step {index + 1} of {total}";
+            string mechanicLabel = $" · {step.Mechanic}";
+
+            // If there's a highlight target, the step auto-advances when user clicks that button.
+            // If there's no highlight (intro/context text), show a "Got it" button for manual advance.
+            bool hasTarget = step.HighlightTarget != null;
+            _waitingForButtonPress = hasTarget;
+
+            string nextLabel = hasTarget ? "👆 Click the highlighted button" : (index == total - 1 ? "Let's go! ✓" : "Next →");
+
+            // Left panel
+            TutorialStepText.Text = stepLabel;
+            TutorialMechanicText.Text = mechanicLabel;
+            TutorialTitleText.Text = step.Title;
+            TutorialMessageText.Text = step.Message;
+            TutorialPrevBtn.Visibility = Visibility.Collapsed;
+            TutorialNextBtn.Content = nextLabel;
+            TutorialNextBtn.IsEnabled = !hasTarget;
+            TutorialNextBtn.Visibility = hasTarget ? Visibility.Collapsed : Visibility.Visible;
+
+            // Right panel
+            TutorialStepTextR.Text = stepLabel;
+            TutorialMechanicTextR.Text = mechanicLabel;
+            TutorialTitleTextR.Text = step.Title;
+            TutorialMessageTextR.Text = step.Message;
+            TutorialPrevBtnR.Visibility = Visibility.Collapsed;
+            TutorialNextBtnR.Content = nextLabel;
+            TutorialNextBtnR.IsEnabled = !hasTarget;
+            TutorialNextBtnR.Visibility = hasTarget ? Visibility.Collapsed : Visibility.Visible;
+
+            // Show the correct side
+            JoanChatPanel.Visibility = useRightBubble ? Visibility.Collapsed : Visibility.Visible;
+            JoanChatPanelRight.Visibility = useRightBubble ? Visibility.Visible : Visibility.Collapsed;
+
+            // Ensure overlay is always visible and on top
+            TutorialOverlay.Visibility = Visibility.Visible;
+            // The overlay grid itself is always hit-test-visible so the bubble stays interactive
+            TutorialOverlay.IsHitTestVisible = true;
+
+            ClearHighlight();
+            if (hasTarget)
+            {
+                HighlightElement(step.HighlightTarget!);
+                // Dimmer doesn't block clicks — game buttons are accessible beneath the overlay
+                TutorialDimmer.IsHitTestVisible = false;
+            }
+            else
+            {
+                // Block game interaction — user must click "Next" in the bubble
+                TutorialDimmer.IsHitTestVisible = true;
+            }
+        }
+
+        /// <summary>
+        /// Called by game button click handlers. When the tutorial is showing a highlighted button
+        /// and the user clicks it, the tutorial auto-advances to the next dialogue step.
+        /// The overlay stays visible throughout — dialogue continues alongside interaction.
+        /// </summary>
+        public void NotifyTutorialButtonPressed(UIElement pressedButton)
+        {
+            if (!_waitingForButtonPress || _tutorialSteps.Count == 0) return;
+            if (_tutorialStepIndex < 0 || _tutorialStepIndex >= _tutorialSteps.Count) return;
+
+            var currentStep = _tutorialSteps[_tutorialStepIndex];
+            if (currentStep.HighlightTarget == pressedButton)
+            {
+                _waitingForButtonPress = false;
+                _tutorialStepIndex++;
+                if (_tutorialStepIndex >= _tutorialSteps.Count)
+                {
+                    HideTutorialOverlay();
+                    if (storyModeManager?.IsStoryMode == true)
+                        storyModeManager.StoryData.CompletedStoryEvents.Add($"quarter_{quarterNumber}");
+                }
+                else
+                {
+                    ShowTutorialStep(_tutorialStepIndex);
+                }
+            }
+        }
+
+        /// <summary>Returns true if the element lives in the left executive-controls column.</summary>
+        private bool IsElementOnLeftSide(UIElement element)
+        {
+            try
+            {
+                var pos = element.TransformToAncestor(CorporateGameGrid).Transform(new System.Windows.Point(0, 0));
+                // Left panel is ~300px wide; anything with X < 350 is considered "left side"
+                return pos.X < 350;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private void HighlightElement(UIElement target)
+        {
+            _currentHighlightTarget = target;
+            try
+            {
+                var pos = target.TransformToAncestor(CorporateGameGrid).Transform(new System.Windows.Point(0, 0));
+                var size = target.RenderSize;
+                double pad = 4;
+                TutorialHighlightRing.Margin = new Thickness(pos.X - pad, pos.Y - pad, 0, 0);
+                TutorialHighlightRing.Width = size.Width + pad * 2;
+                TutorialHighlightRing.Height = size.Height + pad * 2;
+                TutorialHighlightRing.Visibility = Visibility.Visible;
+            }
+            catch
+            {
+                TutorialHighlightRing.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void ClearHighlight()
+        {
+            TutorialHighlightRing.Visibility = Visibility.Collapsed;
+            _currentHighlightTarget = null;
+        }
+
+        private void HideTutorialOverlay()
+        {
+            TutorialOverlay.Visibility = Visibility.Collapsed;
+            TutorialOverlay.IsHitTestVisible = false;
+            TutorialDimmer.IsHitTestVisible = false;
+            JoanChatPanel.Visibility = Visibility.Collapsed;
+            JoanChatPanelRight.Visibility = Visibility.Collapsed;
+            ClearHighlight();
+            _tutorialSteps.Clear();
+            _tutorialStepIndex = 0;
+            _waitingForButtonPress = false;
+        }
+
+        private void LoadTutorialJoanAvatar()
+        {
+            try
+            {
+                var uri = new Uri("pack://application:,,,/images/assistant.png");
+                var bmp = new System.Windows.Media.Imaging.BitmapImage(uri);
+                TutorialJoanAvatar.Source = bmp;
+                TutorialJoanAvatarR.Source = bmp;
+            }
+            catch { }
+        }
+
+        private void TutorialNextBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (_waitingForButtonPress) return; // Don't advance if waiting for button press
+
+            _tutorialStepIndex++;
+            if (_tutorialStepIndex >= _tutorialSteps.Count)
+            {
+                HideTutorialOverlay();
+                if (storyModeManager?.IsStoryMode == true)
+                    storyModeManager.StoryData.CompletedStoryEvents.Add($"quarter_{quarterNumber}");
+            }
+            else
+            {
+                ShowTutorialStep(_tutorialStepIndex);
+            }
+        }
+
+        private void TutorialPrevBtn_Click(object sender, RoutedEventArgs e)
+        {
+            // Linear flow only — back button is hidden but handler kept for XAML binding
+        }
+
+        /// <summary>
+        /// Shows a graduation chat-bubble overlay when the player finishes the tutorial phase.
+        /// Called from CompleteQuarter() when the phase transitions from Tutorial → FullMode.
+        /// </summary>
+        public void ShowTutorialGraduation()
+        {
+            _tutorialSteps = new List<TutorialStep>
+            {
+                new TutorialStep(
+                    "🎓 Tutorial Complete!",
+                    "You've mastered the fundamentals of corporate management! From basic operations to advanced strategy — you've shown real leadership potential.",
+                    "Graduation"
+                ),
+                new TutorialStep(
+                    "🌪️ Full Chaos Mode Unlocked",
+                    "The full ChaosEngine is now active. Expect unpredictable events, market swings, and real corporate drama. All mechanics are unlocked — good luck building your empire!",
+                    "Graduation",
+                    EndQuarterBtn
+                )
+            };
+
+            _tutorialStepIndex = 0;
+            _waitingForButtonPress = false;
+            LoadTutorialJoanAvatar();
+            ShowTutorialStep(_tutorialStepIndex);
         }
     }
 }

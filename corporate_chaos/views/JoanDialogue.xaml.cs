@@ -24,6 +24,9 @@ namespace CorporateChaos.Views
         private List<string> activeStoryFlags = new List<string>();
         private string currentCharacterId = "joan"; // Track which character is speaking
 
+        // Dialogue repetition prevention — tracks indices of previously shown messages per category
+        private static readonly Dictionary<string, HashSet<int>> _shownDialogueIndices = new();
+
         public JoanDialogue(Company company, Dictionary<Department, DepartmentStats> departments, bool isStoryMode = false, int quarter = 1, StoryModeManager? storyModeManager = null)
         {
             InitializeComponent();
@@ -816,7 +819,7 @@ namespace CorporateChaos.Views
                 };
                 
                 return (
-                    healthDialogues[new Random().Next(healthDialogues.Length)],
+                    PickUniqueDialogue("health_retirement", healthDialogues),
                     "After nearly three decades of corporate leadership, it's natural to reflect on health and legacy.",
                     "💡 Consider your long-term well-being\n💡 Retirement at quarter 120 is approaching\n💡 Think about what kind of legacy you want to leave"
                 );
@@ -853,11 +856,20 @@ namespace CorporateChaos.Views
             {
                 "Good day! Let me provide you with a professional assessment of our current business situation.",
                 "I've prepared a comprehensive analysis of our company's performance this quarter.",
-                "As your assistant, I've compiled the key metrics and strategic recommendations for your review."
+                "As your assistant, I've compiled the key metrics and strategic recommendations for your review.",
+                "I've been reviewing the quarterly reports and have some observations to share with you.",
+                "Let me walk you through the current state of affairs — there are some important trends to note.",
+                "I've gathered the latest performance data across all departments for your consideration.",
+                "Before we proceed, I'd like to highlight some key developments from this quarter.",
+                "I've noticed some patterns in our operations that I think warrant your attention.",
+                "Here's my professional assessment of where we stand and what requires your focus.",
+                "I've cross-referenced our metrics with industry benchmarks — here's what I found.",
+                "Allow me to present the quarterly overview. There are both opportunities and concerns.",
+                "I've been monitoring several indicators that suggest we should adjust our approach."
             };
             
             return (
-                messages[random.Next(messages.Length)],
+                PickUniqueDialogue("professional", messages),
                 "Professional analysis of current company metrics and performance indicators.",
                 "Strategic recommendations based on industry best practices and current market conditions."
             );
@@ -869,11 +881,20 @@ namespace CorporateChaos.Views
             {
                 "I've been thinking about our strategic direction, and I have some insights to share with you.",
                 "Based on our working relationship, I feel comfortable sharing some honest observations about our progress.",
-                "You've shown excellent leadership so far. Let me share what I'm seeing from my perspective."
+                "You've shown excellent leadership so far. Let me share what I'm seeing from my perspective.",
+                "I trust you enough to be candid — there are some things we should discuss openly.",
+                "Between us, I think there's an opportunity here that others might miss. Let me explain.",
+                "I've been reflecting on our trajectory, and I want to give you my unfiltered take.",
+                "You know I wouldn't say this to just anyone, but I think we need to reconsider our approach here.",
+                "After working together this long, I feel I owe you my honest assessment — even if it's uncomfortable.",
+                "I've seen enough to know when something's working and when it isn't. Here's my read on things.",
+                "Let me level with you — I've noticed something that could be either a big opportunity or a real problem.",
+                "I respect your judgment, so I want to share a concern I've been sitting on for a while.",
+                "You've earned my trust, so I'll be direct: here's what I really think about our current position."
             };
             
             return (
-                messages[random.Next(messages.Length)],
+                PickUniqueDialogue("trusted", messages),
                 "Trusted advisor perspective on company trajectory and leadership effectiveness.",
                 "Candid recommendations based on our established working relationship and mutual trust."
             );
@@ -883,13 +904,22 @@ namespace CorporateChaos.Views
         {
             var messages = new[]
             {
-                "I hope you don't mind me saying, but I've grown quite invested in our company's success - and your well-being.",
+                "I hope you don't mind me saying, but I've grown quite invested in our company's success — and your well-being.",
                 "After all this time working together, I feel I can speak more personally about what I'm observing.",
-                "You know, I've come to really care about both the business and how you're handling the pressures of leadership."
+                "You know, I've come to really care about both the business and how you're handling the pressures of leadership.",
+                "Can I be honest with you? I worry sometimes that you're carrying too much of this alone.",
+                "I was thinking about you over the weekend — not just as my boss, but as someone I genuinely care about.",
+                "You know what I admire about you? Even under pressure, you try to do right by people. That matters.",
+                "I've been meaning to tell you — watching you grow as a leader has been one of the highlights of my career.",
+                "Sometimes I forget we're technically just colleagues. You feel more like a friend I happen to work with.",
+                "I noticed you seemed stressed lately. I just want you to know — I'm here if you need to talk, about anything.",
+                "Between you and me, I think what we've built here is something special. Not just the company — our partnership.",
+                "I hope you know that my advice comes from a place of genuine care, not just professional obligation.",
+                "You've made this job feel like more than just work. I want you to know how much that means to me."
             };
             
             return (
-                messages[random.Next(messages.Length)],
+                PickUniqueDialogue("personal", messages),
                 "Personal observations about leadership challenges and company culture from someone who cares.",
                 "Heartfelt advice balancing business success with personal well-being and sustainable practices."
             );
@@ -901,14 +931,51 @@ namespace CorporateChaos.Views
             {
                 "My dear friend, after all these years together, I want to share what's truly on my mind about our journey.",
                 "You know, looking back on everything we've built together, I have some thoughts about where we're headed.",
-                "As someone who's been by your side through thick and thin, let me share my deepest insights about our path forward."
+                "As someone who's been by your side through thick and thin, let me share my deepest insights about our path forward.",
+                "Do you remember when we first started? Look how far we've come. I'm so proud of what we've accomplished together.",
+                "I was looking through old reports the other day and got a bit emotional thinking about our journey. We've been through so much.",
+                "You know what? I wouldn't trade these years for anything. Even the hard times taught us something valuable.",
+                "After everything we've weathered together, I feel like there's nothing we can't handle. But I still worry about you.",
+                "I sometimes wonder what my life would have been like if I'd worked for someone else. I'm glad I didn't.",
+                "We've built something remarkable here — not just a company, but a legacy. Let's make sure we finish strong.",
+                "I've been thinking about the future lately. Whatever happens, I want you to know — this partnership has meant the world to me.",
+                "You know, most people never find this kind of professional bond. I consider myself incredibly fortunate.",
+                "Let me share something from the heart: you've made me a better professional and a better person. Thank you for that."
             };
             
             return (
-                messages[random.Next(messages.Length)],
+                PickUniqueDialogue("lifelong", messages),
                 "Lifelong perspective on the journey we've shared and the legacy we're building together.",
                 "Wisdom from a trusted friend who's witnessed your entire corporate journey and cares deeply about your future."
             );
+        }
+
+        /// <summary>
+        /// Picks a dialogue from the array that hasn't been shown recently.
+        /// Resets the tracking when all options have been exhausted.
+        /// </summary>
+        private string PickUniqueDialogue(string category, string[] messages)
+        {
+            if (!_shownDialogueIndices.ContainsKey(category))
+                _shownDialogueIndices[category] = new HashSet<int>();
+
+            var shown = _shownDialogueIndices[category];
+
+            // If all messages have been shown, reset the tracker
+            if (shown.Count >= messages.Length)
+                shown.Clear();
+
+            // Pick a random index that hasn't been shown
+            int index;
+            int attempts = 0;
+            do
+            {
+                index = random.Next(messages.Length);
+                attempts++;
+            } while (shown.Contains(index) && attempts < messages.Length * 3);
+
+            shown.Add(index);
+            return messages[index];
         }
 
         private (string MainMessage, string SituationAnalysis, string Recommendations) GenerateStandardDialogue()
@@ -926,7 +993,7 @@ namespace CorporateChaos.Views
                 };
                 
                 return (
-                    healthDialogues[new Random().Next(healthDialogues.Length)],
+                    PickUniqueDialogue("health_retirement_std", healthDialogues),
                     "After nearly three decades of corporate leadership, it's natural to reflect on health and legacy.",
                     "💡 Consider your long-term well-being\n💡 Retirement at quarter 120 is approaching\n💡 Think about what kind of legacy you want to leave"
                 );
@@ -939,7 +1006,14 @@ namespace CorporateChaos.Views
                 "Time flies when you're running a company! Here's my assessment of this quarter.",
                 "Quarter end is always a good time to reflect and strategize. Here's what I see.",
                 "Great work this quarter! Let me share some insights for moving forward.",
-                "Every quarter brings new challenges and opportunities. Here's my analysis."
+                "Every quarter brings new challenges and opportunities. Here's my analysis.",
+                "Let's take stock of where we are. I've been keeping notes on our progress.",
+                "The numbers are in for this quarter. Let me give you the highlights.",
+                "Another chapter in our corporate story. Here's how I'd summarize this quarter.",
+                "I've been watching the trends closely. Let me share what stands out this quarter.",
+                "Before we look ahead, let's appreciate what we accomplished this quarter.",
+                "The quarterly data tells an interesting story. Let me walk you through it.",
+                "I've been crunching the numbers and have some thoughts on our trajectory."
             };
 
             // Situation-based dialogues with hints
@@ -982,7 +1056,7 @@ namespace CorporateChaos.Views
             }
             else
             {
-                mainMessage = endQuarterDialogues[new Random().Next(endQuarterDialogues.Length)];
+                mainMessage = PickUniqueDialogue("standard_end_quarter", endQuarterDialogues);
             }
 
             // Generate situation analysis with subtle hints
@@ -1105,10 +1179,17 @@ namespace CorporateChaos.Views
                 "Your company is at a critical juncture. The decisions you make this quarter will shape your future.",
                 "I've analyzed the market trends and your competition. Here's what I think you should prioritize.",
                 "Looking at your financial health and employee satisfaction, I have some strategic insights to share.",
-                "The key to success is balancing risk and reward. Let me help you find that balance."
+                "The key to success is balancing risk and reward. Let me help you find that balance.",
+                "I've been studying companies in similar positions. The ones that succeed tend to focus on fundamentals.",
+                "There's a window of opportunity right now that I think we should discuss before it closes.",
+                "I've noticed a pattern in our quarterly results that suggests we should shift our strategy slightly.",
+                "Let me share something I've been mulling over — it could change how we approach the next few quarters.",
+                "I've been comparing our performance against industry leaders. Here's where I think we can improve.",
+                "Sometimes the best strategy is patience. But sometimes you need to be bold. Let me help you decide which.",
+                "I've identified three areas where small changes could yield significant results. Want to hear them?"
             };
 
-            return adviceOptions[random.Next(adviceOptions.Length)];
+            return PickUniqueDialogue("strategic_advice", adviceOptions);
         }
 
         private string GenerateStrategicRecommendations()

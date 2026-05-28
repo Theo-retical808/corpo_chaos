@@ -168,41 +168,36 @@ namespace CorporateChaos.Systems
             var storyEvent = GetStoryEventForQuarter(quarter);
             if (storyEvent != null)
             {
-                // Unlock the mechanic BEFORE showing the dialog so the user can interact with it
+                // Unlock the mechanic BEFORE showing the tutorial so the user can interact with it
                 if (!storyData.UnlockedMechanics.Contains(storyEvent.IntroducedMechanic))
                 {
                     System.Diagnostics.Debug.WriteLine($"Unlocking mechanic: {storyEvent.IntroducedMechanic} for Quarter {quarter}");
                     storyData.UnlockedMechanics.Add(storyEvent.IntroducedMechanic);
                     SaveStoryProgress();
-                    
-                    // Update the main window UI to reflect the newly unlocked mechanic
-                    if (owner is MainWindow mainWindow)
-                    {
-                        System.Diagnostics.Debug.WriteLine("Refreshing MainWindow UI after unlocking mechanic");
-                        mainWindow.RefreshUI();
-                    }
                 }
                 else
                 {
                     System.Diagnostics.Debug.WriteLine($"Mechanic {storyEvent.IntroducedMechanic} already unlocked for Quarter {quarter}");
                 }
-                
-                var guideWindow = new StoryModeGuide(storyEvent, quarter, storyData);
-                try
+
+                // Route to the in-game chat bubble overlay instead of a separate dialog window
+                if (owner is MainWindow mainWindow)
                 {
-                    guideWindow.Owner = owner;
+                    mainWindow.RefreshUI();
+                    mainWindow.ShowTutorialForQuarter(quarter);
                 }
-                catch
+                else
                 {
-                    guideWindow.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-                }
-                
-                if (guideWindow.ShowDialog() == true)
-                {
-                    // Mark event as completed
-                    storyData.CompletedStoryEvents.Add($"quarter_{quarter}");
-                    
-                    SaveStoryProgress();
+                    // Fallback: open the legacy guide window if somehow called from a non-MainWindow
+                    var guideWindow = new StoryModeGuide(storyEvent, quarter, storyData);
+                    try { guideWindow.Owner = owner; }
+                    catch { guideWindow.WindowStartupLocation = WindowStartupLocation.CenterScreen; }
+
+                    if (guideWindow.ShowDialog() == true)
+                    {
+                        storyData.CompletedStoryEvents.Add($"quarter_{quarter}");
+                        SaveStoryProgress();
+                    }
                 }
             }
         }
@@ -289,17 +284,10 @@ namespace CorporateChaos.Systems
 
         private void ShowGraduationMessage()
         {
-            System.Windows.MessageBox.Show(
-                "🎓 Congratulations! You've completed the extended tutorial phase!\n\n" +
-                "Secretary Joan says:\n" +
-                "\"You've mastered both the fundamentals and advanced concepts of corporate management! " +
-                "From basic operations to complex strategic thinking, you've shown excellent progress. " +
-                "The full chaos system is now active - you're ready for the real corporate world!\"\n\n" +
-                "You now have access to all game mechanics including the full ChaosEngine. " +
-                "Good luck building your corporate empire!",
-                "Tutorial Complete!",
-                System.Windows.MessageBoxButton.OK,
-                System.Windows.MessageBoxImage.Information);
+            // The graduation message is now shown via the MainWindow chat bubble overlay.
+            // MainWindow.CompleteQuarter() calls ShowTutorialGraduation() after detecting
+            // the tutorial phase transition, so nothing needs to happen here.
+            System.Diagnostics.Debug.WriteLine("Tutorial graduation — overlay will be shown by MainWindow.");
         }
 
         public List<string> GetAvailableFeatures()
@@ -581,19 +569,18 @@ namespace CorporateChaos.Systems
             var conversation = CreateAdaptiveDialogue(characterId, context);
             if (conversation == null) return;
             
-            var dialogue = new JoanDialogue(
-                company, 
-                departments, 
-                conversation, 
-                storyData.CharacterRelationships, 
-                storyData.StoryFlags, 
-                true, 
-                storyData.CurrentQuarter, 
-                this
+            var chatWindow = new CorporateChaos.Views.CharacterChatWindow(
+                company,
+                this,
+                storyData.CurrentQuarter,
+                characterId,
+                conversation,
+                storyData.CharacterRelationships,
+                storyData.StoryFlags
             );
             
-            dialogue.Owner = owner;
-            dialogue.ShowDialog();
+            chatWindow.Owner = owner;
+            chatWindow.ShowDialog();
         }
 
         public void ShowJoanAdaptiveDialogue(Dictionary<Department, DepartmentStats> departments, Window owner, string context = "quarterly_review")
@@ -607,20 +594,29 @@ namespace CorporateChaos.Systems
                 return;
             }
             
-            // Create adaptive dialogue using the enhanced constructor
-            var dialogue = new JoanDialogue(
-                company, 
-                departments, 
-                null, // No pre-built conversation - let JoanDialogue create it
-                storyData.CharacterRelationships, 
-                storyData.StoryFlags, 
-                true, 
-                storyData.CurrentQuarter, 
-                this
-            );
-            
-            dialogue.Owner = owner;
-            dialogue.ShowDialog();
+            // Build a conversation for Joan and show it in the chat window
+            var conversation = CreateAdaptiveDialogue("joan", context);
+            if (conversation != null)
+            {
+                var chatWindow = new CorporateChaos.Views.CharacterChatWindow(
+                    company,
+                    this,
+                    storyData.CurrentQuarter,
+                    "joan",
+                    conversation,
+                    storyData.CharacterRelationships,
+                    storyData.StoryFlags
+                );
+                chatWindow.Owner = owner;
+                chatWindow.ShowDialog();
+            }
+            else
+            {
+                // Fallback to traditional dialogue
+                var traditionalDialogue = new JoanDialogue(company, departments, true, storyData.CurrentQuarter, this);
+                traditionalDialogue.Owner = owner;
+                traditionalDialogue.ShowDialog();
+            }
         }
 
         public void ApplyChoiceConsequences(string characterId, DialogueChoice choice)

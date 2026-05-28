@@ -266,21 +266,18 @@ namespace CorporateChaos.Views
 
             if (conversation != null)
             {
-                // Show the dialogue
-                var dialogue = new JoanDialogue(
+                var chatWindow = new CharacterChatWindow(
                     company,
-                    null!, // departments not needed for character conversations
+                    storyModeManager,
+                    currentQuarter,
+                    character.CharacterId,
                     conversation,
                     storyModeManager.StoryData.CharacterRelationships,
-                    storyModeManager.StoryData.StoryFlags,
-                    true,
-                    currentQuarter,
-                    storyModeManager
+                    storyModeManager.StoryData.StoryFlags
                 );
 
-                dialogue.Owner = this;
-                dialogue.Title = $"Conversation with {character.Name}";
-                dialogue.ShowDialog();
+                chatWindow.Owner = this;
+                chatWindow.ShowDialog();
 
                 // Refresh the character list to update relationship status
                 PopulateCharacterList();

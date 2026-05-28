@@ -79,16 +79,9 @@
                             <Border.Effect>
                                 <DropShadowEffect Color="Black" Opacity="0.3" BlurRadius="8" ShadowDepth="2"/>
                             </Border.Effect>
-                            <StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                                    <TextBlock Text="💬" FontSize="20" Margin="0,0,8,0"/>
-                                    <TextBlock Text="Joan says:" Style="{StaticResource HeaderSmall}" 
-                                              Foreground="#B0D4F1"/>
-                                </StackPanel>
-                                <TextBlock x:Name="JoanDialogueText" 
-                                          Text="Hello! I'm here to help you manage your company effectively..."
-                                          Style="{StaticResource BodyLarge}" TextWrapping="Wrap"/>
-                            </StackPanel>
+                            <TextBlock x:Name="JoanDialogueText" 
+                                      Text="Hello! I'm here to help you manage your company effectively..."
+                                      Style="{StaticResource BodyLarge}" TextWrapping="Wrap"/>
                         </Border>
                         
                         <!-- Situation Analysis with Icon -->

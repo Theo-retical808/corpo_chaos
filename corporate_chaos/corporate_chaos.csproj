@@ -7,6 +7,20 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>logo.ico</ApplicationIcon>
+    <Version>1.4.0</Version>
+    <AssemblyVersion>1.4.0.0</AssemblyVersion>
+    <FileVersion>1.4.0.0</FileVersion>
+    <Product>Corporate Chaos</Product>
+    <Description>Corporate Chaos v1.4 — Interactive tutorial system, dialogue variety, and UX improvements.</Description>
+    <PackageReleaseNotes>
+      v1.4 Patch Notes:
+      - Interactive tutorial: highlights now follow what Joan is saying and auto-advance when you click the correct button. No more manual "Next" clicking during guided steps.
+      - Tutorial always on top: dialogue overlay renders above all game panels including hiring and executive decision windows.
+      - Smooth tutorial flow: eliminated dead spots where players had no prompt. Clear "Next" buttons for context steps, auto-advance for action steps.
+      - Removed hire alert popup: hiring is now seamless without interrupting MessageBox confirmations.
+      - Dialogue variety: expanded Joan's dialogue pool from 3-5 to 12 unique lines per relationship phase with repetition prevention.
+      - Dialogue never repeats: tracking system ensures every line is shown before any can repeat.
+    </PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
